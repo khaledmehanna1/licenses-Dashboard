@@ -3,257 +3,645 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>لوحة متابعة تراخيص النقل</title>
+  <title>متابعة تراخيص النقل</title>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Tahoma, sans-serif; }
-    body { background-color: #0f172a; color: #f8fafc; padding: 20px 16px; min-height: 100vh; transition: background 0.3s, color 0.3s; }
-    body.light-mode { background-color: #f1f5f9; color: #1e293b; }
+    /* المتغيرات العامة والألوان */
+    :root {
+      --bg-page: #0b1329;
+      --card-bg: #152238;
+      --card-border: #233554;
+      --text-main: #f8fafc;
+      --text-sub: #94a3b8;
+      --box-inner: #0b1329;
+      --btn-bg: #1e293b;
+      --btn-border: #334155;
+      
+      --brand-rasm: #38bdf8;
+      --brand-zawia: #2dd4bf;
+      --brand-contract: #94a3b8;
 
-    .container { max-width: 1200px; margin: 0 auto; }
+      --act-light: #38bdf8;
+      --act-heavy: #f59e0b;
+      --act-bikes: #fb923c;
+      --act-none: #64748b;
 
-    .top-bar { display: flex; justify-content: space-between; align-items: center; padding-bottom: 16px; border-bottom: 1px solid #334155; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
-    body.light-mode .top-bar { border-bottom-color: #cbd5e1; }
-    
-    .title { font-size: 1.4rem; font-weight: bold; }
-    .theme-btn { background: #1e293b; color: #f8fafc; border: 1px solid #475569; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 0.9rem; font-weight: bold; }
-    body.light-mode .theme-btn { background: #ffffff; color: #1e293b; border-color: #cbd5e1; }
+      --st-safe-bg: #064e3b;
+      --st-safe-txt: #6ee7b7;
+      --st-warn-bg: #78350f;
+      --st-warn-txt: #fcd34d;
+      --st-danger-bg: #7f1d1d;
+      --st-danger-txt: #fca5a5;
+    }
 
-    .filters { background: #1e293b; padding: 14px; border-radius: 10px; margin-bottom: 20px; border: 1px solid #334155; display: flex; flex-direction: column; gap: 10px; }
-    body.light-mode .filters { background: #ffffff; border-color: #cbd5e1; }
+    body.light-mode {
+      --bg-page: #f1f5f9;
+      --card-bg: #ffffff;
+      --card-border: #cbd5e1;
+      --text-main: #0f172a;
+      --text-sub: #475569;
+      --box-inner: #f8fafc;
+      --btn-bg: #ffffff;
+      --btn-border: #cbd5e1;
 
-    .btn-f { background: #0f172a; color: #f8fafc; border: 1px solid #475569; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; margin: 2px; }
-    body.light-mode .btn-f { background: #f8fafc; color: #1e293b; border-color: #cbd5e1; }
-    .btn-f.active { background: #2563eb !important; color: #ffffff !important; border-color: #3b82f6 !important; font-weight: bold; }
+      --brand-rasm: #0284c7;
+      --brand-zawia: #0d9488;
+      --brand-contract: #64748b;
 
-    .cards-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 18px; }
-    .card-item { background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 18px; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
-    body.light-mode .card-item { background: #ffffff; border-color: #cbd5e1; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
+      --act-light: #0284c7;
+      --act-heavy: #d97706;
+      --act-bikes: #ea580c;
+      --act-none: #64748b;
 
-    .card-top { display: flex; justify-content: flex-start; align-items: center; margin-bottom: 12px; }
-    .co-badge { font-size: 0.8rem; padding: 4px 10px; border-radius: 6px; font-weight: bold; display: inline-block; }
+      --st-safe-bg: #dcfce7;
+      --st-safe-txt: #166534;
+      --st-warn-bg: #fef3c7;
+      --st-warn-txt: #92400e;
+      --st-danger-bg: #fee2e2;
+      --st-danger-txt: #991b1b;
+    }
 
-    .title-row { display: flex; align-items: center; justify-content: flex-start; gap: 10px; margin-bottom: 8px; }
-    .act-name { font-size: 1.25rem; font-weight: bold; display: inline-flex; align-items: center; gap: 8px; }
-    .act-icon { font-size: 1.5rem; line-height: 1; vertical-align: middle; }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, Tahoma, sans-serif;
+      transition: background-color 0.25s, border-color 0.25s, color 0.25s;
+    }
 
-    .sub-text { font-size: 0.95rem; font-weight: 500; color: #e2e8f0; margin-bottom: 16px; line-height: 1.45; min-height: 42px; }
-    body.light-mode .sub-text { color: #334155; }
+    body {
+      background-color: var(--bg-page);
+      color: var(--text-main);
+      padding: 24px 16px;
+      min-height: 100vh;
+    }
 
-    .info-box { background: #0f172a; padding: 12px; border-radius: 8px; border: 1px solid #334155; font-size: 0.85rem; margin-bottom: 14px; }
-    body.light-mode .info-box { background: #f8fafc; border-color: #cbd5e1; }
-    .info-line { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-    .info-line:last-child { margin-bottom: 0; }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
 
-    .glass-date-badge {
+    /* الشريط العلوي مع توسيط العنوان */
+    .header-section {
+      text-align: center;
+      margin-bottom: 24px;
+      position: relative;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--card-border);
+    }
+
+    .main-title {
+      font-size: 1.85rem;
+      font-weight: 800;
+      color: var(--text-main);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+
+    .main-sub {
+      font-size: 0.9rem;
+      color: var(--text-sub);
+    }
+
+    .header-controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 14px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .theme-btn {
+      background: var(--card-bg);
+      color: var(--text-main);
+      border: 1px solid var(--card-border);
+      padding: 7px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .theme-btn:hover {
+      border-color: #3b82f6;
+    }
+
+    .date-badge {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      color: var(--text-sub);
+      font-weight: 600;
+    }
+
+    /* منطقة الفلاتر */
+    .filters-wrapper {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .filter-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .filter-title {
+      font-size: 0.85rem;
+      font-weight: bold;
+      color: var(--text-sub);
+      min-width: 80px;
+    }
+
+    .btn-f {
+      background: var(--btn-bg);
+      border: 1px solid var(--btn-border);
+      color: var(--text-main);
+      padding: 6px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+    .btn-f:hover {
+      border-color: #3b82f6;
+    }
+    .btn-f.active {
+      background: #2563eb !important;
+      border-color: #3b82f6 !important;
+      color: #ffffff !important;
+    }
+
+    /* شبكة البطاقات */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 18px;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+      position: relative;
+    }
+
+    .card-top {
+      display: flex;
+      justify-content: flex-start;
+      margin-bottom: 12px;
+    }
+
+    .co-badge {
+      font-size: 0.8rem;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-weight: bold;
+    }
+
+    .title-row {
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .act-name {
+      font-size: 1.25rem;
+      font-weight: bold;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .act-icon {
+      font-size: 1.45rem;
+      line-height: 1;
+    }
+
+    .act-sub {
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--text-sub);
+      line-height: 1.45;
+      margin-bottom: 16px;
+      min-height: 40px;
+    }
+
+    /* صندوق التواريخ والحالات */
+    .details-box {
+      background: var(--box-inner);
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      padding: 12px 14px;
+      margin-bottom: 14px;
+    }
+
+    .details-line {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      font-size: 0.85rem;
+    }
+    .details-line:last-child {
+      margin-bottom: 0;
+    }
+
+    .glass-date {
       background: rgba(255, 255, 255, 0.08);
       backdrop-filter: blur(8px);
       -webkit-backdrop-filter: blur(8px);
-      border: 1px solid rgba(255, 255, 255, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.18);
       padding: 4px 10px;
       border-radius: 6px;
       font-weight: bold;
       letter-spacing: 0.5px;
       color: #38bdf8;
     }
-    body.light-mode .glass-date-badge {
+    body.light-mode .glass-date {
       background: rgba(15, 23, 42, 0.05);
       border: 1px solid rgba(15, 23, 42, 0.15);
       color: #0369a1;
     }
 
-    .st-safe { background: #064e3b; color: #6ee7b7; padding: 4px 8px; border-radius: 5px; font-weight: bold; }
-    .st-warn { background: #78350f; color: #fcd34d; padding: 4px 8px; border-radius: 5px; font-weight: bold; }
-    .st-danger { background: #7f1d1d; color: #fca5a5; padding: 4px 8px; border-radius: 5px; font-weight: bold; }
+    .status-badge {
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-weight: bold;
+      font-size: 0.8rem;
+    }
+    .st-safe { background: var(--st-safe-bg); color: var(--st-safe-txt); }
+    .st-warn { background: var(--st-warn-bg); color: var(--st-warn-txt); }
+    .st-danger { background: var(--st-danger-bg); color: var(--st-danger-txt); }
 
-    body.light-mode .st-safe { background: #dcfce7; color: #166534; }
-    body.light-mode .st-warn { background: #fef3c7; color: #92400e; }
-    body.light-mode .st-danger { background: #fee2e2; color: #991b1b; }
+    .btn-edit {
+      background: var(--btn-bg);
+      border: 1px solid var(--card-border);
+      color: var(--text-main);
+      padding: 8px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: bold;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .btn-edit:hover {
+      border-color: #3b82f6;
+    }
 
-    .edit-btn { background: #334155; color: #f8fafc; border: 1px solid #475569; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; width: 100%; font-weight: bold; }
-    body.light-mode .edit-btn { background: #f1f5f9; color: #1e293b; border-color: #cbd5e1; }
+    /* النافذة المنبثقة للتعديل السلس */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(4px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 16px;
+    }
+
+    .modal-content {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: 22px;
+      width: 100%;
+      max-width: 380px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    }
+
+    .modal-title {
+      font-size: 1.15rem;
+      font-weight: bold;
+      margin-bottom: 16px;
+    }
+
+    .modal-input {
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      background: var(--box-inner);
+      border: 1px solid var(--card-border);
+      color: var(--text-main);
+      font-size: 1rem;
+      margin-bottom: 18px;
+      outline: none;
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+
+    .btn-save {
+      background: #2563eb;
+      color: #fff;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .btn-cancel {
+      background: transparent;
+      color: var(--text-sub);
+      border: 1px solid var(--card-border);
+      padding: 8px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
 
 <div class="container">
-  <div class="top-bar">
-    <div class="title">لوحة متابعة تراخيص النقل</div>
-    <button class="theme-btn" onclick="toggleTheme()" id="tBtn">الوضع النهاري ☀️</button>
-  </div>
-
-  <div class="filters">
-    <div>
-      <span style="font-size:0.85rem; margin-left:6px; font-weight:bold;">المنشأة:</span>
-      <button class="btn-f active" onclick="fCo('all', this)">الكل</button>
-      <button class="btn-f" onclick="fCo('رسم الحلول', this)">رسم الحلول</button>
-      <button class="btn-f" onclick="fCo('زاوية أمل اللوجستية', this)">زاوية أمل اللوجستية</button>
-      <button class="btn-f" onclick="fCo('زاوية أمل للمقاولات', this)">زاوية أمل للمقاولات</button>
-    </div>
-    <div>
-      <span style="font-size:0.85rem; margin-left:6px; font-weight:bold;">النشاط:</span>
-      <button class="btn-f active" onclick="fAct('all', this)">الكل</button>
-      <button class="btn-f" onclick="fAct('نقل خفيف', this)">نقل خفيف</button>
-      <button class="btn-f" onclick="fAct('نقل ثقيل', this)">نقل ثقيل</button>
-      <button class="btn-f" onclick="fAct('دراجات', this)">دراجات آلية</button>
+  
+  <!-- العنوان الرئيسي في منتصف الصفحة بالضبط -->
+  <div class="header-section">
+    <h1 class="main-title">
+      متابعة تراخيص النقل 🚚
+    </h1>
+    <div class="main-sub">لوحة مراقبة صلاحية التراخيص والأنشطة اللوجستية وتنبيهات التجديد</div>
+    
+    <div class="header-controls">
+      <button class="theme-btn" onclick="toggleTheme()" id="themeBtn">
+        <span id="themeIcon">☀️</span>
+        <span id="themeLabel">الوضع النهاري</span>
+      </button>
+      <div class="date-badge" id="liveDate"></div>
     </div>
   </div>
 
-  <div class="cards-list" id="grid"></div>
+  <!-- الفلاتر -->
+  <div class="filters-wrapper">
+    <div class="filter-row">
+      <span class="filter-title">المنشأة:</span>
+      <button class="btn-f active" onclick="filterCo('all', this)">الكل</button>
+      <button class="btn-f" onclick="filterCo('رسم الحلول', this)">رسم الحلول</button>
+      <button class="btn-f" onclick="filterCo('زاوية أمل اللوجستية', this)">زاوية أمل اللوجستية</button>
+      <button class="btn-f" onclick="filterCo('زاوية أمل للمقاولات', this)">زاوية أمل للمقاولات</button>
+    </div>
+    <div class="filter-row">
+      <span class="filter-title">النشاط:</span>
+      <button class="btn-f active" onclick="filterAct('all', this)">الكل</button>
+      <button class="btn-f" onclick="filterAct('نقل خفيف', this)">نقل خفيف</button>
+      <button class="btn-f" onclick="filterAct('نقل ثقيل', this)">نقل ثقيل</button>
+      <button class="btn-f" onclick="filterAct('دراجات', this)">دراجات آلية</button>
+    </div>
+  </div>
+
+  <!-- شبكة التراخيص -->
+  <div class="cards-grid" id="licensesGrid"></div>
+
+</div>
+
+<!-- نافذة التعديل المنبثقة -->
+<div class="modal-overlay" id="editModal">
+  <div class="modal-content">
+    <div class="modal-title" id="editModalTitle">تعديل تاريخ الترخيص</div>
+    <input type="date" id="editDateInput" class="modal-input">
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeEditModal()">إلغاء</button>
+      <button class="btn-save" onclick="confirmSaveDate()">حفظ التعديل</button>
+    </div>
+  </div>
 </div>
 
 <script>
-  let data = [
+  let licenses = [
     {
       id: 1,
       co: 'زاوية أمل اللوجستية',
-      coColor: '#0d9488',
+      coColor: 'var(--brand-zawia)',
       main: 'النقل الخفيف',
+      icon: '🚐',
+      actColor: 'var(--act-light)',
       sub: 'نشاط النقل الخفيف للبضائع لأغراض تجارية (للغير)',
       type: 'نقل خفيف',
-      actColor: '#38bdf8',
-      icon: '🚐',
       date: '2026-12-17'
     },
     {
       id: 2,
       co: 'رسم الحلول',
-      coColor: '#0284c7',
+      coColor: 'var(--brand-rasm)',
       main: 'الدراجات الآلية',
+      icon: '🛵',
+      actColor: 'var(--act-bikes)',
       sub: 'نقل البضائع عبر الدراجة الآلية لصالح الغير - البيئة',
       type: 'دراجات',
-      actColor: '#fb923c',
-      icon: '🛵',
       date: '2027-08-24'
     },
     {
       id: 3,
       co: 'رسم الحلول',
-      coColor: '#0284c7',
+      coColor: 'var(--brand-rasm)',
       main: 'النقل الخفيف',
+      icon: '🚐',
+      actColor: 'var(--act-light)',
       sub: 'نشاط النقل الخفيف للبضائع لأغراض تجارية (للغير)',
       type: 'نقل خفيف',
-      actColor: '#38bdf8',
-      icon: '🚐',
       date: '2029-01-05'
     },
     {
       id: 4,
       co: 'رسم الحلول',
-      coColor: '#0284c7',
+      coColor: 'var(--brand-rasm)',
       main: 'النقل الثقيل',
+      icon: '🚛',
+      actColor: 'var(--act-heavy)',
       sub: 'النقل الثقيل للبضائع لأغراض تجارية (للغير - منشآت)',
       type: 'نقل ثقيل',
-      actColor: '#d97706',
-      icon: '🚛',
       date: '2029-04-24'
     },
     {
       id: 5,
       co: 'زاوية أمل للمقاولات',
-      coColor: '#64748b',
+      coColor: 'var(--brand-contract)',
       main: 'بدون تراخيص',
+      icon: '🚫',
+      actColor: 'var(--act-none)',
       sub: 'المنشأة غير مسجل عليها أي ترخيص نقل حالياً',
       type: 'بدون',
-      actColor: '#94a3b8',
-      icon: '🚫',
       date: null
     }
   ];
 
+  // استرجاع التعديلات المحفوظة محلياً
   try {
-    const s = localStorage.getItem('site_lic_data');
-    if (s) data = JSON.parse(s);
+    const cached = localStorage.getItem('transport_licenses_data');
+    if (cached) licenses = JSON.parse(cached);
   } catch(e) {}
 
-  let curCo = 'all', curAct = 'all';
+  let activeCo = 'all';
+  let activeAct = 'all';
+  let editingId = null;
 
-  function render() {
-    const el = document.getElementById('grid');
-    el.innerHTML = '';
-    const now = new Date();
-    now.setHours(0,0,0,0);
+  function renderDashboard() {
+    const grid = document.getElementById('licensesGrid');
+    grid.innerHTML = '';
+    
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
 
-    data.filter(x => (curCo === 'all' || x.co === curCo) && (curAct === 'all' || x.type === curAct))
-    .forEach(x => {
-      let dHtml = '<span style="color:#94a3b8;">لا يوجد</span>', sClass = '', sLabel = 'غير مقيد';
-      if (x.date) {
-        const target = new Date(x.date);
-        const diff = Math.ceil((target - now) / (1000 * 60 * 60 * 24));
-        dHtml = `<span class="glass-date-badge">${x.date}</span>`;
-        if (diff < 0) {
-          sClass = 'st-danger'; sLabel = 'منتهي';
-        } else if (diff <= 30) {
-          sClass = 'st-warn'; sLabel = 'متبقي ' + diff + ' يوم';
+    // عرض تاريخ اليوم في الشريط
+    const options = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'short' };
+    document.getElementById('liveDate').innerText = 'اليوم: ' + today.toLocaleDateString('ar-SA', options);
+
+    const filtered = licenses.filter(item => {
+      const coMatch = (activeCo === 'all' || item.co === activeCo);
+      const actMatch = (activeAct === 'all' || item.type === activeAct);
+      return coMatch && actMatch;
+    });
+
+    filtered.forEach(item => {
+      let dateDisplay = '<span style="color:var(--text-sub)">غير مسجل</span>';
+      let statusClass = '';
+      let statusLabel = 'غير مقيد';
+
+      if (item.date) {
+        const exp = new Date(item.date);
+        const diffDays = Math.ceil((exp - today) / (1000 * 60 * 60 * 24));
+        dateDisplay = `<span class="glass-date">${item.date}</span>`;
+
+        if (diffDays < 0) {
+          statusClass = 'st-danger';
+          statusLabel = `منتهي منذ ${Math.abs(diffDays)} يوم`;
+        } else if (diffDays <= 30) {
+          statusClass = 'st-warn';
+          statusLabel = `متبقي ${diffDays} يوم (تنبيه تجديد)`;
         } else {
-          sClass = 'st-safe'; sLabel = 'ساري (متبقي ' + diff + ' يوم)';
+          statusClass = 'st-safe';
+          statusLabel = `ساري (متبقي ${diffDays} يوم)`;
         }
       }
 
-      const c = document.createElement('div');
-      c.className = 'card-item';
-      c.innerHTML = `
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.innerHTML = `
         <div>
           <div class="card-top">
-            <span class="co-badge" style="background:${x.coColor}22; color:${x.coColor}; border:1px solid ${x.coColor}">${x.co}</span>
-          </div>
-
-          <div class="title-row">
-            <span class="act-name" style="color:${x.actColor}">
-              ${x.main} <span class="act-icon">${x.icon}</span>
+            <span class="co-badge" style="background:rgba(125,125,125,0.12); color:${item.coColor}; border:1px solid currentColor;">
+              ${item.co}
             </span>
           </div>
 
-          <div class="sub-text">${x.sub}</div>
+          <div class="title-row">
+            <span class="act-name" style="color:${item.actColor}">
+              ${item.main} <span class="act-icon">${item.icon}</span>
+            </span>
+          </div>
 
-          <div class="info-box">
-            <div class="info-line">
-              <span>تاريخ الانتهاء:</span>
-              ${dHtml}
+          <div class="act-sub">${item.sub}</div>
+
+          <div class="details-box">
+            <div class="details-line">
+              <span style="color:var(--text-sub)">تاريخ الصلاحية:</span>
+              ${dateDisplay}
             </div>
-            <div class="info-line">
-              <span>الحالة:</span>
-              <span class="${sClass}">${sLabel}</span>
+            <div class="details-line">
+              <span style="color:var(--text-sub)">الحالة:</span>
+              <span class="status-badge ${statusClass}">${statusLabel}</span>
             </div>
           </div>
         </div>
 
-        <button class="edit-btn" onclick="editLic(${x.id})">${x.date ? 'تعديل التاريخ ✏️' : 'إضافة تاريخ ➕'}</button>
+        <button class="btn-edit" onclick="openEditModal(${item.id})">
+          ${item.date ? 'تعديل التاريخ ✏️' : 'إضافة ترخيص ➕'}
+        </button>
       `;
-      el.appendChild(c);
+      grid.appendChild(card);
     });
   }
 
-  function fCo(c, b) {
-    curCo = c;
-    b.parentElement.querySelectorAll('button').forEach(x => x.classList.remove('active'));
-    b.classList.add('active');
-    render();
+  // التحكم بالفلاتر
+  function filterCo(company, btn) {
+    activeCo = company;
+    btn.parentElement.querySelectorAll('.btn-f').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    renderDashboard();
   }
 
-  function fAct(a, b) {
-    curAct = a;
-    b.parentElement.querySelectorAll('button').forEach(x => x.classList.remove('active'));
-    b.classList.add('active');
-    render();
+  function filterAct(activity, btn) {
+    activeAct = activity;
+    btn.parentElement.querySelectorAll('.btn-f').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    renderDashboard();
+  }
+
+  // التبديل بين النهاري والليلي وحفظ التفضيل
+  function applyThemeMode(theme) {
+    const isLight = theme === 'light';
+    document.body.classList.toggle('light-mode', isLight);
+    document.getElementById('themeIcon').innerText = isLight ? '🌙' : '☀️';
+    document.getElementById('themeLabel').innerText = isLight ? 'الوضع الليلي' : 'الوضع النهاري';
+    localStorage.setItem('pref_theme', theme);
   }
 
   function toggleTheme() {
-    document.body.classList.toggle('light-mode');
-    const isLight = document.body.classList.contains('light-mode');
-    document.getElementById('tBtn').innerText = isLight ? 'الوضع الليلي 🌙' : 'الوضع النهاري ☀️';
+    const current = document.body.classList.contains('light-mode') ? 'light' : 'dark';
+    applyThemeMode(current === 'light' ? 'dark' : 'light');
   }
 
-  function editLic(id) {
-    const item = data.find(x => x.id === id);
-    const val = prompt('أدخل تاريخ الانتهاء بصيغة YYYY-MM-DD:', item.date || '2026-12-17');
-    if (val) {
-      item.date = val;
-      try { localStorage.setItem('site_lic_data', JSON.stringify(data)); } catch(e){}
-      render();
+  // فتح وإغلاق نافذة التعديل
+  function openEditModal(id) {
+    editingId = id;
+    const target = licenses.find(x => x.id === id);
+    document.getElementById('editModalTitle').innerText = `${target.co} - ${target.main}`;
+    document.getElementById('editDateInput').value = target.date || '';
+    document.getElementById('editModal').style.display = 'flex';
+  }
+
+  function closeEditModal() {
+    document.getElementById('editModal').style.display = 'none';
+  }
+
+  function confirmSaveDate() {
+    const inputVal = document.getElementById('editDateInput').value;
+    if (!inputVal) return alert('يرجى تحديد التاريخ أولاً');
+    
+    const target = licenses.find(x => x.id === editingId);
+    if (target) {
+      target.date = inputVal;
+      try {
+        localStorage.setItem('transport_licenses_data', JSON.stringify(licenses));
+      } catch(e) {}
+      closeEditModal();
+      renderDashboard();
     }
   }
 
-  render();
+  // التهيئة المبدئية
+  const initialTheme = localStorage.getItem('pref_theme') || 'dark';
+  applyThemeMode(initialTheme);
+  renderDashboard();
 </script>
 </body>
 </html>
