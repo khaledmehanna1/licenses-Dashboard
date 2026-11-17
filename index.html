@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>لوحة متابعة تراخيص النقل</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Tahoma, sans-serif; }
+    body { background-color: #0f172a; color: #f8fafc; padding: 20px 16px; min-height: 100vh; transition: background 0.3s, color 0.3s; }
+    body.light-mode { background-color: #f1f5f9; color: #1e293b; }
+
+    .container { max-width: 1200px; margin: 0 auto; }
+
+    .top-bar { display: flex; justify-content: space-between; align-items: center; padding-bottom: 16px; border-bottom: 1px solid #334155; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
+    body.light-mode .top-bar { border-bottom-color: #cbd5e1; }
+    
+    .title { font-size: 1.4rem; font-weight: bold; }
+    .theme-btn { background: #1e293b; color: #f8fafc; border: 1px solid #475569; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 0.9rem; font-weight: bold; }
+    body.light-mode .theme-btn { background: #ffffff; color: #1e293b; border-color: #cbd5e1; }
+
+    .filters { background: #1e293b; padding: 14px; border-radius: 10px; margin-bottom: 20px; border: 1px solid #334155; display: flex; flex-direction: column; gap: 10px; }
+    body.light-mode .filters { background: #ffffff; border-color: #cbd5e1; }
+
+    .btn-f { background: #0f172a; color: #f8fafc; border: 1px solid #475569; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; margin: 2px; }
+    body.light-mode .btn-f { background: #f8fafc; color: #1e293b; border-color: #cbd5e1; }
+    .btn-f.active { background: #2563eb !important; color: #ffffff !important; border-color: #3b82f6 !important; font-weight: bold; }
+
+    .cards-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 18px; }
+    .card-item { background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 18px; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+    body.light-mode .card-item { background: #ffffff; border-color: #cbd5e1; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
+
+    .card-top { display: flex; justify-content: flex-start; align-items: center; margin-bottom: 12px; }
+    .co-badge { font-size: 0.8rem; padding: 4px 10px; border-radius: 6px; font-weight: bold; display: inline-block; }
+
+    .title-row { display: flex; align-items: center; justify-content: flex-start; gap: 10px; margin-bottom: 8px; }
+    .act-name { font-size: 1.25rem; font-weight: bold; display: inline-flex; align-items: center; gap: 8px; }
+    .act-icon { font-size: 1.5rem; line-height: 1; vertical-align: middle; }
+
+    .sub-text { font-size: 0.95rem; font-weight: 500; color: #e2e8f0; margin-bottom: 16px; line-height: 1.45; min-height: 42px; }
+    body.light-mode .sub-text { color: #334155; }
+
+    .info-box { background: #0f172a; padding: 12px; border-radius: 8px; border: 1px solid #334155; font-size: 0.85rem; margin-bottom: 14px; }
+    body.light-mode .info-box { background: #f8fafc; border-color: #cbd5e1; }
+    .info-line { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .info-line:last-child { margin-bottom: 0; }
+
+    .glass-date-badge {
+      background: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-weight: bold;
+      letter-spacing: 0.5px;
+      color: #38bdf8;
+    }
+    body.light-mode .glass-date-badge {
+      background: rgba(15, 23, 42, 0.05);
+      border: 1px solid rgba(15, 23, 42, 0.15);
+      color: #0369a1;
+    }
+
+    .st-safe { background: #064e3b; color: #6ee7b7; padding: 4px 8px; border-radius: 5px; font-weight: bold; }
+    .st-warn { background: #78350f; color: #fcd34d; padding: 4px 8px; border-radius: 5px; font-weight: bold; }
+    .st-danger { background: #7f1d1d; color: #fca5a5; padding: 4px 8px; border-radius: 5px; font-weight: bold; }
+
+    body.light-mode .st-safe { background: #dcfce7; color: #166534; }
+    body.light-mode .st-warn { background: #fef3c7; color: #92400e; }
+    body.light-mode .st-danger { background: #fee2e2; color: #991b1b; }
+
+    .edit-btn { background: #334155; color: #f8fafc; border: 1px solid #475569; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; width: 100%; font-weight: bold; }
+    body.light-mode .edit-btn { background: #f1f5f9; color: #1e293b; border-color: #cbd5e1; }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <div class="top-bar">
+    <div class="title">لوحة متابعة تراخيص النقل</div>
+    <button class="theme-btn" onclick="toggleTheme()" id="tBtn">الوضع النهاري ☀️</button>
+  </div>
+
+  <div class="filters">
+    <div>
+      <span style="font-size:0.85rem; margin-left:6px; font-weight:bold;">المنشأة:</span>
+      <button class="btn-f active" onclick="fCo('all', this)">الكل</button>
+      <button class="btn-f" onclick="fCo('رسم الحلول', this)">رسم الحلول</button>
+      <button class="btn-f" onclick="fCo('زاوية أمل اللوجستية', this)">زاوية أمل اللوجستية</button>
+      <button class="btn-f" onclick="fCo('زاوية أمل للمقاولات', this)">زاوية أمل للمقاولات</button>
+    </div>
+    <div>
+      <span style="font-size:0.85rem; margin-left:6px; font-weight:bold;">النشاط:</span>
+      <button class="btn-f active" onclick="fAct('all', this)">الكل</button>
+      <button class="btn-f" onclick="fAct('نقل خفيف', this)">نقل خفيف</button>
+      <button class="btn-f" onclick="fAct('نقل ثقيل', this)">نقل ثقيل</button>
+      <button class="btn-f" onclick="fAct('دراجات', this)">دراجات آلية</button>
+    </div>
+  </div>
+
+  <div class="cards-list" id="grid"></div>
+</div>
+
+<script>
+  let data = [
+    {
+      id: 1,
+      co: 'زاوية أمل اللوجستية',
+      coColor: '#0d9488',
+      main: 'النقل الخفيف',
+      sub: 'نشاط النقل الخفيف للبضائع لأغراض تجارية (للغير)',
+      type: 'نقل خفيف',
+      actColor: '#38bdf8',
+      icon: '🚐',
+      date: '2026-12-17'
+    },
+    {
+      id: 2,
+      co: 'رسم الحلول',
+      coColor: '#0284c7',
+      main: 'الدراجات الآلية',
+      sub: 'نقل البضائع عبر الدراجة الآلية لصالح الغير - البيئة',
+      type: 'دراجات',
+      actColor: '#fb923c',
+      icon: '🛵',
+      date: '2027-08-24'
+    },
+    {
+      id: 3,
+      co: 'رسم الحلول',
+      coColor: '#0284c7',
+      main: 'النقل الخفيف',
+      sub: 'نشاط النقل الخفيف للبضائع لأغراض تجارية (للغير)',
+      type: 'نقل خفيف',
+      actColor: '#38bdf8',
+      icon: '🚐',
+      date: '2029-01-05'
+    },
+    {
+      id: 4,
+      co: 'رسم الحلول',
+      coColor: '#0284c7',
+      main: 'النقل الثقيل',
+      sub: 'النقل الثقيل للبضائع لأغراض تجارية (للغير - منشآت)',
+      type: 'نقل ثقيل',
+      actColor: '#d97706',
+      icon: '🚛',
+      date: '2029-04-24'
+    },
+    {
+      id: 5,
+      co: 'زاوية أمل للمقاولات',
+      coColor: '#64748b',
+      main: 'بدون تراخيص',
+      sub: 'المنشأة غير مسجل عليها أي ترخيص نقل حالياً',
+      type: 'بدون',
+      actColor: '#94a3b8',
+      icon: '🚫',
+      date: null
+    }
+  ];
+
+  try {
+    const s = localStorage.getItem('site_lic_data');
+    if (s) data = JSON.parse(s);
+  } catch(e) {}
+
+  let curCo = 'all', curAct = 'all';
+
+  function render() {
+    const el = document.getElementById('grid');
+    el.innerHTML = '';
+    const now = new Date();
+    now.setHours(0,0,0,0);
+
+    data.filter(x => (curCo === 'all' || x.co === curCo) && (curAct === 'all' || x.type === curAct))
+    .forEach(x => {
+      let dHtml = '<span style="color:#94a3b8;">لا يوجد</span>', sClass = '', sLabel = 'غير مقيد';
+      if (x.date) {
+        const target = new Date(x.date);
+        const diff = Math.ceil((target - now) / (1000 * 60 * 60 * 24));
+        dHtml = `<span class="glass-date-badge">${x.date}</span>`;
+        if (diff < 0) {
+          sClass = 'st-danger'; sLabel = 'منتهي';
+        } else if (diff <= 30) {
+          sClass = 'st-warn'; sLabel = 'متبقي ' + diff + ' يوم';
+        } else {
+          sClass = 'st-safe'; sLabel = 'ساري (متبقي ' + diff + ' يوم)';
+        }
+      }
+
+      const c = document.createElement('div');
+      c.className = 'card-item';
+      c.innerHTML = `
+        <div>
+          <div class="card-top">
+            <span class="co-badge" style="background:${x.coColor}22; color:${x.coColor}; border:1px solid ${x.coColor}">${x.co}</span>
+          </div>
+
+          <div class="title-row">
+            <span class="act-name" style="color:${x.actColor}">
+              ${x.main} <span class="act-icon">${x.icon}</span>
+            </span>
+          </div>
+
+          <div class="sub-text">${x.sub}</div>
+
+          <div class="info-box">
+            <div class="info-line">
+              <span>تاريخ الانتهاء:</span>
+              ${dHtml}
+            </div>
+            <div class="info-line">
+              <span>الحالة:</span>
+              <span class="${sClass}">${sLabel}</span>
+            </div>
+          </div>
+        </div>
+
+        <button class="edit-btn" onclick="editLic(${x.id})">${x.date ? 'تعديل التاريخ ✏️' : 'إضافة تاريخ ➕'}</button>
+      `;
+      el.appendChild(c);
+    });
+  }
+
+  function fCo(c, b) {
+    curCo = c;
+    b.parentElement.querySelectorAll('button').forEach(x => x.classList.remove('active'));
+    b.classList.add('active');
+    render();
+  }
+
+  function fAct(a, b) {
+    curAct = a;
+    b.parentElement.querySelectorAll('button').forEach(x => x.classList.remove('active'));
+    b.classList.add('active');
+    render();
+  }
+
+  function toggleTheme() {
+    document.body.classList.toggle('light-mode');
+    const isLight = document.body.classList.contains('light-mode');
+    document.getElementById('tBtn').innerText = isLight ? 'الوضع الليلي 🌙' : 'الوضع النهاري ☀️';
+  }
+
+  function editLic(id) {
+    const item = data.find(x => x.id === id);
+    const val = prompt('أدخل تاريخ الانتهاء بصيغة YYYY-MM-DD:', item.date || '2026-12-17');
+    if (val) {
+      item.date = val;
+      try { localStorage.setItem('site_lic_data', JSON.stringify(data)); } catch(e){}
+      render();
+    }
+  }
+
+  render();
+</script>
+</body>
+</html>
