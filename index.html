@@ -1,647 +1,1995 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="ar" dir="rtl" class="dark">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>متابعة تراخيص النقل</title>
-  <style>
-    /* المتغيرات العامة والألوان */
-    :root {
-      --bg-page: #0b1329;
-      --card-bg: #152238;
-      --card-border: #233554;
-      --text-main: #f8fafc;
-      --text-sub: #94a3b8;
-      --box-inner: #0b1329;
-      --btn-bg: #1e293b;
-      --btn-border: #334155;
-      
-      --brand-rasm: #38bdf8;
-      --brand-zawia: #2dd4bf;
-      --brand-contract: #94a3b8;
-
-      --act-light: #38bdf8;
-      --act-heavy: #f59e0b;
-      --act-bikes: #fb923c;
-      --act-none: #64748b;
-
-      --st-safe-bg: #064e3b;
-      --st-safe-txt: #6ee7b7;
-      --st-warn-bg: #78350f;
-      --st-warn-txt: #fcd34d;
-      --st-danger-bg: #7f1d1d;
-      --st-danger-txt: #fca5a5;
-    }
-
-    body.light-mode {
-      --bg-page: #f1f5f9;
-      --card-bg: #ffffff;
-      --card-border: #cbd5e1;
-      --text-main: #0f172a;
-      --text-sub: #475569;
-      --box-inner: #f8fafc;
-      --btn-bg: #ffffff;
-      --btn-border: #cbd5e1;
-
-      --brand-rasm: #0284c7;
-      --brand-zawia: #0d9488;
-      --brand-contract: #64748b;
-
-      --act-light: #0284c7;
-      --act-heavy: #d97706;
-      --act-bikes: #ea580c;
-      --act-none: #64748b;
-
-      --st-safe-bg: #dcfce7;
-      --st-safe-txt: #166534;
-      --st-warn-bg: #fef3c7;
-      --st-warn-txt: #92400e;
-      --st-danger-bg: #fee2e2;
-      --st-danger-txt: #991b1b;
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: system-ui, -apple-system, "Segoe UI", Roboto, Tahoma, sans-serif;
-      transition: background-color 0.25s, border-color 0.25s, color 0.25s;
-    }
-
-    body {
-      background-color: var(--bg-page);
-      color: var(--text-main);
-      padding: 24px 16px;
-      min-height: 100vh;
-    }
-
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-    }
-
-    /* الشريط العلوي مع توسيط العنوان */
-    .header-section {
-      text-align: center;
-      margin-bottom: 24px;
-      position: relative;
-      padding-bottom: 20px;
-      border-bottom: 1px solid var(--card-border);
-    }
-
-    .main-title {
-      font-size: 1.85rem;
-      font-weight: 800;
-      color: var(--text-main);
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 12px;
-      margin-bottom: 8px;
-    }
-
-    .main-sub {
-      font-size: 0.9rem;
-      color: var(--text-sub);
-    }
-
-    .header-controls {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-top: 14px;
-      flex-wrap: wrap;
-      gap: 10px;
-    }
-
-    .theme-btn {
-      background: var(--card-bg);
-      color: var(--text-main);
-      border: 1px solid var(--card-border);
-      padding: 7px 16px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 0.85rem;
-      font-weight: 600;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .theme-btn:hover {
-      border-color: #3b82f6;
-    }
-
-    .date-badge {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      padding: 6px 14px;
-      border-radius: 8px;
-      font-size: 0.85rem;
-      color: var(--text-sub);
-      font-weight: 600;
-    }
-
-    /* منطقة الفلاتر */
-    .filters-wrapper {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 12px;
-      padding: 16px;
-      margin-bottom: 24px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .filter-row {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    .filter-title {
-      font-size: 0.85rem;
-      font-weight: bold;
-      color: var(--text-sub);
-      min-width: 80px;
-    }
-
-    .btn-f {
-      background: var(--btn-bg);
-      border: 1px solid var(--btn-border);
-      color: var(--text-main);
-      padding: 6px 14px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 0.85rem;
-      font-weight: 600;
-    }
-    .btn-f:hover {
-      border-color: #3b82f6;
-    }
-    .btn-f.active {
-      background: #2563eb !important;
-      border-color: #3b82f6 !important;
-      color: #ffffff !important;
-    }
-
-    /* شبكة البطاقات */
-    .cards-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-      gap: 18px;
-    }
-
-    .card {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 14px;
-      padding: 20px;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
-      position: relative;
-    }
-
-    .card-top {
-      display: flex;
-      justify-content: flex-start;
-      margin-bottom: 12px;
-    }
-
-    .co-badge {
-      font-size: 0.8rem;
-      padding: 4px 10px;
-      border-radius: 6px;
-      font-weight: bold;
-    }
-
-    .title-row {
-      display: flex;
-      align-items: center;
-      justify-content: flex-start;
-      gap: 10px;
-      margin-bottom: 8px;
-    }
-
-    .act-name {
-      font-size: 1.25rem;
-      font-weight: bold;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .act-icon {
-      font-size: 1.45rem;
-      line-height: 1;
-    }
-
-    .act-sub {
-      font-size: 0.9rem;
-      font-weight: 500;
-      color: var(--text-sub);
-      line-height: 1.45;
-      margin-bottom: 16px;
-      min-height: 40px;
-    }
-
-    /* صندوق التواريخ والحالات */
-    .details-box {
-      background: var(--box-inner);
-      border: 1px solid var(--card-border);
-      border-radius: 10px;
-      padding: 12px 14px;
-      margin-bottom: 14px;
-    }
-
-    .details-line {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 8px;
-      font-size: 0.85rem;
-    }
-    .details-line:last-child {
-      margin-bottom: 0;
-    }
-
-    .glass-date {
-      background: rgba(255, 255, 255, 0.08);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      border: 1px solid rgba(255, 255, 255, 0.18);
-      padding: 4px 10px;
-      border-radius: 6px;
-      font-weight: bold;
-      letter-spacing: 0.5px;
-      color: #38bdf8;
-    }
-    body.light-mode .glass-date {
-      background: rgba(15, 23, 42, 0.05);
-      border: 1px solid rgba(15, 23, 42, 0.15);
-      color: #0369a1;
-    }
-
-    .status-badge {
-      padding: 4px 10px;
-      border-radius: 6px;
-      font-weight: bold;
-      font-size: 0.8rem;
-    }
-    .st-safe { background: var(--st-safe-bg); color: var(--st-safe-txt); }
-    .st-warn { background: var(--st-warn-bg); color: var(--st-warn-txt); }
-    .st-danger { background: var(--st-danger-bg); color: var(--st-danger-txt); }
-
-    .btn-edit {
-      background: var(--btn-bg);
-      border: 1px solid var(--card-border);
-      color: var(--text-main);
-      padding: 8px 14px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 0.85rem;
-      font-weight: bold;
-      width: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-    }
-    .btn-edit:hover {
-      border-color: #3b82f6;
-    }
-
-    /* النافذة المنبثقة للتعديل السلس */
-    .modal-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.7);
-      backdrop-filter: blur(4px);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 1000;
-      padding: 16px;
-    }
-
-    .modal-content {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 14px;
-      padding: 22px;
-      width: 100%;
-      max-width: 380px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
-    }
-
-    .modal-title {
-      font-size: 1.15rem;
-      font-weight: bold;
-      margin-bottom: 16px;
-    }
-
-    .modal-input {
-      width: 100%;
-      padding: 10px;
-      border-radius: 8px;
-      background: var(--box-inner);
-      border: 1px solid var(--card-border);
-      color: var(--text-main);
-      font-size: 1rem;
-      margin-bottom: 18px;
-      outline: none;
-    }
-
-    .modal-actions {
-      display: flex;
-      justify-content: flex-end;
-      gap: 10px;
-    }
-
-    .btn-save {
-      background: #2563eb;
-      color: #fff;
-      border: none;
-      padding: 8px 16px;
-      border-radius: 6px;
-      font-weight: bold;
-      cursor: pointer;
-    }
-    .btn-cancel {
-      background: transparent;
-      color: var(--text-sub);
-      border: 1px solid var(--card-border);
-      padding: 8px 14px;
-      border-radius: 6px;
-      cursor: pointer;
-    }
-  </style>
-</head>
-<body>
-
-<div class="container">
-  
-  <!-- العنوان الرئيسي في منتصف الصفحة بالضبط -->
-  <div class="header-section">
-    <h1 class="main-title">
-      متابعة تراخيص النقل 🚚
-    </h1>
-    <div class="main-sub">لوحة مراقبة صلاحية التراخيص والأنشطة اللوجستية وتنبيهات التجديد</div>
-    
-    <div class="header-controls">
-      <button class="theme-btn" onclick="toggleTheme()" id="themeBtn">
-        <span id="themeIcon">☀️</span>
-        <span id="themeLabel">الوضع النهاري</span>
-      </button>
-      <div class="date-badge" id="liveDate"></div>
-    </div>
-  </div>
-
-  <!-- الفلاتر -->
-  <div class="filters-wrapper">
-    <div class="filter-row">
-      <span class="filter-title">المنشأة:</span>
-      <button class="btn-f active" onclick="filterCo('all', this)">الكل</button>
-      <button class="btn-f" onclick="filterCo('رسم الحلول', this)">رسم الحلول</button>
-      <button class="btn-f" onclick="filterCo('زاوية أمل اللوجستية', this)">زاوية أمل اللوجستية</button>
-      <button class="btn-f" onclick="filterCo('زاوية أمل للمقاولات', this)">زاوية أمل للمقاولات</button>
-    </div>
-    <div class="filter-row">
-      <span class="filter-title">النشاط:</span>
-      <button class="btn-f active" onclick="filterAct('all', this)">الكل</button>
-      <button class="btn-f" onclick="filterAct('نقل خفيف', this)">نقل خفيف</button>
-      <button class="btn-f" onclick="filterAct('نقل ثقيل', this)">نقل ثقيل</button>
-      <button class="btn-f" onclick="filterAct('دراجات', this)">دراجات آلية</button>
-    </div>
-  </div>
-
-  <!-- شبكة التراخيص -->
-  <div class="cards-grid" id="licensesGrid"></div>
-
-</div>
-
-<!-- نافذة التعديل المنبثقة -->
-<div class="modal-overlay" id="editModal">
-  <div class="modal-content">
-    <div class="modal-title" id="editModalTitle">تعديل تاريخ الترخيص</div>
-    <input type="date" id="editDateInput" class="modal-input">
-    <div class="modal-actions">
-      <button class="btn-cancel" onclick="closeEditModal()">إلغاء</button>
-      <button class="btn-save" onclick="confirmSaveDate()">حفظ التعديل</button>
-    </div>
-  </div>
-</div>
-
-<script>
-  let licenses = [
-    {
-      id: 1,
-      co: 'زاوية أمل اللوجستية',
-      coColor: 'var(--brand-zawia)',
-      main: 'النقل الخفيف',
-      icon: '🚐',
-      actColor: 'var(--act-light)',
-      sub: 'نشاط النقل الخفيف للبضائع لأغراض تجارية (للغير)',
-      type: 'نقل خفيف',
-      date: '2026-12-17'
-    },
-    {
-      id: 2,
-      co: 'رسم الحلول',
-      coColor: 'var(--brand-rasm)',
-      main: 'الدراجات الآلية',
-      icon: '🛵',
-      actColor: 'var(--act-bikes)',
-      sub: 'نقل البضائع عبر الدراجة الآلية لصالح الغير - البيئة',
-      type: 'دراجات',
-      date: '2027-08-24'
-    },
-    {
-      id: 3,
-      co: 'رسم الحلول',
-      coColor: 'var(--brand-rasm)',
-      main: 'النقل الخفيف',
-      icon: '🚐',
-      actColor: 'var(--act-light)',
-      sub: 'نشاط النقل الخفيف للبضائع لأغراض تجارية (للغير)',
-      type: 'نقل خفيف',
-      date: '2029-01-05'
-    },
-    {
-      id: 4,
-      co: 'رسم الحلول',
-      coColor: 'var(--brand-rasm)',
-      main: 'النقل الثقيل',
-      icon: '🚛',
-      actColor: 'var(--act-heavy)',
-      sub: 'النقل الثقيل للبضائع لأغراض تجارية (للغير - منشآت)',
-      type: 'نقل ثقيل',
-      date: '2029-04-24'
-    },
-    {
-      id: 5,
-      co: 'زاوية أمل للمقاولات',
-      coColor: 'var(--brand-contract)',
-      main: 'بدون تراخيص',
-      icon: '🚫',
-      actColor: 'var(--act-none)',
-      sub: 'المنشأة غير مسجل عليها أي ترخيص نقل حالياً',
-      type: 'بدون',
-      date: null
-    }
-  ];
-
-  // استرجاع التعديلات المحفوظة محلياً
-  try {
-    const cached = localStorage.getItem('transport_licenses_data');
-    if (cached) licenses = JSON.parse(cached);
-  } catch(e) {}
-
-  let activeCo = 'all';
-  let activeAct = 'all';
-  let editingId = null;
-
-  function renderDashboard() {
-    const grid = document.getElementById('licensesGrid');
-    grid.innerHTML = '';
-    
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    // عرض تاريخ اليوم في الشريط
-    const options = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'short' };
-    document.getElementById('liveDate').innerText = 'اليوم: ' + today.toLocaleDateString('ar-SA', options);
-
-    const filtered = licenses.filter(item => {
-      const coMatch = (activeCo === 'all' || item.co === activeCo);
-      const actMatch = (activeAct === 'all' || item.type === activeAct);
-      return coMatch && actMatch;
-    });
-
-    filtered.forEach(item => {
-      let dateDisplay = '<span style="color:var(--text-sub)">غير مسجل</span>';
-      let statusClass = '';
-      let statusLabel = 'غير مقيد';
-
-      if (item.date) {
-        const exp = new Date(item.date);
-        const diffDays = Math.ceil((exp - today) / (1000 * 60 * 60 * 24));
-        dateDisplay = `<span class="glass-date">${item.date}</span>`;
-
-        if (diffDays < 0) {
-          statusClass = 'st-danger';
-          statusLabel = `منتهي منذ ${Math.abs(diffDays)} يوم`;
-        } else if (diffDays <= 30) {
-          statusClass = 'st-warn';
-          statusLabel = `متبقي ${diffDays} يوم (تنبيه تجديد)`;
-        } else {
-          statusClass = 'st-safe';
-          statusLabel = `ساري (متبقي ${diffDays} يوم)`;
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>منظومة إدارة تراخيص الأسطول وبطاقات التشغيل</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Cairo', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'Courier New', 'monospace']
+                    }
+                }
+            }
         }
-      }
+    </script>
+    <!-- Google Fonts Cairo & JetBrains Mono -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body {
+            font-family: 'Cairo', sans-serif;
+            user-select: none;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
 
-      const card = document.createElement('div');
-      card.className = 'card';
-      card.innerHTML = `
-        <div>
-          <div class="card-top">
-            <span class="co-badge" style="background:rgba(125,125,125,0.12); color:${item.coColor}; border:1px solid currentColor;">
-              ${item.co}
-            </span>
-          </div>
+        .saudi-plate {
+            background: #ffffff !important;
+            color: #0f172a !important;
+            border-radius: 8px;
+            display: inline-flex;
+            flex-direction: row;
+            box-shadow: 0 4px 14px -2px rgba(0, 0, 0, 0.45);
+            border: 2px solid #0f172a !important;
+            overflow: hidden;
+            height: 60px;
+            min-width: 175px;
+        }
 
-          <div class="title-row">
-            <span class="act-name" style="color:${item.actColor}">
-              ${item.main} <span class="act-icon">${item.icon}</span>
-            </span>
-          </div>
+        .plate-box {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 2px 6px;
+            background: #ffffff !important;
+        }
 
-          <div class="act-sub">${item.sub}</div>
+        .plate-row-cell {
+            font-weight: 800;
+            font-size: 13.5px;
+            color: #0f172a !important;
+            line-height: 1.25;
+            text-align: center;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
 
-          <div class="details-box">
-            <div class="details-line">
-              <span style="color:var(--text-sub)">تاريخ الصلاحية:</span>
-              ${dateDisplay}
+        .plate-top-cell {
+            border-bottom: 1.5px solid #cbd5e1 !important;
+            padding-bottom: 2px;
+            margin-bottom: 2px;
+        }
+
+        .plate-bottom-cell {
+            font-family: 'JetBrains Mono', monospace;
+            letter-spacing: 0.5px;
+        }
+
+        .saudi-plate-center-divider {
+            width: 26px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            padding: 3px 0;
+            font-size: 8px;
+            font-weight: 900;
+            border-left: 2px solid #0f172a !important;
+            border-right: 2px solid #0f172a !important;
+            line-height: 1;
+        }
+
+        .strip-light {
+            background-color: #facc15 !important;
+            color: #000000 !important;
+        }
+
+        .strip-heavy {
+            background-color: #2563eb !important;
+            color: #ffffff !important;
+        }
+
+        .strip-motorcycle {
+            background-color: #10b981 !important;
+            color: #ffffff !important;
+        }
+
+        .company-filter-card {
+            transition: all 0.24s cubic-bezier(0.34, 1.56, 0.64, 1);
+            backdrop-filter: blur(8px);
+        }
+        .company-filter-card:hover {
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15);
+        }
+        .company-filter-card:active {
+            transform: scale(0.97);
+        }
+
+        .dark .comp-btn-all.active {
+            background: rgba(37, 99, 235, 0.25) !important;
+            border-color: #3b82f6 !important;
+            color: #93c5fd !important;
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.4) !important;
+        }
+        .dark .comp-btn-zawaya.active {
+            background: rgba(16, 185, 129, 0.25) !important;
+            border-color: #10b981 !important;
+            color: #6ee7b7 !important;
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.4) !important;
+        }
+        .dark .comp-btn-rasm.active {
+            background: rgba(168, 85, 247, 0.25) !important;
+            border-color: #a855f7 !important;
+            color: #d8b4fe !important;
+            box-shadow: 0 0 20px rgba(168, 85, 247, 0.4) !important;
+        }
+        .dark .comp-btn-tamayoz.active {
+            background: rgba(245, 158, 11, 0.25) !important;
+            border-color: #f59e0b !important;
+            color: #fde68a !important;
+            box-shadow: 0 0 20px rgba(245, 158, 11, 0.4) !important;
+        }
+
+        html:not(.dark) .comp-btn-all.active {
+            background: #2563eb !important;
+            border-color: #1d4ed8 !important;
+            color: #ffffff !important;
+            box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35) !important;
+        }
+        html:not(.dark) .comp-btn-zawaya.active {
+            background: #059669 !important;
+            border-color: #047857 !important;
+            color: #ffffff !important;
+            box-shadow: 0 4px 14px rgba(5, 150, 105, 0.35) !important;
+        }
+        html:not(.dark) .comp-btn-rasm.active {
+            background: #7c3aed !important;
+            border-color: #6d28d9 !important;
+            color: #ffffff !important;
+            box-shadow: 0 4px 14px rgba(124, 58, 237, 0.35) !important;
+        }
+        html:not(.dark) .comp-btn-tamayoz.active {
+            background: #d97706 !important;
+            border-color: #b45309 !important;
+            color: #ffffff !important;
+            box-shadow: 0 4px 14px rgba(217, 119, 6, 0.35) !important;
+        }
+
+        .dark .lic-theme-emerald {
+            border-color: rgba(16, 185, 129, 0.35);
+            background: linear-gradient(145deg, rgba(16, 185, 129, 0.08), rgba(15, 23, 42, 0.85));
+        }
+        .dark .lic-theme-emerald:hover {
+            border-color: #10b981;
+            box-shadow: 0 8px 24px -4px rgba(16, 185, 129, 0.25);
+        }
+
+        .dark .lic-theme-purple {
+            border-color: rgba(168, 85, 247, 0.35);
+            background: linear-gradient(145deg, rgba(168, 85, 247, 0.08), rgba(15, 23, 42, 0.85));
+        }
+        .dark .lic-theme-purple:hover {
+            border-color: #a855f7;
+            box-shadow: 0 8px 24px -4px rgba(168, 85, 247, 0.25);
+        }
+
+        .dark .lic-theme-cyan {
+            border-color: rgba(6, 182, 212, 0.35);
+            background: linear-gradient(145deg, rgba(6, 182, 212, 0.08), rgba(15, 23, 42, 0.85));
+        }
+        .dark .lic-theme-cyan:hover {
+            border-color: #06b6d4;
+            box-shadow: 0 8px 24px -4px rgba(6, 182, 212, 0.25);
+        }
+
+        .dark .lic-theme-blue {
+            border-color: rgba(59, 130, 246, 0.35);
+            background: linear-gradient(145deg, rgba(59, 130, 246, 0.08), rgba(15, 23, 42, 0.85));
+        }
+        .dark .lic-theme-blue:hover {
+            border-color: #3b82f6;
+            box-shadow: 0 8px 24px -4px rgba(59, 130, 246, 0.25);
+        }
+
+        html:not(.dark) .lic-theme-emerald {
+            border-color: #a7f3d0 !important;
+            background: linear-gradient(145deg, #f0fdf4, #ffffff) !important;
+        }
+        html:not(.dark) .lic-theme-emerald:hover {
+            border-color: #10b981 !important;
+            box-shadow: 0 8px 20px -4px rgba(16, 185, 129, 0.18) !important;
+        }
+
+        html:not(.dark) .lic-theme-purple {
+            border-color: #e9d5ff !important;
+            background: linear-gradient(145deg, #faf5ff, #ffffff) !important;
+        }
+        html:not(.dark) .lic-theme-purple:hover {
+            border-color: #a855f7 !important;
+            box-shadow: 0 8px 20px -4px rgba(168, 85, 247, 0.18) !important;
+        }
+
+        html:not(.dark) .lic-theme-cyan {
+            border-color: #cffafe !important;
+            background: linear-gradient(145deg, #ecfeff, #ffffff) !important;
+        }
+        html:not(.dark) .lic-theme-cyan:hover {
+            border-color: #06b6d4 !important;
+            box-shadow: 0 8px 20px -4px rgba(6, 182, 212, 0.18) !important;
+        }
+
+        html:not(.dark) .lic-theme-blue {
+            border-color: #bfdbfe !important;
+            background: linear-gradient(145deg, #eff6ff, #ffffff) !important;
+        }
+        html:not(.dark) .lic-theme-blue:hover {
+            border-color: #3b82f6 !important;
+            box-shadow: 0 8px 20px -4px rgba(59, 130, 246, 0.18) !important;
+        }
+
+        html:not(.dark) body {
+            background-color: #f1f5f9 !important;
+            color: #0f172a !important;
+        }
+
+        html:not(.dark) header {
+            background-color: rgba(255, 255, 255, 0.96) !important;
+            border-color: #cbd5e1 !important;
+            box-shadow: 0 4px 15px -3px rgba(0, 0, 0, 0.05);
+        }
+
+        html:not(.dark) .kpi-card {
+            background: #ffffff !important;
+            border-color: #e2e8f0 !important;
+            box-shadow: 0 4px 16px -2px rgba(15, 23, 42, 0.06) !important;
+        }
+        html:not(.dark) .kpi-card:hover {
+            box-shadow: 0 8px 24px -4px rgba(15, 23, 42, 0.12) !important;
+        }
+
+        html:not(.dark) .company-filter-card {
+            background: #ffffff !important;
+            border-color: #cbd5e1 !important;
+            color: #334155 !important;
+            box-shadow: 0 2px 8px -1px rgba(0, 0, 0, 0.04);
+        }
+
+        html:not(.dark) .license-card-interactive,
+        html:not(.dark) .veh-card {
+            background-color: #ffffff !important;
+            border-color: #e2e8f0 !important;
+            box-shadow: 0 4px 14px -3px rgba(15, 23, 42, 0.06);
+        }
+        html:not(.dark) .veh-card:hover {
+            border-color: #93c5fd !important;
+            box-shadow: 0 8px 20px -4px rgba(37, 99, 235, 0.1);
+        }
+
+        html:not(.dark) .text-white {
+            color: #0f172a !important;
+        }
+        html:not(.dark) .text-slate-400 {
+            color: #475569 !important;
+        }
+        html:not(.dark) .text-slate-300 {
+            color: #1e293b !important;
+        }
+        html:not(.dark) .text-slate-500 {
+            color: #64748b !important;
+        }
+
+        html:not(.dark) .veh-inner-box,
+        html:not(.dark) .info-block {
+            background-color: #f8fafc !important;
+            border-color: #e2e8f0 !important;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.03) !important;
+        }
+
+        html:not(.dark) .driver-card-box {
+            background: #ffffff !important;
+            border-color: #cbd5e1 !important;
+            box-shadow: 0 3px 10px -2px rgba(15, 23, 42, 0.08) !important;
+        }
+        html:not(.dark) .driver-card-box:hover {
+            border-color: #3b82f6 !important;
+        }
+        html:not(.dark) .driver-capsule {
+            background-color: #f1f5f9 !important;
+            border-color: #cbd5e1 !important;
+        }
+        html:not(.dark) .driver-iqama-text {
+            color: #0f172a !important;
+            font-weight: 800 !important;
+        }
+        html:not(.dark) .driver-user-text {
+            color: #1d4ed8 !important;
+            font-weight: 900 !important;
+        }
+
+        html:not(.dark) .card-num-badge {
+            background: #eff6ff !important;
+            color: #1d4ed8 !important;
+            border-color: #bfdbfe !important;
+        }
+
+        html:not(.dark) #search-input {
+            background-color: #ffffff !important;
+            border-color: #cbd5e1 !important;
+            color: #0f172a !important;
+        }
+        html:not(.dark) #search-input::placeholder {
+            color: #94a3b8 !important;
+        }
+        html:not(.dark) .project-filter-pill-inactive {
+            background-color: #ffffff !important;
+            border-color: #cbd5e1 !important;
+            color: #475569 !important;
+        }
+        html:not(.dark) .project-filter-pill-inactive:hover {
+            background-color: #f1f5f9 !important;
+            color: #0f172a !important;
+        }
+
+        html:not(.dark) .bg-slate-900,
+        html:not(.dark) .bg-slate-900\/90,
+        html:not(.dark) .bg-slate-900\/85,
+        html:not(.dark) .bg-slate-900\/80 {
+            background-color: #ffffff !important;
+        }
+        html:not(.dark) .bg-slate-950,
+        html:not(.dark) .bg-slate-950\/80,
+        html:not(.dark) .bg-slate-950\/70,
+        html:not(.dark) .bg-slate-950\/50,
+        html:not(.dark) .bg-slate-950\/40 {
+            background-color: #f8fafc !important;
+            border-color: #e2e8f0 !important;
+        }
+        html:not(.dark) .border-slate-800,
+        html:not(.dark) .border-slate-800\/80,
+        html:not(.dark) .border-slate-800\/90,
+        html:not(.dark) .border-slate-800\/60 {
+            border-color: #e2e8f0 !important;
+        }
+
+        html:not(.dark) input,
+        html:not(.dark) select,
+        html:not(.dark) textarea {
+            background-color: #ffffff !important;
+            border-color: #cbd5e1 !important;
+            color: #0f172a !important;
+        }
+
+        .license-card-interactive {
+            transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.22s ease, border-color 0.22s ease;
+        }
+        .license-card-interactive:hover {
+            transform: translateY(-4px) scale(1.012);
+        }
+        .license-card-interactive:active {
+            transform: scale(0.985);
+        }
+
+        .glow-action-edit {
+            background: rgba(59, 130, 246, 0.12);
+            border: 1px solid rgba(59, 130, 246, 0.35);
+            color: #60a5fa;
+            transition: all 0.2s ease;
+        }
+        .glow-action-edit:hover {
+            background: rgba(59, 130, 246, 0.25);
+            box-shadow: 0 0 14px rgba(59, 130, 246, 0.5);
+            color: #ffffff;
+        }
+
+        .glow-action-delete {
+            background: rgba(239, 68, 68, 0.12);
+            border: 1px solid rgba(239, 68, 68, 0.35);
+            color: #f87171;
+            transition: all 0.2s ease;
+        }
+        .glow-action-delete:hover {
+            background: rgba(239, 68, 68, 0.25);
+            box-shadow: 0 0 14px rgba(239, 68, 68, 0.5);
+            color: #ffffff;
+        }
+
+        .glow-action-attach {
+            background: rgba(16, 185, 129, 0.12);
+            border: 1px solid rgba(16, 185, 129, 0.35);
+            color: #34d399;
+            transition: all 0.2s ease;
+        }
+        .glow-action-attach:hover {
+            background: rgba(16, 185, 129, 0.25);
+            box-shadow: 0 0 14px rgba(16, 185, 129, 0.5);
+            color: #ffffff;
+        }
+
+        html:not(.dark) .glow-action-edit {
+            background: #eff6ff !important;
+            border-color: #bfdbfe !important;
+            color: #1d4ed8 !important;
+        }
+        html:not(.dark) .glow-action-edit:hover {
+            background: #dbeafe !important;
+            color: #1e40af !important;
+        }
+
+        html:not(.dark) .glow-action-delete {
+            background: #fef2f2 !important;
+            border-color: #fecaca !important;
+            color: #dc2626 !important;
+        }
+        html:not(.dark) .glow-action-delete:hover {
+            background: #fee2e2 !important;
+            color: #991b1b !important;
+        }
+
+        html:not(.dark) .glow-action-attach {
+            background: #f0fdf4 !important;
+            border-color: #bbf7d0 !important;
+            color: #059669 !important;
+        }
+        html:not(.dark) .glow-action-attach:hover {
+            background: #dcfce7 !important;
+            color: #047857 !important;
+        }
+
+        .kpi-card {
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .kpi-card:hover {
+            transform: translateY(-4px);
+        }
+        .kpi-card:active {
+            transform: scale(0.97);
+        }
+
+        .card-num-badge {
+            background: linear-gradient(135deg, rgba(30, 58, 138, 0.25), rgba(15, 23, 42, 0.65));
+            border: 1px solid rgba(96, 165, 250, 0.35);
+            box-shadow: 0 0 10px -2px rgba(59, 130, 246, 0.25);
+            padding: 2px 8px;
+            border-radius: 9999px;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 800;
+            color: #93c5fd;
+        }
+
+        .driver-card-box {
+            background: linear-gradient(145deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.5));
+            border: 1px solid rgba(51, 65, 85, 0.8);
+            border-radius: 14px;
+            padding: 12px 14px;
+            box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.25);
+            transition: border-color 0.2s ease, transform 0.2s ease;
+        }
+        .driver-card-box:hover {
+            border-color: rgba(96, 165, 250, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .pulse-danger {
+            animation: pulse-danger-animation 1.3s infinite;
+        }
+        @keyframes pulse-danger-animation {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.85; transform: scale(1.04); }
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col antialiased selection:bg-blue-600 selection:text-white">
+
+    <!-- Top Navigation Header -->
+    <header class="bg-slate-900/90 border-b border-slate-800 sticky top-0 z-40 px-4 lg:px-8 py-3 flex flex-wrap items-center justify-between gap-3 shadow-xl backdrop-blur-md">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-cyan-500 flex items-center justify-center text-white shadow-lg shadow-blue-500/25">
+                <i data-lucide="shield-check" class="w-5 h-5"></i>
             </div>
-            <div class="details-line">
-              <span style="color:var(--text-sub)">الحالة:</span>
-              <span class="status-badge ${statusClass}">${statusLabel}</span>
+            <div>
+                <h1 class="font-extrabold text-base lg:text-lg leading-snug flex items-center gap-2">
+                    <span>منظومة إدارة تراخيص الأسطول وبطاقات التشغيل</span>
+                    <span class="text-[11px] px-2.5 py-0.5 rounded-full bg-blue-500/10 text-blue-500 dark:text-blue-400 border border-blue-500/20 font-bold">إشراف ورقابة</span>
+                </h1>
+                <p class="text-xs text-slate-500 dark:text-slate-400">المتابعة اللوجستية والنظامية للتراخيص وبطاقات التشغيل وسعة المستخدمين</p>
             </div>
-          </div>
         </div>
 
-        <button class="btn-edit" onclick="openEditModal(${item.id})">
-          ${item.date ? 'تعديل التاريخ ✏️' : 'إضافة ترخيص ➕'}
-        </button>
-      `;
-      grid.appendChild(card);
-    });
-  }
+        <div class="flex items-center gap-2.5">
+            <!-- Theme Toggle Button -->
+            <button onclick="toggleTheme()" id="theme-toggle-btn" class="p-2.5 bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200 dark:hover:bg-slate-700 text-amber-500 dark:text-amber-400 rounded-xl border border-slate-300 dark:border-slate-700 text-xs transition flex items-center justify-center active:scale-90" title="تبديل الوضع النهاري / الليلي">
+                <i data-lucide="sun" id="theme-icon" class="w-4 h-4"></i>
+            </button>
 
-  // التحكم بالفلاتر
-  function filterCo(company, btn) {
-    activeCo = company;
-    btn.parentElement.querySelectorAll('.btn-f').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    renderDashboard();
-  }
+            <button onclick="openLicenseModal()" class="flex items-center gap-1.5 px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition shadow-lg shadow-emerald-600/20 active:scale-95">
+                <i data-lucide="plus-circle" class="w-4 h-4"></i>
+                <span>إضافة ترخيص</span>
+            </button>
+            <button onclick="openVehicleModal()" class="flex items-center gap-1.5 px-3.5 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold transition shadow-lg shadow-blue-600/20 active:scale-95">
+                <i data-lucide="truck" class="w-4 h-4"></i>
+                <span>إضافة مركبة</span>
+            </button>
+            <button onclick="exportData()" class="p-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl border border-slate-300 dark:border-slate-700 text-xs transition" title="تصدير نسخة JSON">
+                <i data-lucide="download" class="w-4 h-4"></i>
+            </button>
+            <label class="p-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl border border-slate-300 dark:border-slate-700 text-xs transition cursor-pointer" title="استيراد نسخة JSON">
+                <i data-lucide="upload" class="w-4 h-4"></i>
+                <input type="file" accept=".json" onchange="importData(event)" class="hidden">
+            </label>
+        </div>
+    </header>
 
-  function filterAct(activity, btn) {
-    activeAct = activity;
-    btn.parentElement.querySelectorAll('.btn-f').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    renderDashboard();
-  }
+    <!-- Main Workspace -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 lg:p-6 space-y-6">
 
-  // التبديل بين النهاري والليلي وحفظ التفضيل
-  function applyThemeMode(theme) {
-    const isLight = theme === 'light';
-    document.body.classList.toggle('light-mode', isLight);
-    document.getElementById('themeIcon').innerText = isLight ? '🌙' : '☀️';
-    document.getElementById('themeLabel').innerText = isLight ? 'الوضع الليلي' : 'الوضع النهاري';
-    localStorage.setItem('pref_theme', theme);
-  }
+        <!-- Enhanced Interactive KPI Cards -->
+        <section class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div onclick="showKpiModal('licenses')" class="kpi-card cursor-pointer bg-gradient-to-br from-slate-900 via-slate-900 to-blue-950/40 border border-slate-800 dark:border-slate-800 p-4 rounded-2xl shadow relative overflow-hidden group">
+                <div class="absolute -right-6 -bottom-6 w-20 h-20 bg-blue-500/10 rounded-full blur-xl group-hover:bg-blue-500/20 transition-all"></div>
+                <div class="flex items-center justify-between text-blue-600 dark:text-blue-400 mb-2">
+                    <span class="text-xs font-bold text-slate-600 dark:text-slate-400">التراخيص الوزارية</span>
+                    <span class="p-1.5 rounded-lg bg-blue-500/10 border border-blue-500/20 text-blue-600 dark:text-blue-400"><i data-lucide="award" class="w-4 h-4"></i></span>
+                </div>
+                <div class="text-3xl font-black text-slate-900 dark:text-white font-mono tracking-tight" id="kpi-licenses">0</div>
+                <div class="text-[11px] text-emerald-600 dark:text-emerald-400 mt-2 flex items-center justify-between font-semibold">
+                    <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span> تراخيص سارية ومفعلة</span>
+                    <span class="text-slate-400 group-hover:text-blue-500 transition">&larr; التفاصيل</span>
+                </div>
+            </div>
 
-  function toggleTheme() {
-    const current = document.body.classList.contains('light-mode') ? 'light' : 'dark';
-    applyThemeMode(current === 'light' ? 'dark' : 'light');
-  }
+            <div onclick="showKpiModal('vehicles')" class="kpi-card cursor-pointer bg-gradient-to-br from-slate-900 via-slate-900 to-indigo-950/40 border border-slate-800 dark:border-slate-800 p-4 rounded-2xl shadow relative overflow-hidden group">
+                <div class="absolute -right-6 -bottom-6 w-20 h-20 bg-indigo-500/10 rounded-full blur-xl group-hover:bg-indigo-500/20 transition-all"></div>
+                <div class="flex items-center justify-between text-indigo-600 dark:text-indigo-400 mb-2">
+                    <span class="text-xs font-bold text-slate-600 dark:text-slate-400">إجمالي الأسطول</span>
+                    <span class="p-1.5 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-indigo-600 dark:text-indigo-400"><i data-lucide="truck" class="w-4 h-4"></i></span>
+                </div>
+                <div class="text-3xl font-black text-slate-900 dark:text-white font-mono tracking-tight" id="kpi-vehicles">0</div>
+                <div class="text-[11px] text-indigo-600 dark:text-indigo-300 mt-2 flex items-center justify-between font-semibold">
+                    <span>مركبات ودبابات ومعدات</span>
+                    <span class="text-slate-400 group-hover:text-indigo-500 transition">&larr; التفاصيل</span>
+                </div>
+            </div>
 
-  // فتح وإغلاق نافذة التعديل
-  function openEditModal(id) {
-    editingId = id;
-    const target = licenses.find(x => x.id === id);
-    document.getElementById('editModalTitle').innerText = `${target.co} - ${target.main}`;
-    document.getElementById('editDateInput').value = target.date || '';
-    document.getElementById('editModal').style.display = 'flex';
-  }
+            <div onclick="showKpiModal('completed')" class="kpi-card cursor-pointer bg-gradient-to-br from-slate-900 via-slate-900 to-emerald-950/40 border border-slate-800 dark:border-slate-800 p-4 rounded-2xl shadow relative overflow-hidden group">
+                <div class="absolute -right-6 -bottom-6 w-20 h-20 bg-emerald-500/10 rounded-full blur-xl group-hover:bg-emerald-500/20 transition-all"></div>
+                <div class="flex items-center justify-between text-emerald-600 dark:text-emerald-400 mb-2">
+                    <span class="text-xs font-bold text-slate-600 dark:text-slate-400">سعة مكتملة (3/3)</span>
+                    <span class="p-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400"><i data-lucide="check-circle" class="w-4 h-4"></i></span>
+                </div>
+                <div class="text-3xl font-black text-emerald-600 dark:text-emerald-400 font-mono tracking-tight" id="kpi-completed">0</div>
+                <div class="text-[11px] text-emerald-600 dark:text-emerald-300 mt-2 flex items-center justify-between font-semibold">
+                    <span>تشغيل كامل بالطاقة القصوى</span>
+                    <span class="text-slate-400 group-hover:text-emerald-500 transition">&larr; التفاصيل</span>
+                </div>
+            </div>
 
-  function closeEditModal() {
-    document.getElementById('editModal').style.display = 'none';
-  }
+            <div onclick="showKpiModal('vacant')" class="kpi-card cursor-pointer bg-gradient-to-br from-slate-900 via-slate-900 to-amber-950/40 border border-slate-800 dark:border-slate-800 p-4 rounded-2xl shadow relative overflow-hidden group">
+                <div class="absolute -right-6 -bottom-6 w-20 h-20 bg-amber-500/10 rounded-full blur-xl group-hover:bg-amber-500/20 transition-all"></div>
+                <div class="flex items-center justify-between text-amber-600 dark:text-amber-400 mb-2">
+                    <span class="text-xs font-bold text-slate-600 dark:text-slate-400">شواغر متاحة</span>
+                    <span class="p-1.5 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400"><i data-lucide="user-plus" class="w-4 h-4"></i></span>
+                </div>
+                <div class="text-3xl font-black text-amber-600 dark:text-amber-400 font-mono tracking-tight" id="kpi-vacant">0</div>
+                <div class="text-[11px] text-amber-600 dark:text-amber-300 mt-2 flex items-center justify-between font-semibold">
+                    <span>مقاعد شاغرة قابلة للتسكين</span>
+                    <span class="text-slate-400 group-hover:text-amber-500 transition">&larr; التفاصيل</span>
+                </div>
+            </div>
+        </section>
 
-  function confirmSaveDate() {
-    const inputVal = document.getElementById('editDateInput').value;
-    if (!inputVal) return alert('يرجى تحديد التاريخ أولاً');
-    
-    const target = licenses.find(x => x.id === editingId);
-    if (target) {
-      target.date = inputVal;
-      try {
-        localStorage.setItem('transport_licenses_data', JSON.stringify(licenses));
-      } catch(e) {}
-      closeEditModal();
-      renderDashboard();
-    }
-  }
+        <!-- Company Glowing Interactive Filters with Lift Animation -->
+        <section class="space-y-2.5">
+            <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-slate-600 dark:text-slate-400 flex items-center gap-1.5">
+                    <i data-lucide="layers" class="w-3.5 h-3.5 text-blue-500"></i> تصفية المنشأة والشركات
+                </span>
+                <span id="active-filter-badge" class="text-[11px] px-3 py-1 rounded-xl bg-slate-200 dark:bg-slate-900 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-800 font-bold shadow-inner">جميع المنشآت</span>
+            </div>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <button onclick="setCompanyFilter('all')" id="comp-btn-all" class="company-filter-card comp-btn-all active px-4 py-3 rounded-2xl border border-slate-300 dark:border-slate-800 text-xs font-bold flex items-center justify-center gap-2">
+                    <i data-lucide="building-2" class="w-4 h-4"></i>
+                    <span>جميع المنشآت</span>
+                </button>
+                <button onclick="setCompanyFilter('زاوية أمل اللوجستية')" id="comp-btn-zawaya" class="company-filter-card comp-btn-zawaya px-4 py-3 rounded-2xl border border-slate-300 dark:border-slate-800 text-xs font-bold flex items-center justify-center gap-2">
+                    <i data-lucide="navigation" class="w-4 h-4"></i>
+                    <span>زاوية أمل اللوجستية</span>
+                </button>
+                <button onclick="setCompanyFilter('رسم الحلول اللوجستية')" id="comp-btn-rasm" class="company-filter-card comp-btn-rasm px-4 py-3 rounded-2xl border border-slate-300 dark:border-slate-800 text-xs font-bold flex items-center justify-center gap-2">
+                    <i data-lucide="boxes" class="w-4 h-4"></i>
+                    <span>رسم الحلول اللوجستية</span>
+                </button>
+                <button onclick="setCompanyFilter('تميز زاوية')" id="comp-btn-tamayoz" class="company-filter-card comp-btn-tamayoz px-4 py-3 rounded-2xl border border-slate-300 dark:border-slate-800 text-xs font-bold flex items-center justify-center gap-2">
+                    <i data-lucide="zap" class="w-4 h-4"></i>
+                    <span>تميز زاوية (الكهرباء)</span>
+                </button>
+            </div>
+        </section>
 
-  // التهيئة المبدئية
-  const initialTheme = localStorage.getItem('pref_theme') || 'dark';
-  applyThemeMode(initialTheme);
-  renderDashboard();
-</script>
+        <!-- Licenses Section with Balanced Compact Badges -->
+        <section class="space-y-3.5">
+            <div class="flex items-center justify-between">
+                <h2 class="text-sm font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
+                    <i data-lucide="file-check-2" class="w-4 h-4 text-emerald-600 dark:text-emerald-400"></i>
+                    <span>التراخيص الحكومية المعتمدة</span>
+                </h2>
+                <div id="license-filter-badge-box" class="hidden">
+                    <button onclick="clearLicenseFilter()" class="text-xs text-rose-500 hover:text-rose-600 flex items-center gap-1 font-bold bg-rose-50 dark:bg-rose-500/10 px-2.5 py-1 rounded-xl border border-rose-300 dark:border-rose-500/20 transition">
+                        <i data-lucide="x" class="w-3.5 h-3.5"></i> إلغاء تصفية الترخيص
+                    </button>
+                </div>
+            </div>
+            <div id="licenses-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <!-- Dynamically rendered licenses -->
+            </div>
+        </section>
+
+        <!-- Vehicles Section, Search, and Operational Cards -->
+        <section class="space-y-4">
+            <div class="bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 p-3.5 rounded-2xl flex flex-col md:flex-row gap-3 items-center justify-between shadow-sm">
+                <div class="relative w-full md:w-80">
+                    <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute right-3.5 top-1/2 -translate-y-1/2"></i>
+                    <input type="text" id="search-input" oninput="renderVehicles()" placeholder="بحث برقم اللوحة، بطاقة التشغيل، السائق، أو اليوزر..." class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-xl pr-10 pl-4 py-2 text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/40 font-medium">
+                </div>
+
+                <div class="flex items-center gap-2 overflow-x-auto w-full md:w-auto pb-1 md:pb-0" id="project-filter-pills">
+                    <!-- Project filters rendered dynamically -->
+                </div>
+            </div>
+
+            <div id="vehicles-container" class="space-y-3.5">
+                <!-- Vehicles rendered dynamically -->
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Modal: License Form -->
+    <div id="modal-license" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            <div class="px-5 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                <h3 class="font-bold text-sm text-slate-900 dark:text-white" id="modal-license-title">إضافة ترخيص وزاري جديد</h3>
+                <button onclick="closeModal('modal-license')" class="text-slate-400 hover:text-slate-600 dark:hover:text-white p-1 rounded-lg">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <form onsubmit="saveLicenseForm(event)" class="p-5 space-y-3.5 overflow-y-auto flex-1 text-xs">
+                <input type="hidden" id="lic-id">
+                <div>
+                    <label class="block font-bold text-slate-600 dark:text-slate-400 mb-1">الشركة المالكة للترخيص</label>
+                    <select id="lic-company" required class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 dark:text-white">
+                        <option value="زاوية أمل اللوجستية">زاوية أمل اللوجستية</option>
+                        <option value="رسم الحلول اللوجستية">رسم الحلول اللوجستية</option>
+                        <option value="تميز زاوية">تميز زاوية</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block font-bold text-slate-600 dark:text-slate-400 mb-1">اسم النشاط الرسمي</label>
+                    <input type="text" id="lic-activity" required placeholder="مثال: النقل الخفيف للبضائع على الطرق" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 dark:text-white">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-bold text-slate-600 dark:text-slate-400 mb-1">رقم الترخيص الوزاري</label>
+                        <input type="text" id="lic-number" required placeholder="مثال: 010211003400" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 dark:text-white font-mono">
+                    </div>
+                    <div>
+                        <label class="block font-bold text-slate-600 dark:text-slate-400 mb-1">تاريخ الانتهاء</label>
+                        <input type="date" id="lic-expiry" required class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 dark:text-white font-mono">
+                    </div>
+                </div>
+                <div>
+                    <label class="block font-bold text-slate-600 dark:text-slate-400 mb-1">الجهة المصدرة للترخيص</label>
+                    <input type="text" id="lic-issuer" value="الهيئة العامة للنقل (TGA)" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 dark:text-white">
+                </div>
+                <div>
+                    <label class="block font-bold text-slate-600 dark:text-slate-400 mb-1 flex items-center gap-1.5">
+                        <i data-lucide="paperclip" class="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400"></i>
+                        <span>إرفاق وثيقة الترخيص (PDF أو صورة)</span>
+                    </label>
+                    <input type="file" id="lic-file" accept="image/*,.pdf" onchange="handleFileUpload(event, 'lic-doc-preview', 'lic-doc-base64')" class="w-full text-xs text-slate-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-slate-200 dark:file:bg-slate-800 file:text-slate-800 dark:file:text-white hover:file:bg-slate-300">
+                    <input type="hidden" id="lic-doc-base64">
+                    <div id="lic-doc-preview" class="mt-2 text-[11px] text-emerald-600 dark:text-emerald-400 font-bold"></div>
+                </div>
+                <div class="pt-3 border-t border-slate-200 dark:border-slate-800 flex justify-end gap-2">
+                    <button type="button" onclick="closeModal('modal-license')" class="px-4 py-2 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-300 rounded-xl text-xs font-bold">إلغاء</button>
+                    <button type="submit" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold">حفظ الترخيص</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Vehicle Form -->
+    <div id="modal-vehicle" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            <div class="px-5 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                <h3 class="font-bold text-sm text-slate-900 dark:text-white" id="modal-vehicle-title">إضافة مركبة / بطاقة تشغيل</h3>
+                <button onclick="closeModal('modal-vehicle')" class="text-slate-400 hover:text-slate-600 dark:hover:text-white p-1 rounded-lg">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <form onsubmit="saveVehicleForm(event)" class="p-5 space-y-3.5 overflow-y-auto flex-1 text-xs">
+                <input type="hidden" id="veh-id">
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-bold text-slate-600 dark:text-slate-400 mb-1">الشركة المشغلة</label>
+                        <select id="veh-company" required onchange="updateLicenseDropdownForVehicle()" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 dark:text-white">
+                            <option value="زاوية أمل اللوجستية">زاوية أمل اللوجستية</option>
+                            <option value="رسم الحلول اللوجستية">رسم الحلول اللوجستية</option>
+                            <option value="تميز زاوية">تميز زاوية</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-bold text-slate-600 dark:text-slate-400 mb-1">المشروع</label>
+                        <select id="veh-project" required class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 dark:text-white">
+                            <option value="مشروع التوصيل">مشروع التوصيل</option>
+                            <option value="مشروع الدينات">مشروع الدينات</option>
+                            <option value="مشروع الكهرباء">مشروع الكهرباء</option>
+                            <option value="نقل طرود (دراجات)">نقل طرود (دراجات)</option>
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <label class="block font-bold text-slate-600 dark:text-slate-400 mb-1">الترخيص المربوط به</label>
+                    <select id="veh-license-id" required class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 dark:text-white"></select>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-bold text-slate-600 dark:text-slate-400 mb-1">أرقام اللوحة (عربي | إنجليزي)</label>
+                        <input type="text" id="veh-plate-num" required placeholder="مثال: 8623" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 dark:text-white font-mono font-bold">
+                    </div>
+                    <div>
+                        <label class="block font-bold text-slate-600 dark:text-slate-400 mb-1">حروف اللوحة (عربي | إنجليزي)</label>
+                        <input type="text" id="veh-plate-letters" required placeholder="أ ص ص | XXA" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 dark:text-white font-mono font-bold">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-bold text-slate-600 dark:text-slate-400 mb-1">رقم بطاقة التشغيل</label>
+                        <input type="text" id="veh-card-num" required placeholder="مثال: 38-00059641" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 dark:text-white font-mono">
+                    </div>
+                    <div>
+                        <label class="block font-bold text-slate-600 dark:text-slate-400 mb-1">تاريخ انتهاء البطاقة</label>
+                        <input type="date" id="veh-expiry" required class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 dark:text-white font-mono">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-bold text-slate-600 dark:text-slate-400 mb-1">نوع التصنيف المروري</label>
+                        <select id="veh-type" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 dark:text-white">
+                            <option value="light">نقل خفيف (شريط أصفر في المنتصف)</option>
+                            <option value="heavy">نقل ثقيل (شريط أزرق في المنتصف)</option>
+                            <option value="general">نقل طرود / دبابات (شريط أخضر في المنتصف)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-bold text-slate-600 dark:text-slate-400 mb-1">نظام التشغيل</label>
+                        <select id="veh-mode" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 dark:text-white">
+                            <option value="users">نظام السعة (3 مستخدمين)</option>
+                            <option value="direct">تشغيل مباشر (بدون يوزرات)</option>
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <label class="block font-bold text-slate-600 dark:text-slate-400 mb-1 flex items-center gap-1.5">
+                        <i data-lucide="paperclip" class="w-3.5 h-3.5 text-blue-600 dark:text-blue-400"></i>
+                        <span>إرفاق وثيقة بطاقة التشغيل (PDF أو صورة)</span>
+                    </label>
+                    <input type="file" id="veh-file" accept="image/*,.pdf" onchange="handleFileUpload(event, 'veh-doc-preview', 'veh-doc-base64')" class="w-full text-xs text-slate-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-slate-200 dark:file:bg-slate-800 file:text-slate-800 dark:file:text-white hover:file:bg-slate-300">
+                    <input type="hidden" id="veh-doc-base64">
+                    <div id="veh-doc-preview" class="mt-2 text-[11px] text-emerald-600 dark:text-emerald-400 font-bold"></div>
+                </div>
+                <div class="pt-3 border-t border-slate-200 dark:border-slate-800 flex justify-end gap-2">
+                    <button type="button" onclick="closeModal('modal-vehicle')" class="px-4 py-2 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-300 rounded-xl text-xs font-bold">إلغاء</button>
+                    <button type="submit" class="px-5 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold">حفظ المركبة</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Add Driver -->
+    <div id="modal-driver" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 w-full max-w-sm rounded-2xl shadow-2xl p-5 space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
+                <h3 class="font-bold text-sm text-slate-900 dark:text-white flex items-center gap-2">
+                    <i data-lucide="user-plus" class="w-4 h-4 text-emerald-600 dark:text-emerald-400"></i>
+                    <span>إضافة مستخدم / يوزر</span>
+                </h3>
+                <button onclick="closeModal('modal-driver')" class="text-slate-400 hover:text-slate-600 dark:hover:text-white">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            </div>
+            <form onsubmit="saveDriverForm(event)" class="space-y-3 text-xs">
+                <input type="hidden" id="drv-veh-id">
+                <div>
+                    <label class="block font-bold text-slate-600 dark:text-slate-400 mb-1">اسم السائق</label>
+                    <input type="text" id="drv-name" required placeholder="الاسم كاملاً" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white">
+                </div>
+                <div>
+                    <label class="block font-bold text-slate-600 dark:text-slate-400 mb-1">رقم الإقامة / الهوية</label>
+                    <input type="text" id="drv-iqama" required placeholder="10 أرقام" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white font-mono">
+                </div>
+                <div>
+                    <label class="block font-bold text-slate-600 dark:text-slate-400 mb-1">رقم اليوزر التشغيلي (User ID)</label>
+                    <input type="text" id="drv-user" required placeholder="مثال: USR-8623-1" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white font-mono">
+                </div>
+                <div class="pt-2 flex justify-end gap-2">
+                    <button type="button" onclick="closeModal('modal-driver')" class="px-4 py-2 bg-slate-200 dark:bg-slate-800 text-slate-800 dark:text-slate-300 rounded-xl text-xs font-bold">إلغاء</button>
+                    <button type="submit" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold">ربط السائق</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: View Document Attachment -->
+    <div id="modal-preview" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 w-full max-w-3xl rounded-2xl shadow-2xl p-4 flex flex-col h-[85vh]">
+            <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3 mb-3">
+                <h4 class="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2" id="preview-title">
+                    <i data-lucide="paperclip" class="w-4 h-4 text-emerald-600 dark:text-emerald-400"></i>
+                    <span>استعراض الوثيقة المرفقة</span>
+                </h4>
+                <button onclick="closeModal('modal-preview')" class="text-slate-400 hover:text-slate-600 dark:hover:text-white">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <div class="flex-1 bg-slate-100 dark:bg-slate-950 rounded-xl overflow-hidden flex items-center justify-center p-2" id="preview-content"></div>
+        </div>
+    </div>
+
+    <!-- Modal: Enhanced KPI Breakdown -->
+    <div id="modal-kpi" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 w-full max-w-xl rounded-2xl shadow-2xl p-5 space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
+                <h3 class="font-bold text-sm text-slate-900 dark:text-white flex items-center gap-2" id="kpi-modal-title">
+                    <i data-lucide="activity" class="w-4 h-4 text-blue-600 dark:text-blue-400"></i>
+                    <span>تفاصيل المؤشر التشغيلي</span>
+                </h3>
+                <button onclick="closeModal('modal-kpi')" class="text-slate-400 hover:text-slate-600 dark:hover:text-white">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <div class="text-xs text-slate-700 dark:text-slate-300 leading-relaxed space-y-3 max-h-[60vh] overflow-y-auto" id="kpi-modal-content"></div>
+            <div class="pt-3 border-t border-slate-200 dark:border-slate-800 flex justify-end">
+                <button onclick="closeModal('modal-kpi')" class="px-5 py-2 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-800 dark:text-white rounded-xl text-xs font-bold transition">إغلاق</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Application Script with High-Capacity Persistent Storage (IndexedDB + LocalStorage) -->
+    <script>
+        const defaultLicenses = [
+            {
+                id: 'lic-zawaya-light',
+                company: 'زاوية أمل اللوجستية',
+                activity: 'النقل الخفيف للبضائع على الطرق',
+                number: '010211003400',
+                expiry: '2026-12-19',
+                issuer: 'الهيئة العامة للنقل (TGA)',
+                theme: 'emerald',
+                notes: 'يغطي أسطول الدينات الـ 10 لشركة زاوية أمل اللوجستية (تشغيل مباشر بدون يوزرات)',
+                doc: null
+            },
+            {
+                id: 'lic-rasm-light',
+                company: 'رسم الحلول اللوجستية',
+                activity: 'النقل الخفيف للبضائع على الطرق',
+                number: '010211004100',
+                expiry: '2029-01-05',
+                issuer: 'الهيئة العامة للنقل (TGA)',
+                theme: 'purple',
+                notes: 'يغطي سيارات التوصيل الخفيف (21 مركبة - نظام السعة 3 يوزرات)',
+                doc: null
+            },
+            {
+                id: 'lic-rasm-bikes',
+                company: 'رسم الحلول اللوجستية',
+                activity: 'نقل الطرود بالدراجات الآلية',
+                number: '010211005200',
+                expiry: '2027-08-24',
+                issuer: 'الهيئة العامة للنقل (TGA)',
+                theme: 'cyan',
+                notes: 'يغطي دبابات التوصيل الـ 10 (نظام السعة 3 يوزرات لكل دراجة)',
+                doc: null
+            },
+            {
+                id: 'lic-rasm-heavy',
+                company: 'رسم الحلول اللوجستية',
+                activity: 'النقل الثقيل للبضائع على الطرق',
+                number: '010111008900',
+                expiry: '2029-04-24',
+                issuer: 'الهيئة العامة للنقل (TGA)',
+                theme: 'blue',
+                notes: 'النقل الثقيل للبضائع لأغراض تجارية (للغير - منشآت) شاحنات تميز زاوية 6557 و 6559',
+                doc: null
+            }
+        ];
+
+        const defaultVehicles = [
+            // 1. دبابات التوصيل (10)
+            { id: 'v-bike-5108', company: 'رسم الحلول اللوجستية', project: 'نقل طرود (دراجات)', licenseId: 'lic-rasm-bikes', plateNum: '5108', plateLetters: 'د ب | BD', cardNum: '81-00010540', expiry: '2027-08-24', owner: 'رسم الحلول اللوجستية', type: 'general', mode: 'users', drivers: [{ name: 'M DAUD GHULAM SAFDAR', iqama: '2587251501', user: '2472804' }, { name: 'ABID HUSSAIN M HUSSAIN', iqama: '2588578928', user: '2480297' }, { name: 'MD RUBEL MIAH', iqama: '2541814741', user: '1942230' }], doc: null },
+            { id: 'v-bike-5109', company: 'رسم الحلول اللوجستية', project: 'نقل طرود (دراجات)', licenseId: 'lic-rasm-bikes', plateNum: '5109', plateLetters: 'د ب | BD', cardNum: '81-00010538', expiry: '2027-08-24', owner: 'رسم الحلول اللوجستية', type: 'general', mode: 'users', drivers: [{ name: 'M WALEED M MAJEED', iqama: '2587881737', user: '2472785' }, { name: 'MD MEHEDI HASAN', iqama: '2526001942', user: '2016759' }, { name: 'HUZAIFA FARAZ FARAZ UL HAQ', iqama: '2565941081', user: '2063655' }], doc: null },
+            { id: 'v-bike-5110', company: 'رسم الحلول اللوجستية', project: 'نقل طرود (دراجات)', licenseId: 'lic-rasm-bikes', plateNum: '5110', plateLetters: 'د ب | BD', cardNum: '81-00010615', expiry: '2027-08-24', owner: 'رسم الحلول اللوجستية', type: 'general', mode: 'users', drivers: [{ name: 'SAQIB ALI SAHIQ HUSSAIN', iqama: '2597079660', user: '4624014' }, { name: 'UMAR KHATTAB M SADIQ', iqama: '2594571404', user: '4585987' }, { name: 'M HASNAIN NAWAZ RAB NAWAZ', iqama: '2591404401', user: '2539306' }], doc: null },
+            { id: 'v-bike-5112', company: 'رسم الحلول اللوجستية', project: 'نقل طرود (دراجات)', licenseId: 'lic-rasm-bikes', plateNum: '5112', plateLetters: 'د ب | BD', cardNum: '81-00010701', expiry: '2027-08-24', owner: 'رسم الحلول اللوجستية', type: 'general', mode: 'users', drivers: [{ name: 'M HAMMAD FERDOS', iqama: '2588578605', user: '2480283' }, { name: 'MEHEDI HASAN', iqama: '2551540343', user: '2026833' }, { name: 'IBTESAM M AHMAD', iqama: '2591403965', user: '2539262' }], doc: null },
+            { id: 'v-bike-5113', company: 'رسم الحلول اللوجستية', project: 'نقل طرود (دراجات)', licenseId: 'lic-rasm-bikes', plateNum: '5113', plateLetters: 'د ب | BD', cardNum: '81-00010536', expiry: '2027-08-24', owner: 'رسم الحلول اللوجستية', type: 'general', mode: 'users', drivers: [{ name: 'JAQBOOL HUSSAIN MANZOOR HUSSAIN', iqama: '2584309591', user: '2436254' }, { name: 'ZAIN ALI QAISAR AZAD', iqama: '2591404732', user: '4486215' }, { name: 'SHAHBAZ MURAD ALI', iqama: '2591404922', user: '4486279' }], doc: null },
+            { id: 'v-bike-5114', company: 'رسم الحلول اللوجستية', project: 'نقل طرود (دراجات)', licenseId: 'lic-rasm-bikes', plateNum: '5114', plateLetters: 'د ب | BD', cardNum: '81-00010663', expiry: '2027-08-24', owner: 'رسم الحلول اللوجستية', type: 'general', mode: 'users', drivers: [{ name: 'SAJID MEHMOOD MANZOOR HUSSAIN', iqama: '2558764623', user: '2009400' }, { name: 'MD SALIM', iqama: '2583941436', user: '2412689' }, { name: 'M FAIZAN M SALEEM', iqama: '2596643888', user: '4596789' }], doc: null },
+            { id: 'v-bike-2423', company: 'رسم الحلول اللوجستية', project: 'نقل طرود (دراجات)', licenseId: 'lic-rasm-bikes', plateNum: '2423', plateLetters: 'د ب | BD', cardNum: '81-00010537', expiry: '2027-08-24', owner: 'رسم الحلول اللوجستية', type: 'general', mode: 'users', drivers: [{ name: 'M ZARAR NASIR MAHMOOD', iqama: '2603407533', user: '4486298' }, { name: 'M AYUB CHAN MEHBOOB', iqama: '2591404435', user: '4609242' }, { name: 'MUNEER ALI MUHAMMAD SHARIF', iqama: '2645755931', user: '5004680' }], doc: null },
+            { id: 'v-bike-2425', company: 'رسم الحلول اللوجستية', project: 'نقل طرود (دراجات)', licenseId: 'lic-rasm-bikes', plateNum: '2425', plateLetters: 'د ب | BD', cardNum: '81-00010614', expiry: '2027-08-24', owner: 'رسم الحلول اللوجستية', type: 'general', mode: 'users', drivers: [{ name: 'ATIF AZIZ ABDUL AZIZ', iqama: '2562358099', user: '2029196' }, { name: 'M KAMRAN MEHR KHAN', iqama: '2589108204', user: '2474570' }, { name: 'ARSLAN AHMAD IRSHAD HUSSAIN', iqama: '2621753652', user: 'USR-2425' }], doc: null },
+            { id: 'v-bike-2427', company: 'رسم الحلول اللوجستية', project: 'نقل طرود (دراجات)', licenseId: 'lic-rasm-bikes', plateNum: '2427', plateLetters: 'د ب | BD', cardNum: '81-00010692', expiry: '2027-08-24', owner: 'رسم الحلول اللوجستية', type: 'general', mode: 'users', drivers: [{ name: 'MD ABU YOUNUS', iqama: '2551914696', user: '2026977' }, { name: 'SUSANTO CHANDRA DAS', iqama: '2516097777', user: '1963461' }, { name: 'M AFZAAL IBRAHIM', iqama: '2591404815', user: '2590465' }], doc: null },
+            { id: 'v-bike-2429', company: 'رسم الحلول اللوجستية', project: 'نقل طرود (دراجات)', licenseId: 'lic-rasm-bikes', plateNum: '2429', plateLetters: 'د ب | BD', cardNum: '81-00010539', expiry: '2027-08-24', owner: 'رسم الحلول اللوجستية', type: 'general', mode: 'users', drivers: [{ name: 'TANJIR AHAMMED RASEL', iqama: '2545227890', user: '2015858' }, { name: 'MD ISMAIL HOSSAIN', iqama: '2539220398', user: '1942253' }, { name: 'UMAR QAYYUM ABDUL QAYYUM', iqama: '2562359246', user: '2029291' }], doc: null },
+
+            // 2. سيارات النقل الخفيف (21)
+            { id: 'v-rasm-1442', company: 'رسم الحلول اللوجستية', project: 'مشروع التوصيل', licenseId: 'lic-rasm-light', plateNum: '1442', plateLetters: 'أ ص ص | XXA', cardNum: '38-00059641', expiry: '2027-01-09', owner: 'رسم الحلول اللوجستية', type: 'light', mode: 'users', drivers: [{ name: 'M ISMAIL FAZAL HUSSAIN', iqama: '2587251600', user: '2474629' }, { name: 'M ANSAR SHAHZAD GULAM M', iqama: '2594571222', user: '3922919' }, { name: 'M DULAL MIA', iqama: '2535342113', user: '1843272' }], doc: null },
+            { id: 'v-rasm-1443', company: 'رسم الحلول اللوجستية', project: 'مشروع التوصيل', licenseId: 'lic-rasm-light', plateNum: '1443', plateLetters: 'أ ص ص | XXA', cardNum: '38-00059642', expiry: '2027-01-09', owner: 'رسم الحلول اللوجستية', type: 'light', mode: 'users', drivers: [{ name: 'GAYASUDEEN ERRABALLI', iqama: '2483002123', user: '1151727' }, { name: 'QAISER SHEHZAD M FIDA', iqama: '2591404021', user: '3438504' }], doc: null },
+            { id: 'v-rasm-1444', company: 'رسم الحلول اللوجستية', project: 'مشروع التوصيل', licenseId: 'lic-rasm-light', plateNum: '1444', plateLetters: 'أ ص ص | XXA', cardNum: '38-00059643', expiry: '2027-01-09', owner: 'رسم الحلول اللوجستية', type: 'light', mode: 'users', drivers: [{ name: 'MOHAMMAD NAZIM UDDIN', iqama: '2541182727', user: '1738459' }, { name: 'HAROON RASHEED', iqama: '2152443079', user: '456534' }], doc: null },
+            { id: 'v-rasm-1933', company: 'رسم الحلول اللوجستية', project: 'مشروع التوصيل', licenseId: 'lic-rasm-light', plateNum: '1933', plateLetters: 'أ ص ص | XXA', cardNum: '38-00059644', expiry: '2027-01-09', owner: 'رسم الحلول اللوجستية', type: 'light', mode: 'users', drivers: [], doc: null },
+            { id: 'v-rasm-1935', company: 'رسم الحلول اللوجستية', project: 'مشروع التوصيل', licenseId: 'lic-rasm-light', plateNum: '1935', plateLetters: 'أ ص ص | XXA', cardNum: '38-00059645', expiry: '2027-01-09', owner: 'رسم الحلول اللوجستية', type: 'light', mode: 'users', drivers: [{ name: 'SAKIL AHAMMED MD SOHIDUL ISLAM', iqama: '2527292060', user: '4480961' }, { name: 'MOHAMMAD ASLAM SHAH', iqama: '2250122104', user: '112047' }, { name: 'M KHALID M SHAFI', iqama: '2591404583', user: '2590451' }], doc: null },
+            { id: 'v-rasm-1936', company: 'رسم الحلول اللوجستية', project: 'مشروع التوصيل', licenseId: 'lic-rasm-light', plateNum: '1936', plateLetters: 'أ ص ص | XXA', cardNum: '38-00059639', expiry: '2027-01-09', owner: 'رسم الحلول اللوجستية', type: 'light', mode: 'users', drivers: [], doc: null },
+            { id: 'v-rasm-2043', company: 'رسم الحلول اللوجستية', project: 'مشروع التوصيل', licenseId: 'lic-rasm-light', plateNum: '2043', plateLetters: 'أ ص ص | XXA', cardNum: '38-00059640', expiry: '2027-01-09', owner: 'رسم الحلول اللوجستية', type: 'light', mode: 'users', drivers: [{ name: 'M DELAWAR', iqama: '2552346112', user: '1945572' }, { name: 'MD ABOUL HOSSAIN', iqama: '2609277559', user: '4392559' }, { name: 'M FORHAD MIAH', iqama: '2548067665', user: '1863443' }], doc: null },
+            { id: 'v-rasm-9549', company: 'رسم الحلول اللوجستية', project: 'مشروع التوصيل', licenseId: 'lic-rasm-light', plateNum: '9549', plateLetters: 'أ ص ط | XTA', cardNum: '38-00060305', expiry: '2027-01-09', owner: 'رسم الحلول اللوجستية', type: 'light', mode: 'users', drivers: [{ name: 'MUHAMMAD HASNAIN MUHAMMAD HAYAT', iqama: '2558764508', user: '2009405' }, { name: 'MD PARVEZ', iqama: '2453276145', user: '1882485' }, { name: 'MOHAMMED MOHSIN', iqama: '2576092908', user: '4656454' }], doc: null },
+            { id: 'v-rasm-4454', company: 'رسم الحلول اللوجستية', project: 'مشروع التوصيل', licenseId: 'lic-rasm-light', plateNum: '4454', plateLetters: 'أ ط و | UTA', cardNum: '38-00083081', expiry: '2027-02-19', owner: 'رسم الحلول اللوجستية', type: 'light', mode: 'users', drivers: [{ name: 'ZOEB RAIS AHEMED KHAN', iqama: '2538640000', user: '4891713' }, { name: 'MD RABBI RAHMAN KHAN', iqama: '2600648238', user: '4784895' }, { name: 'FARHAD FARHAD', iqama: '2599832801', user: '4755428' }], doc: null },
+            { id: 'v-rasm-4456', company: 'رسم الحلول اللوجستية', project: 'مشروع التوصيل', licenseId: 'lic-rasm-light', plateNum: '4456', plateLetters: 'أ ط و | UTA', cardNum: '38-00083082', expiry: '2027-04-29', owner: 'رسم الحلول اللوجستية', type: 'light', mode: 'users', drivers: [{ name: 'HASIBUR RAHMAN RAFI', iqama: '2603112026', user: '4768546' }, { name: 'M PRAVEJ M ILYAS', iqama: '2545965580', user: '2016630' }], doc: null },
+            { id: 'v-rasm-4457', company: 'رسم الحلول اللوجستية', project: 'مشروع التوصيل', licenseId: 'lic-rasm-light', plateNum: '4457', plateLetters: 'أ ط و | UTA', cardNum: '38-00083083', expiry: '2027-02-12', owner: 'رسم الحلول اللوجستية', type: 'light', mode: 'users', drivers: [{ name: 'SAMI ULLAH M ZAFAR ULLAH', iqama: '2589932439', user: '2539249' }], doc: null },
+            { id: 'v-rasm-4458', company: 'رسم الحلول اللوجستية', project: 'مشروع التوصيل', licenseId: 'lic-rasm-light', plateNum: '4458', plateLetters: 'أ ط و | UTA', cardNum: '38-00083084', expiry: '2027-04-23', owner: 'رسم الحلول اللوجستية', type: 'light', mode: 'users', drivers: [{ name: 'AHSAN ALI YOUNAS ALI', iqama: '2570399812', user: '2112114' }, { name: 'MD MAHABUB ALAM', iqama: '2433340607', user: '1071358' }], doc: null },
+            { id: 'v-rasm-4459', company: 'رسم الحلول اللوجستية', project: 'مشروع التوصيل', licenseId: 'lic-rasm-light', plateNum: '4459', plateLetters: 'أ ط و | UTA', cardNum: '38-00083085', expiry: '2027-04-29', owner: 'رسم الحلول اللوجستية', type: 'light', mode: 'users', drivers: [{ name: 'SAHARIAR KHAN', iqama: '2637250255', user: '4807720' }, { name: 'SHAHZAD HUSSAIN ZAHOOR', iqama: '2558764763', user: '2019869' }, { name: 'M IMRAN ABDUL RAZAQ', iqama: '2591404666', user: '4590768' }], doc: null },
+            { id: 'v-rasm-4460', company: 'رسم الحلول اللوجستية', project: 'مشروع التوصيل', licenseId: 'lic-rasm-light', plateNum: '4460', plateLetters: 'أ ط و | UTA', cardNum: '38-00083086', expiry: '2027-02-12', owner: 'رسم الحلول اللوجستية', type: 'light', mode: 'users', drivers: [], doc: null },
+            { id: 'v-rasm-4461', company: 'رسم الحلول اللوجستية', project: 'مشروع التوصيل', licenseId: 'lic-rasm-light', plateNum: '4461', plateLetters: 'أ ط و | UTA', cardNum: '38-00083087', expiry: '2027-04-23', owner: 'رسم الحلول اللوجستية', type: 'light', mode: 'users', drivers: [], doc: null },
+            { id: 'v-rasm-4462', company: 'رسم الحلول اللوجستية', project: 'مشروع التوصيل', licenseId: 'lic-rasm-light', plateNum: '4462', plateLetters: 'أ ط و | UTA', cardNum: '38-00083088', expiry: '2027-04-29', owner: 'رسم الحلول اللوجستية', type: 'light', mode: 'users', drivers: [{ name: 'MUBASIR KHAN KHAN FAROSH', iqama: '2565830342', user: '2050733' }, { name: 'MUHAMMAD NADEEM KHADIM HUSSAIN', iqama: '2560058931', user: '2009445' }, { name: 'ADEEL IQBAL NOOR MUHAMMAD', iqama: '2560057404', user: '2009415' }], doc: null },
+            { id: 'v-rasm-4463', company: 'رسم الحلول اللوجستية', project: 'مشروع التوصيل', licenseId: 'lic-rasm-light', plateNum: '4463', plateLetters: 'أ ط و | UTA', cardNum: '38-00083080', expiry: '2027-02-13', owner: 'رسم الحلول اللوجستية', type: 'light', mode: 'users', drivers: [{ name: 'JAVED KHAN', iqama: '2619911999', user: '4695822' }, { name: 'ABDUL WAHEED MUHAMMAD MURSALEEN', iqama: '2589932363', user: '2519083' }, { name: 'SHUAIB AHMAD ISRAIL AHMAD', iqama: '2490317985', user: '1148346' }], doc: null },
+            { id: 'v-rasm-9152', company: 'رسم الحلول اللوجستية', project: 'مشروع التوصيل', licenseId: 'lic-rasm-light', plateNum: '9152', plateLetters: 'أ ط ب | BTA', cardNum: '38-00066117', expiry: '2027-01-03', owner: 'رسم الحلول اللوجستية', type: 'light', mode: 'users', drivers: [{ name: 'MOHAMMED ABDUL BASIT', iqama: '2576642264', user: '2155694' }, { name: 'ADNAN ILYAS ABBASI M ILYAS ABBASI', iqama: '2588579462', user: '2474581' }], doc: null },
+            { id: 'v-rasm-9192', company: 'رسم الحلول اللوجستية', project: 'مشروع التوصيل', licenseId: 'lic-rasm-light', plateNum: '9192', plateLetters: 'أ ط ب | BTA', cardNum: '38-00066115', expiry: '2027-01-03', owner: 'رسم الحلول اللوجستية', type: 'light', mode: 'users', drivers: [{ name: 'MD SUMON HOSSEN', iqama: '2546469970', user: '2163246' }, { name: 'ARSLAN SARDAR SARDAR SHER KHAN', iqama: '2587251915', user: '2472706' }, { name: 'NAVEED AHMAD GHULAM FAREED', iqama: '2589108071', user: '2474688' }], doc: null },
+            { id: 'v-rasm-9193', company: 'رسم الحلول اللوجستية', project: 'مشروع التوصيل', licenseId: 'lic-rasm-light', plateNum: '9193', plateLetters: 'أ ط ب | BTA', cardNum: '38-00066116', expiry: '2027-01-06', owner: 'رسم الحلول اللوجستية', type: 'light', mode: 'users', drivers: [{ name: 'SHAHZAIB SARWAR', iqama: '2570400529', user: '2113072' }, { name: 'SAMSUL HAQUE', iqama: '2576642306', user: '2161854' }, { name: 'MOHAMMAD SHOHIDUL ISLAM', iqama: '2439928595', user: '4504279' }], doc: null },
+            { id: 'v-rasm-9194', company: 'رسم الحلول اللوجستية', project: 'مشروع التوصيل', licenseId: 'lic-rasm-light', plateNum: '9194', plateLetters: 'أ ط ب | BTA', cardNum: '38-00066005', expiry: '2027-01-06', owner: 'رسم الحلول اللوجستية', type: 'light', mode: 'users', drivers: [{ name: 'MD NURUL ALOM HOWLADER', iqama: '2449200795', user: '4548141' }, { name: 'ABDUS SHAHID', iqama: '2534242272', user: '1774719' }], doc: null },
+
+            // 3. النقل الثقيل (2)
+            { id: 'v-heavy-6557', company: 'رسم الحلول اللوجستية', project: 'مشروع التوصيل', licenseId: 'lic-rasm-heavy', plateNum: '6557', plateLetters: 'أ ع أ | AEA', cardNum: '11-00760321', expiry: '2027-11-19', owner: 'رسم الحلول اللوجستية (تميز زاوية)', type: 'heavy', mode: 'direct', drivers: [], doc: null },
+            { id: 'v-heavy-6559', company: 'رسم الحلول اللوجستية', project: 'مشروع التوصيل', licenseId: 'lic-rasm-heavy', plateNum: '6559', plateLetters: 'أ ع أ | AEA', cardNum: '11-00747436', expiry: '2027-10-21', owner: 'رسم الحلول اللوجستية (تميز زاوية)', type: 'heavy', mode: 'direct', drivers: [], doc: null },
+
+            // 4. مشروع الدينات (10)
+            { id: 'v-dyna-8623', company: 'زاوية أمل اللوجستية', project: 'مشروع الدينات', licenseId: 'lic-zawaya-light', plateNum: '8623', plateLetters: 'أ ط ص | XTA', cardNum: '38-00068896', expiry: '2026-12-19', owner: 'زاوية أمل اللوجستية', type: 'light', mode: 'direct', drivers: [], doc: null },
+            { id: 'v-dyna-8624', company: 'زاوية أمل اللوجستية', project: 'مشروع الدينات', licenseId: 'lic-zawaya-light', plateNum: '8624', plateLetters: 'أ ط ص | XTA', cardNum: '38-00068897', expiry: '2026-12-19', owner: 'زاوية أمل اللوجستية', type: 'light', mode: 'direct', drivers: [], doc: null },
+            { id: 'v-dyna-8625', company: 'زاوية أمل اللوجستية', project: 'مشروع الدينات', licenseId: 'lic-zawaya-light', plateNum: '8625', plateLetters: 'أ ط ص | XTA', cardNum: '38-00068898', expiry: '2026-12-19', owner: 'زاوية أمل اللوجستية', type: 'light', mode: 'direct', drivers: [], doc: null },
+            { id: 'v-dyna-8626', company: 'زاوية أمل اللوجستية', project: 'مشروع الدينات', licenseId: 'lic-zawaya-light', plateNum: '8626', plateLetters: 'أ ط ص | XTA', cardNum: '38-00068899', expiry: '2026-12-19', owner: 'زاوية أمل اللوجستية', type: 'light', mode: 'direct', drivers: [], doc: null },
+            { id: 'v-dyna-8627', company: 'زاوية أمل اللوجستية', project: 'مشروع الدينات', licenseId: 'lic-zawaya-light', plateNum: '8627', plateLetters: 'أ ط ص | XTA', cardNum: '38-00068900', expiry: '2026-12-19', owner: 'زاوية أمل اللوجستية', type: 'light', mode: 'direct', drivers: [], doc: null },
+            { id: 'v-dyna-8628', company: 'زاوية أمل اللوجستية', project: 'مشروع الدينات', licenseId: 'lic-zawaya-light', plateNum: '8628', plateLetters: 'أ ط ص | XTA', cardNum: '38-00068901', expiry: '2026-12-19', owner: 'زاوية أمل اللوجستية', type: 'light', mode: 'direct', drivers: [], doc: null },
+            { id: 'v-dyna-8629', company: 'زاوية أمل اللوجستية', project: 'مشروع الدينات', licenseId: 'lic-zawaya-light', plateNum: '8629', plateLetters: 'أ ط ص | XTA', cardNum: '38-00068902', expiry: '2026-12-19', owner: 'زاوية أمل اللوجستية', type: 'light', mode: 'direct', drivers: [], doc: null },
+            { id: 'v-dyna-8630', company: 'زاوية أمل اللوجستية', project: 'مشروع الدينات', licenseId: 'lic-zawaya-light', plateNum: '8630', plateLetters: 'أ ط ص | XTA', cardNum: '38-00068903', expiry: '2026-12-19', owner: 'زاوية أمل اللوجستية', type: 'light', mode: 'direct', drivers: [], doc: null },
+            { id: 'v-dyna-8631', company: 'زاوية أمل اللوجستية', project: 'مشروع الدينات', licenseId: 'lic-zawaya-light', plateNum: '8631', plateLetters: 'أ ط ص | XTA', cardNum: '38-00068904', expiry: '2026-12-19', owner: 'زاوية أمل اللوجستية', type: 'light', mode: 'direct', drivers: [], doc: null },
+            { id: 'v-dyna-8632', company: 'زاوية أمل اللوجستية', project: 'مشروع الدينات', licenseId: 'lic-zawaya-light', plateNum: '8632', plateLetters: 'أ ط ص | XTA', cardNum: '38-00068905', expiry: '2026-12-19', owner: 'زاوية أمل اللوجستية', type: 'light', mode: 'direct', drivers: [], doc: null }
+        ];
+
+        // IndexedDB High-Capacity Storage System for PDF and Heavy Attachments
+        const DB_NAME = 'ZawayaFleetDB_v2';
+        const DB_STORE = 'fleet_attachments';
+        let dbInstance = null;
+
+        function initDatabase() {
+            return new Promise((resolve) => {
+                const req = indexedDB.open(DB_NAME, 1);
+                req.onupgradeneeded = (e) => {
+                    const db = e.target.result;
+                    if (!db.objectStoreNames.contains(DB_STORE)) {
+                        db.createObjectStore(DB_STORE, { keyPath: 'id' });
+                    }
+                };
+                req.onsuccess = (e) => {
+                    dbInstance = e.target.result;
+                    resolve(dbInstance);
+                };
+                req.onerror = () => {
+                    console.warn('IndexedDB unavailable, falling back to LocalStorage');
+                    resolve(null);
+                };
+            });
+        }
+
+        function saveDocToDB(id, docBase64) {
+            return new Promise((resolve) => {
+                if (!dbInstance) return resolve(false);
+                const tx = dbInstance.transaction(DB_STORE, 'readwrite');
+                const store = tx.objectStore(DB_STORE);
+                store.put({ id: id, data: docBase64 });
+                tx.oncomplete = () => resolve(true);
+                tx.onerror = () => resolve(false);
+            });
+        }
+
+        function getDocFromDB(id) {
+            return new Promise((resolve) => {
+                if (!dbInstance) return resolve(null);
+                const tx = dbInstance.transaction(DB_STORE, 'readonly');
+                const store = tx.objectStore(DB_STORE);
+                const req = store.get(id);
+                req.onsuccess = () => resolve(req.result ? req.result.data : null);
+                req.onerror = () => resolve(null);
+            });
+        }
+
+        let state = {
+            licenses: defaultLicenses,
+            vehicles: defaultVehicles,
+            activeCompany: 'all',
+            activeLicenseFilter: null,
+            activeProjectFilter: 'all',
+            theme: localStorage.getItem('zawaya_theme') || 'dark'
+        };
+
+        // Load Persistent State on Startup (Always prioritized over default data)
+        async function loadPersistentState() {
+            await initDatabase();
+            const storedLic = localStorage.getItem('zawaya_licenses_live_v4');
+            const storedVeh = localStorage.getItem('zawaya_vehicles_live_v4');
+
+            if (storedLic) {
+                try { 
+                    const parsedLic = JSON.parse(storedLic);
+                    if (Array.isArray(parsedLic) && parsedLic.length > 0) {
+                        state.licenses = parsedLic;
+                    }
+                } catch (e) {
+                    console.error('Error parsing stored licenses', e);
+                }
+            }
+            if (storedVeh) {
+                try { 
+                    const parsedVeh = JSON.parse(storedVeh);
+                    if (Array.isArray(parsedVeh) && parsedVeh.length > 0) {
+                        state.vehicles = parsedVeh;
+                    }
+                } catch (e) {
+                    console.error('Error parsing stored vehicles', e);
+                }
+            }
+
+            // Restore attachments from IndexedDB
+            for (let lic of state.licenses) {
+                const doc = await getDocFromDB(lic.id);
+                if (doc) lic.doc = doc;
+            }
+            for (let veh of state.vehicles) {
+                const doc = await getDocFromDB(veh.id);
+                if (doc) veh.doc = doc;
+            }
+
+            updateKPIs();
+            renderLicenses();
+            renderVehicles();
+        }
+
+        async function persistState() {
+            // Save metadata without massive base64 in localStorage to ensure it NEVER fails or gets wiped
+            const cleanLicenses = state.licenses.map(l => ({ ...l, doc: l.doc ? 'stored_in_idb' : null }));
+            const cleanVehicles = state.vehicles.map(v => ({ ...v, doc: v.doc ? 'stored_in_idb' : null }));
+
+            try {
+                localStorage.setItem('zawaya_licenses_live_v4', JSON.stringify(cleanLicenses));
+                localStorage.setItem('zawaya_vehicles_live_v4', JSON.stringify(cleanVehicles));
+            } catch (err) {
+                console.error('LocalStorage write error:', err);
+            }
+
+            // Save actual documents in IndexedDB (Unlimited capacity)
+            for (let lic of state.licenses) {
+                if (lic.doc && lic.doc !== 'stored_in_idb') {
+                    await saveDocToDB(lic.id, lic.doc);
+                }
+            }
+            for (let veh of state.vehicles) {
+                if (veh.doc && veh.doc !== 'stored_in_idb') {
+                    await saveDocToDB(veh.id, veh.doc);
+                }
+            }
+
+            updateKPIs();
+        }
+
+        function getDaysDiff(targetDateStr) {
+            const now = new Date();
+            const target = new Date(targetDateStr);
+            const diffTime = target - now;
+            return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        }
+
+        function toArabicDigits(str) {
+            return (str + '').replace(/[0-9]/g, d => '٠١٢٣٤٥٦٧٨٩'[d]);
+        }
+
+        window.addEventListener('DOMContentLoaded', async () => {
+            applyTheme(state.theme);
+            await loadPersistentState();
+            lucide.createIcons();
+        });
+
+        function toggleTheme() {
+            state.theme = state.theme === 'dark' ? 'light' : 'dark';
+            localStorage.setItem('zawaya_theme', state.theme);
+            applyTheme(state.theme);
+        }
+
+        function applyTheme(theme) {
+            const html = document.documentElement;
+            const btn = document.getElementById('theme-toggle-btn');
+            if (theme === 'light') {
+                html.classList.remove('dark');
+                if (btn) btn.innerHTML = `<i data-lucide="moon" class="w-4 h-4 text-slate-800"></i>`;
+            } else {
+                html.classList.add('dark');
+                if (btn) btn.innerHTML = `<i data-lucide="sun" class="w-4 h-4 text-amber-400"></i>`;
+            }
+            renderLicenses();
+            renderVehicles();
+            lucide.createIcons();
+        }
+
+        function updateKPIs() {
+            document.getElementById('kpi-licenses').textContent = state.licenses.length;
+            document.getElementById('kpi-vehicles').textContent = state.vehicles.length;
+
+            let completed = 0;
+            let vacant = 0;
+
+            state.vehicles.forEach(v => {
+                if (v.mode === 'users') {
+                    const count = (v.drivers || []).length;
+                    if (count === 3) completed++;
+                    if (count < 3) vacant += (3 - count);
+                }
+            });
+
+            document.getElementById('kpi-completed').textContent = completed;
+            document.getElementById('kpi-vacant').textContent = vacant;
+        }
+
+        function renderLicenses() {
+            const container = document.getElementById('licenses-grid');
+            container.innerHTML = '';
+
+            let filtered = state.licenses;
+            if (state.activeCompany !== 'all') {
+                if (state.activeCompany === 'تميز زاوية') {
+                    filtered = state.licenses.filter(l => l.id === 'lic-rasm-heavy');
+                } else {
+                    filtered = filtered.filter(l => l.company === state.activeCompany);
+                }
+            }
+
+            const isDark = document.documentElement.classList.contains('dark');
+
+            const themeClasses = {
+                emerald: 'lic-theme-emerald',
+                purple: 'lic-theme-purple',
+                cyan: 'lic-theme-cyan',
+                blue: 'lic-theme-blue'
+            };
+
+            const iconBgClasses = {
+                emerald: isDark ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30' : 'bg-emerald-50 text-emerald-600 border-emerald-200',
+                purple: isDark ? 'bg-purple-500/15 text-purple-400 border-purple-500/30' : 'bg-purple-50 text-purple-600 border-purple-200',
+                cyan: isDark ? 'bg-cyan-500/15 text-cyan-400 border-cyan-500/30' : 'bg-cyan-50 text-cyan-600 border-cyan-200',
+                blue: isDark ? 'bg-blue-500/15 text-blue-400 border-blue-500/30' : 'bg-blue-50 text-blue-600 border-blue-200'
+            };
+
+            filtered.forEach(lic => {
+                const days = getDaysDiff(lic.expiry);
+                let badgeClass = isDark ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30" : "bg-emerald-50 text-emerald-700 border-emerald-200";
+                let statusText = `متبقي ${days} يوم`;
+
+                if (days <= 0) {
+                    badgeClass = isDark ? "bg-rose-500/10 text-rose-400 border-rose-500/30" : "bg-rose-50 text-rose-700 border-rose-200";
+                    statusText = "منتهي";
+                } else if (days <= 60) {
+                    badgeClass = isDark ? "bg-amber-500/10 text-amber-400 border-amber-500/30" : "bg-amber-50 text-amber-700 border-amber-200";
+                    statusText = `${days} يوم متبقي`;
+                }
+
+                const linkedCount = state.vehicles.filter(v => v.licenseId === lic.id).length;
+                const isSelected = state.activeLicenseFilter === lic.id;
+                const cardTheme = themeClasses[lic.theme || 'blue'] || 'lic-theme-blue';
+                const iconTheme = iconBgClasses[lic.theme || 'blue'] || 'bg-blue-500/15 text-blue-400 border-blue-500/30';
+
+                const card = document.createElement('div');
+                card.className = `license-card-interactive ${cardTheme} p-4 rounded-2xl border cursor-pointer relative ${isSelected ? 'ring-2 ring-blue-500 shadow-xl shadow-blue-500/20' : ''}`;
+                
+                card.innerHTML = `
+                    <div class="flex items-start justify-between gap-2 mb-3">
+                        <div class="flex items-center gap-2.5">
+                            <span class="p-2.5 rounded-xl ${iconTheme} border shadow-sm">
+                                <i data-lucide="${lic.theme === 'cyan' ? 'bike' : (lic.theme === 'blue' ? 'truck' : 'shield-check')}" class="w-4 h-4"></i>
+                            </span>
+                            <div>
+                                <h3 class="font-extrabold text-sm text-slate-900 dark:text-white leading-tight">${lic.activity}</h3>
+                                <p class="text-xs text-slate-600 dark:text-slate-400 font-semibold mt-0.5">${lic.company}</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-1.5">
+                            <button onclick="event.stopPropagation(); triggerAttachmentUpload('${lic.id}', 'license')" class="glow-action-attach p-1.5 rounded-lg" title="إرفاق مستند جديد"><i data-lucide="paperclip" class="w-3.5 h-3.5"></i></button>
+                            ${lic.doc ? `<button onclick="event.stopPropagation(); viewAttachment('${lic.activity}', '${lic.id}')" class="p-1.5 rounded-lg bg-blue-50 dark:bg-blue-500/15 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-500/30 hover:bg-blue-100" title="استعراض الوثيقة"><i data-lucide="eye" class="w-3.5 h-3.5"></i></button>` : ''}
+                            <button onclick="event.stopPropagation(); editLicense('${lic.id}')" class="glow-action-edit p-1.5 rounded-lg" title="تعديل الترخيص"><i data-lucide="pencil" class="w-3.5 h-3.5"></i></button>
+                            <button onclick="event.stopPropagation(); deleteLicense('${lic.id}')" class="glow-action-delete p-1.5 rounded-lg" title="حذف الترخيص"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+                        </div>
+                    </div>
+
+                    ${lic.notes ? `
+                    <div class="text-[11px] text-slate-700 dark:text-slate-400 bg-slate-100 dark:bg-slate-950/50 px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800/60 mb-2.5 leading-relaxed">
+                        <span class="text-slate-500 font-bold">ملاحظة:</span> ${lic.notes}
+                    </div>` : ''}
+
+                    <div class="info-block bg-slate-50 dark:bg-slate-950/80 px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-800/90 my-2.5 flex items-center justify-between shadow-inner">
+                        <div class="flex items-center gap-2">
+                            <span class="text-[11px] text-slate-500 dark:text-slate-400 font-bold">ينتهي:</span>
+                            <span class="font-mono text-slate-900 dark:text-white text-xs font-black tracking-wide">${lic.expiry}</span>
+                        </div>
+                        <div>
+                            <span class="px-2 py-0.5 rounded-md border text-[11px] font-bold ${badgeClass}">${statusText}</span>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-between pt-2 border-t border-slate-200 dark:border-slate-800/80 text-xs text-slate-500 dark:text-slate-400">
+                        <span class="flex items-center gap-1 font-mono text-[11px]">رقم: <b class="text-slate-800 dark:text-slate-300 font-bold">${lic.number}</b></span>
+                        <span class="text-blue-600 dark:text-blue-400 font-bold flex items-center gap-1.5 text-xs bg-blue-50 dark:bg-blue-500/10 px-2 py-0.5 rounded-lg border border-blue-200 dark:border-blue-500/20">
+                            <i data-lucide="truck" class="w-3.5 h-3.5"></i> ${linkedCount} مركبة مرتبطة
+                        </span>
+                    </div>
+                `;
+
+                card.onclick = () => filterByLicense(lic.id);
+                container.appendChild(card);
+            });
+
+            lucide.createIcons();
+        }
+
+        function renderCapacityIndicator(vehicle) {
+            const isDark = document.documentElement.classList.contains('dark');
+
+            if (vehicle.mode === 'direct') {
+                return `
+                    <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-blue-50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/20 text-blue-700 dark:text-blue-400 text-xs font-bold shadow-sm whitespace-nowrap">
+                        <i data-lucide="gauge" class="w-3.5 h-3.5"></i>
+                        <span>تشغيل مباشر (بدون يوزرات)</span>
+                    </div>
+                `;
+            }
+
+            const count = (vehicle.drivers || []).length;
+            let donutSvg = '';
+            let pillClass = '';
+            let labelText = '';
+            const trackColor = isDark ? 'stroke-slate-800' : 'stroke-slate-200';
+
+            if (count === 0) {
+                pillClass = isDark ? "bg-slate-800 text-slate-400 border-slate-700" : "bg-slate-100 text-slate-600 border-slate-300";
+                labelText = "فارغ (0/3)";
+                donutSvg = `
+                    <svg class="w-5 h-5 transform -rotate-90" viewBox="0 0 36 36">
+                        <circle cx="18" cy="18" r="14" fill="none" class="${trackColor}" stroke-width="4"></circle>
+                    </svg>
+                `;
+            } else if (count === 1) {
+                pillClass = isDark ? "bg-yellow-400/10 text-yellow-300 border-yellow-400/30" : "bg-amber-50 text-amber-700 border-amber-200";
+                labelText = "متاح 2 (1/3)";
+                donutSvg = `
+                    <svg class="w-5 h-5 transform -rotate-90" viewBox="0 0 36 36">
+                        <circle cx="18" cy="18" r="14" fill="none" class="${trackColor}" stroke-width="4"></circle>
+                        <circle cx="18" cy="18" r="14" fill="none" stroke="#f59e0b" stroke-width="4" stroke-dasharray="29.3 58.7" stroke-dashoffset="0"></circle>
+                    </svg>
+                `;
+            } else if (count === 2) {
+                pillClass = isDark ? "bg-amber-500/10 text-amber-400 border-amber-500/30" : "bg-amber-100 text-amber-800 border-amber-300";
+                labelText = "متاح 1 (2/3)";
+                donutSvg = `
+                    <svg class="w-5 h-5 transform -rotate-90" viewBox="0 0 36 36">
+                        <circle cx="18" cy="18" r="14" fill="none" class="${trackColor}" stroke-width="4"></circle>
+                        <circle cx="18" cy="18" r="14" fill="none" stroke="#d97706" stroke-width="4" stroke-dasharray="58.6 29.4" stroke-dashoffset="0"></circle>
+                    </svg>
+                `;
+            } else if (count === 3) {
+                pillClass = isDark ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30" : "bg-emerald-50 text-emerald-700 border-emerald-200";
+                labelText = "مكتمل (3/3)";
+                donutSvg = `
+                    <svg class="w-5 h-5 transform -rotate-90" viewBox="0 0 36 36">
+                        <circle cx="18" cy="18" r="14" fill="none" class="${trackColor}" stroke-width="4"></circle>
+                        <circle cx="18" cy="18" r="14" fill="none" stroke="#10b981" stroke-width="4" stroke-dasharray="88 0" stroke-dashoffset="0"></circle>
+                    </svg>
+                `;
+            } else {
+                pillClass = "bg-rose-500/20 text-rose-500 border-rose-500 pulse-danger";
+                labelText = `تجاوز الحد (${count}/3) ⚠`;
+                donutSvg = `
+                    <svg class="w-5 h-5 transform -rotate-90" viewBox="0 0 36 36">
+                        <circle cx="18" cy="18" r="14" fill="none" stroke="#ef4444" stroke-width="5" stroke-dasharray="88 0" stroke-dashoffset="0"></circle>
+                    </svg>
+                `;
+            }
+
+            return `
+                <div class="flex items-center gap-2">
+                    ${donutSvg}
+                    <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-xl border text-xs font-bold ${pillClass} whitespace-nowrap">
+                        <span>${labelText}</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderVehicles() {
+            const container = document.getElementById('vehicles-container');
+            const searchVal = (document.getElementById('search-input')?.value || '').toLowerCase().trim();
+            container.innerHTML = '';
+
+            let filtered = state.vehicles;
+
+            if (state.activeCompany !== 'all') {
+                filtered = filtered.filter(v => v.company === state.activeCompany);
+            }
+
+            if (state.activeLicenseFilter) {
+                filtered = filtered.filter(v => v.licenseId === state.activeLicenseFilter);
+            }
+
+            if (state.activeProjectFilter !== 'all') {
+                filtered = filtered.filter(v => v.project === state.activeProjectFilter);
+            }
+
+            if (searchVal) {
+                filtered = filtered.filter(v => {
+                    const plateMatch = (v.plateNum + ' ' + v.plateLetters).toLowerCase().includes(searchVal);
+                    const cardMatch = (v.cardNum || '').includes(searchVal);
+                    const driverMatch = (v.drivers || []).some(d => 
+                        (d.name || '').toLowerCase().includes(searchVal) ||
+                        (d.iqama || '').includes(searchVal) ||
+                        (d.user || '').toLowerCase().includes(searchVal)
+                    );
+                    return plateMatch || cardMatch || driverMatch;
+                });
+            }
+
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div class="bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-2xl p-8 text-center text-slate-500 text-xs shadow-sm">
+                        <i data-lucide="search-x" class="w-8 h-8 mx-auto mb-2 opacity-50"></i>
+                        لا توجد مركبات أو بطاقات تشغيل مطابقة لخيارات التصفية الحالية.
+                    </div>
+                `;
+                lucide.createIcons();
+                return;
+            }
+
+            const isDark = document.documentElement.classList.contains('dark');
+
+            filtered.forEach(veh => {
+                const days = getDaysDiff(veh.expiry);
+                let badgeClass = isDark ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30" : "bg-emerald-50 text-emerald-700 border-emerald-200";
+                let statusText = `متبقي ${days} يوم`;
+
+                if (days <= 0) {
+                    badgeClass = isDark ? "bg-rose-500/10 text-rose-400 border-rose-500/30" : "bg-rose-50 text-rose-700 border-rose-200";
+                    statusText = "منتهي";
+                } else if (days <= 60) {
+                    badgeClass = isDark ? "bg-amber-500/10 text-amber-400 border-amber-500/30" : "bg-amber-50 text-amber-700 border-amber-200";
+                    statusText = `${days} يوم متبقي`;
+                }
+
+                const cardEl = document.createElement('div');
+                cardEl.className = "veh-card bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 rounded-2xl p-4 transition-all duration-200 shadow-sm";
+
+                const plateParts = (veh.plateLetters || '').split('|').map(s => s.trim());
+                const arabicLetters = plateParts[0] || '';
+                const engLetters = plateParts[1] || '';
+                const arabicPlateNum = toArabicDigits(veh.plateNum);
+
+                let stripClass = 'strip-light';
+                let stripSymbol = '▲';
+                if (veh.type === 'heavy' || veh.project?.includes('كهرباء') || veh.project?.includes('دينات')) {
+                    stripClass = 'strip-heavy';
+                } else if (veh.type === 'general' || veh.project?.includes('دراجات')) {
+                    stripClass = 'strip-motorcycle';
+                    stripSymbol = '●';
+                }
+
+                cardEl.innerHTML = `
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-center">
+                        <div class="lg:col-span-5 flex items-center gap-3.5">
+                            <div class="saudi-plate flex-shrink-0">
+                                <div class="plate-box">
+                                    <div class="plate-row-cell plate-top-cell">${arabicLetters}</div>
+                                    <div class="plate-row-cell plate-bottom-cell">${engLetters}</div>
+                                </div>
+                                <div class="saudi-plate-center-divider ${stripClass}">
+                                    <span>${stripSymbol}</span>
+                                    <span>KSA</span>
+                                    <span>${stripSymbol}</span>
+                                </div>
+                                <div class="plate-box">
+                                    <div class="plate-row-cell plate-top-cell font-mono">${arabicPlateNum}</div>
+                                    <div class="plate-row-cell plate-bottom-cell font-mono">${veh.plateNum}</div>
+                                </div>
+                            </div>
+
+                            <div class="space-y-1">
+                                <div class="flex items-center gap-2">
+                                    <span class="text-xs font-extrabold text-slate-900 dark:text-white">${veh.company}</span>
+                                    <span class="text-[10px] px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold border border-slate-200 dark:border-slate-700 whitespace-nowrap">${veh.project}</span>
+                                </div>
+                                <div class="text-xs text-slate-500 dark:text-slate-400 font-mono flex items-center gap-1.5 flex-wrap">
+                                    <span>بطاقة:</span>
+                                    <span class="card-num-badge">${veh.cardNum}</span>
+                                    <span class="text-slate-400 dark:text-slate-600">•</span>
+                                    <span class="text-[11px] text-slate-600 dark:text-slate-400">الملكية: <b class="text-slate-900 dark:text-slate-300 font-bold">${veh.owner || 'المنشأة'}</b></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="lg:col-span-4 flex items-center justify-between lg:justify-center gap-3">
+                            <div class="flex-shrink-0">
+                                ${renderCapacityIndicator(veh)}
+                            </div>
+
+                            <div class="veh-inner-box bg-slate-50 dark:bg-slate-950/70 px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-800 flex items-center gap-3 whitespace-nowrap min-w-fit shadow-inner">
+                                <div class="text-right">
+                                    <span class="text-[10px] text-slate-500 dark:text-slate-400 block font-semibold leading-tight">تاريخ الانتهاء</span>
+                                    <span class="text-xs font-mono font-bold text-slate-900 dark:text-white tracking-wide">${veh.expiry}</span>
+                                </div>
+                                <div class="h-6 w-px bg-slate-200 dark:bg-slate-800/80"></div>
+                                <div class="flex-shrink-0">
+                                    <span class="px-2.5 py-1 rounded-lg border text-[11px] font-bold inline-flex items-center justify-center ${badgeClass}">${statusText}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="lg:col-span-3 flex items-center justify-end gap-2 border-t lg:border-t-0 pt-2 lg:pt-0 border-slate-200 dark:border-slate-800">
+                            <button onclick="triggerAttachmentUpload('${veh.id}', 'vehicle')" class="glow-action-attach p-1.5 rounded-lg" title="إرفاق وثيقة"><i data-lucide="paperclip" class="w-3.5 h-3.5"></i></button>
+                            ${veh.doc ? `<button onclick="viewAttachment('بطاقة مركبة ${veh.plateNum}', '${veh.id}')" class="p-1.5 rounded-lg bg-blue-50 dark:bg-blue-500/15 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-500/30 hover:bg-blue-100" title="استعراض بطاقة التشغيل"><i data-lucide="eye" class="w-3.5 h-3.5"></i></button>` : ''}
+                            <button onclick="editVehicle('${veh.id}')" class="glow-action-edit p-1.5 rounded-lg" title="تعديل"><i data-lucide="pencil" class="w-3.5 h-3.5"></i></button>
+                            <button onclick="deleteVehicle('${veh.id}')" class="glow-action-delete p-1.5 rounded-lg" title="حذف"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+                            <button onclick="toggleAccordion('acc-${veh.id}')" class="p-1.5 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition" title="المستخدمين واليوزرات"><i data-lucide="chevron-down" class="w-4 h-4"></i></button>
+                        </div>
+                    </div>
+
+                    <div id="acc-${veh.id}" class="mt-4 pt-3.5 border-t border-slate-200 dark:border-slate-800/80 hidden space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-bold text-slate-600 dark:text-slate-400 flex items-center gap-1.5">
+                                <i data-lucide="users" class="w-3.5 h-3.5 text-blue-600 dark:text-blue-400"></i> المستخدمين والسائقين المرتبطين ببطاقة التشغيل:
+                            </span>
+                            ${veh.mode === 'users' ? `<button onclick="openDriverModal('${veh.id}')" class="text-xs px-3 py-1 bg-emerald-50 dark:bg-emerald-600/20 hover:bg-emerald-100 dark:hover:bg-emerald-600/30 text-emerald-700 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-500/30 rounded-xl font-bold flex items-center gap-1.5 transition"><i data-lucide="user-plus" class="w-3.5 h-3.5"></i> إضافة مستخدم</button>` : ''}
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                            ${(veh.drivers || []).length > 0 ? veh.drivers.map((drv, idx) => `
+                                <div class="driver-card-box flex flex-col justify-between">
+                                    <div class="flex items-center justify-between pb-2 mb-2 border-b border-slate-200 dark:border-slate-800/80">
+                                        <div class="flex items-center gap-2">
+                                            <span class="w-5 h-5 rounded-full bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-400 border border-blue-300 dark:border-blue-500/30 text-[11px] font-black flex items-center justify-center font-mono">${idx+1}</span>
+                                            <span class="font-extrabold text-slate-900 dark:text-white text-xs tracking-tight">${drv.name}</span>
+                                        </div>
+                                        <button onclick="removeDriver('${veh.id}', ${idx})" class="glow-action-delete p-1 rounded-lg text-slate-400 hover:text-rose-500" title="حذف المستخدم"><i data-lucide="x" class="w-3.5 h-3.5"></i></button>
+                                    </div>
+                                    <div class="grid grid-cols-2 gap-2 mt-0.5">
+                                        <div class="driver-capsule bg-slate-100 dark:bg-slate-950/70 p-2 rounded-xl border border-slate-200 dark:border-slate-800/80">
+                                            <span class="text-[10px] text-slate-500 dark:text-slate-400 block font-semibold leading-none mb-1">رقم الإقامة</span>
+                                            <span class="driver-iqama-text font-mono text-slate-900 dark:text-slate-200 text-xs font-bold tracking-wide">${drv.iqama}</span>
+                                        </div>
+                                        <div class="driver-capsule bg-slate-100 dark:bg-slate-950/70 p-2 rounded-xl border border-slate-200 dark:border-slate-800/80">
+                                            <span class="text-[10px] text-slate-500 dark:text-slate-400 block font-semibold leading-none mb-1">اليوزر التشغيلي</span>
+                                            <span class="driver-user-text font-mono text-blue-700 dark:text-blue-400 text-xs font-extrabold tracking-wide">${drv.user}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            `).join('') : `
+                                <div class="col-span-3 text-xs text-slate-500 py-3 text-center bg-slate-50 dark:bg-slate-950/40 rounded-xl border border-slate-200 dark:border-slate-800/60 font-medium">لا يوجد مستخدمين مسجلين لهذه البطاقة حالياً (أو نظام تشغيل مباشر بدون يوزرات).</div>
+                            `}
+                        </div>
+                    </div>
+                `;
+
+                container.appendChild(cardEl);
+            });
+
+            renderProjectFilterPills();
+            lucide.createIcons();
+        }
+
+        function renderProjectFilterPills() {
+            const container = document.getElementById('project-filter-pills');
+            const projects = ['all', 'مشروع التوصيل', 'مشروع الدينات', 'مشروع الكهرباء', 'نقل طرود (دراجات)'];
+            
+            container.innerHTML = projects.map(p => {
+                const label = p === 'all' ? 'جميع المشاريع' : p;
+                const active = state.activeProjectFilter === p;
+                return `
+                    <button onclick="setProjectFilter('${p}')" class="whitespace-nowrap px-3.5 py-1.5 rounded-xl text-xs font-bold transition ${active ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30' : 'project-filter-pill-inactive bg-slate-100 dark:bg-slate-950 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800'}">
+                        ${label}
+                    </button>
+                `;
+            }).join('');
+        }
+
+        function setCompanyFilter(comp) {
+            state.activeCompany = comp;
+            state.activeLicenseFilter = null;
+            document.getElementById('license-filter-badge-box').classList.add('hidden');
+            
+            ['all', 'zawaya', 'rasm', 'tamayoz'].forEach(k => {
+                const btn = document.getElementById(`comp-btn-${k}`);
+                if (btn) btn.classList.remove('active');
+            });
+
+            if (comp === 'all') {
+                document.getElementById('comp-btn-all').classList.add('active');
+                document.getElementById('active-filter-badge').textContent = 'جميع المنشآت';
+            } else if (comp.includes('زاوية أمل')) {
+                document.getElementById('comp-btn-zawaya').classList.add('active');
+                document.getElementById('active-filter-badge').textContent = comp;
+            } else if (comp.includes('رسم الحلول')) {
+                document.getElementById('comp-btn-rasm').classList.add('active');
+                document.getElementById('active-filter-badge').textContent = comp;
+            } else {
+                document.getElementById('comp-btn-tamayoz').classList.add('active');
+                document.getElementById('active-filter-badge').textContent = comp;
+            }
+
+            renderLicenses();
+            renderVehicles();
+        }
+
+        function filterByLicense(licenseId) {
+            state.activeLicenseFilter = licenseId;
+            document.getElementById('license-filter-badge-box').classList.remove('hidden');
+            renderLicenses();
+            renderVehicles();
+        }
+
+        function clearLicenseFilter() {
+            state.activeLicenseFilter = null;
+            document.getElementById('license-filter-badge-box').classList.add('hidden');
+            renderLicenses();
+            renderVehicles();
+        }
+
+        function setProjectFilter(proj) {
+            state.activeProjectFilter = proj;
+            renderVehicles();
+        }
+
+        function toggleAccordion(id) {
+            const el = document.getElementById(id);
+            if (el) el.classList.toggle('hidden');
+        }
+
+        function handleFileUpload(event, previewId, hiddenInputId) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById(hiddenInputId).value = e.target.result;
+                document.getElementById(previewId).textContent = `✓ تم تجهيز المستند: ${file.name} (${(file.size/1024).toFixed(1)} KB)`;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function triggerAttachmentUpload(id, type) {
+            const fileInput = document.createElement('input');
+            fileInput.type = 'file';
+            fileInput.accept = 'image/*,.pdf';
+            fileInput.onchange = (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = async (uploadEvt) => {
+                    const base64Data = uploadEvt.target.result;
+                    if (type === 'license') {
+                        const target = state.licenses.find(l => l.id === id);
+                        if (target) target.doc = base64Data;
+                    } else {
+                        const target = state.vehicles.find(v => v.id === id);
+                        if (target) target.doc = base64Data;
+                    }
+                    await persistState();
+                    renderLicenses();
+                    renderVehicles();
+                    alert(`✓ تم إرفاق وحفظ الوثيقة (${file.name}) بنجاح دائم!`);
+                };
+                reader.readAsDataURL(file);
+            };
+            fileInput.click();
+        }
+
+        async function viewAttachment(title, targetId) {
+            let docData = null;
+            
+            // Check in memory first
+            const lic = state.licenses.find(l => l.id === targetId);
+            if (lic && lic.doc && lic.doc !== 'stored_in_idb') docData = lic.doc;
+
+            const veh = state.vehicles.find(v => v.id === targetId);
+            if (veh && veh.doc && veh.doc !== 'stored_in_idb') docData = veh.doc;
+
+            // Fetch from IndexedDB if needed
+            if (!docData) {
+                docData = await getDocFromDB(targetId);
+            }
+
+            if (!docData) {
+                alert('لم يتم العثور على الوثيقة المرفقة');
+                return;
+            }
+
+            document.getElementById('preview-title').innerHTML = `<i data-lucide="paperclip" class="w-4 h-4 text-emerald-600 dark:text-emerald-400"></i> ${title}`;
+            const box = document.getElementById('preview-content');
+
+            if (docData.startsWith('data:application/pdf')) {
+                box.innerHTML = `<iframe src="${docData}" class="w-full h-full rounded-lg border-0"></iframe>`;
+            } else {
+                box.innerHTML = `<img src="${docData}" class="max-w-full max-h-full object-contain rounded-lg">`;
+            }
+
+            openModal('modal-preview');
+            lucide.createIcons();
+        }
+
+        function openLicenseModal(id = null) {
+            document.getElementById('lic-id').value = id || '';
+            document.getElementById('lic-file').value = '';
+            document.getElementById('lic-doc-base64').value = '';
+            document.getElementById('lic-doc-preview').textContent = '';
+
+            if (id) {
+                const lic = state.licenses.find(l => l.id === id);
+                document.getElementById('modal-license-title').textContent = 'تعديل بيانات الترخيص الوزاري';
+                document.getElementById('lic-company').value = lic.company;
+                document.getElementById('lic-activity').value = lic.activity;
+                document.getElementById('lic-number').value = lic.number;
+                document.getElementById('lic-expiry').value = lic.expiry;
+                document.getElementById('lic-issuer').value = lic.issuer;
+                document.getElementById('lic-doc-base64').value = lic.doc || '';
+                if (lic.doc) document.getElementById('lic-doc-preview').textContent = '✓ يوجد مستند مرفق مسجل بالفعل';
+            } else {
+                document.getElementById('modal-license-title').textContent = 'إضافة ترخيص وزاري جديد';
+                document.getElementById('lic-activity').value = '';
+                document.getElementById('lic-number').value = '';
+                document.getElementById('lic-expiry').value = '';
+            }
+            openModal('modal-license');
+        }
+
+        function editLicense(id) {
+            openLicenseModal(id);
+        }
+
+        async function deleteLicense(id) {
+            if (confirm('هل أنت متأكد من حذف هذا الترخيص؟ سيتم فك ارتباط المركبات التابعة له.')) {
+                state.licenses = state.licenses.filter(l => l.id !== id);
+                if (state.activeLicenseFilter === id) state.activeLicenseFilter = null;
+                await persistState();
+                renderLicenses();
+                renderVehicles();
+            }
+        }
+
+        async function saveLicenseForm(e) {
+            e.preventDefault();
+            const id = document.getElementById('lic-id').value;
+            const existing = state.licenses.find(l => l.id === id);
+
+            const newLic = {
+                id: id || 'lic-' + Date.now(),
+                company: document.getElementById('lic-company').value,
+                activity: document.getElementById('lic-activity').value,
+                number: document.getElementById('lic-number').value,
+                expiry: document.getElementById('lic-expiry').value,
+                issuer: document.getElementById('lic-issuer').value,
+                theme: existing ? existing.theme : 'blue',
+                notes: existing ? existing.notes : '',
+                doc: document.getElementById('lic-doc-base64').value || (existing ? existing.doc : null)
+            };
+
+            if (id) {
+                const index = state.licenses.findIndex(l => l.id === id);
+                if (index > -1) state.licenses[index] = newLic;
+            } else {
+                state.licenses.push(newLic);
+            }
+
+            await persistState();
+            closeModal('modal-license');
+            renderLicenses();
+            renderVehicles();
+        }
+
+        function updateLicenseDropdownForVehicle() {
+            const comp = document.getElementById('veh-company').value;
+            const select = document.getElementById('veh-license-id');
+            let licList = [];
+            
+            if (comp === 'تميز زاوية') {
+                licList = state.licenses.filter(l => l.id === 'lic-rasm-heavy');
+            } else {
+                licList = state.licenses.filter(l => l.company === comp);
+            }
+            
+            select.innerHTML = licList.map(l => `
+                <option value="${l.id}">${l.activity} - ${l.company} (رقم: ${l.number})</option>
+            `).join('');
+        }
+
+        function openVehicleModal(id = null) {
+            document.getElementById('veh-id').value = id || '';
+            document.getElementById('veh-file').value = '';
+            document.getElementById('veh-doc-base64').value = '';
+            document.getElementById('veh-doc-preview').textContent = '';
+
+            updateLicenseDropdownForVehicle();
+
+            if (id) {
+                const veh = state.vehicles.find(v => v.id === id);
+                document.getElementById('modal-vehicle-title').textContent = 'تعديل بيانات المركبة';
+                document.getElementById('veh-company').value = veh.company;
+                updateLicenseDropdownForVehicle();
+                document.getElementById('veh-license-id').value = veh.licenseId;
+                document.getElementById('veh-project').value = veh.project;
+                document.getElementById('veh-plate-num').value = veh.plateNum;
+                document.getElementById('veh-plate-letters').value = veh.plateLetters;
+                document.getElementById('veh-card-num').value = veh.cardNum;
+                document.getElementById('veh-expiry').value = veh.expiry;
+                document.getElementById('veh-type').value = veh.type || 'light';
+                document.getElementById('veh-mode').value = veh.mode || 'users';
+                document.getElementById('veh-doc-base64').value = veh.doc || '';
+                if (veh.doc) document.getElementById('veh-doc-preview').textContent = '✓ يوجد مستند مرفق مسجل بالفعل';
+            } else {
+                document.getElementById('modal-vehicle-title').textContent = 'إضافة مركبة / بطاقة تشغيل جديدة';
+                document.getElementById('veh-plate-num').value = '';
+                document.getElementById('veh-plate-letters').value = '';
+                document.getElementById('veh-card-num').value = '';
+                document.getElementById('veh-expiry').value = '';
+            }
+            openModal('modal-vehicle');
+        }
+
+        function editVehicle(id) {
+            openVehicleModal(id);
+        }
+
+        async function deleteVehicle(id) {
+            if (confirm('هل أنت متأكد من حذف هذه المركبة وبطاقة التشغيل الخاصة بها؟')) {
+                state.vehicles = state.vehicles.filter(v => v.id !== id);
+                await persistState();
+                renderVehicles();
+            }
+        }
+
+        async function saveVehicleForm(e) {
+            e.preventDefault();
+            const id = document.getElementById('veh-id').value;
+            const existing = state.vehicles.find(v => v.id === id);
+
+            const newVeh = {
+                id: id || 'v-' + Date.now(),
+                company: document.getElementById('veh-company').value,
+                licenseId: document.getElementById('veh-license-id').value,
+                project: document.getElementById('veh-project').value,
+                plateNum: document.getElementById('veh-plate-num').value,
+                plateLetters: document.getElementById('veh-plate-letters').value,
+                cardNum: document.getElementById('veh-card-num').value,
+                expiry: document.getElementById('veh-expiry').value,
+                owner: document.getElementById('veh-owner')?.value || (existing ? existing.owner : 'المنشأة'),
+                type: document.getElementById('veh-type').value,
+                mode: document.getElementById('veh-mode').value,
+                drivers: existing ? existing.drivers : [],
+                doc: document.getElementById('veh-doc-base64').value || (existing ? existing.doc : null)
+            };
+
+            if (id) {
+                const index = state.vehicles.findIndex(v => v.id === id);
+                if (index > -1) state.vehicles[index] = newVeh;
+            } else {
+                state.vehicles.push(newVeh);
+            }
+
+            await persistState();
+            closeModal('modal-vehicle');
+            renderVehicles();
+        }
+
+        function openDriverModal(vehId) {
+            document.getElementById('drv-veh-id').value = vehId;
+            document.getElementById('drv-name').value = '';
+            document.getElementById('drv-iqama').value = '';
+            document.getElementById('drv-user').value = '';
+            openModal('modal-driver');
+        }
+
+        async function saveDriverForm(e) {
+            e.preventDefault();
+            const vehId = document.getElementById('drv-veh-id').value;
+            const veh = state.vehicles.find(v => v.id === vehId);
+            if (!veh) return;
+
+            if (!veh.drivers) veh.drivers = [];
+            veh.drivers.push({
+                name: document.getElementById('drv-name').value,
+                iqama: document.getElementById('drv-iqama').value,
+                user: document.getElementById('drv-user').value
+            });
+
+            await persistState();
+            closeModal('modal-driver');
+            renderVehicles();
+        }
+
+        async function removeDriver(vehId, driverIndex) {
+            const veh = state.vehicles.find(v => v.id === vehId);
+            if (veh && veh.drivers) {
+                veh.drivers.splice(driverIndex, 1);
+                await persistState();
+                renderVehicles();
+            }
+        }
+
+        function showKpiModal(type) {
+            const titleEl = document.getElementById('kpi-modal-title');
+            const contentEl = document.getElementById('kpi-modal-content');
+
+            if (type === 'licenses') {
+                titleEl.textContent = 'بيانات وجدول التراخيص الحكومية المسجلة';
+                contentEl.innerHTML = `
+                    <div class="space-y-3">
+                        <p class="text-slate-700 dark:text-slate-300 font-medium">إجمالي التراخيص الوزارية النشطة: <b class="text-slate-900 dark:text-white font-mono text-sm">${state.licenses.length} تراخيص</b></p>
+                        <div class="space-y-2">
+                            ${state.licenses.map(l => {
+                                const days = getDaysDiff(l.expiry);
+                                return `
+                                    <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                                        <div>
+                                            <div class="font-bold text-slate-900 dark:text-white text-xs">${l.activity}</div>
+                                            <div class="text-[11px] text-slate-600 dark:text-slate-400">${l.company} • رقم: <span class="font-mono">${l.number}</span></div>
+                                        </div>
+                                        <div class="text-left font-mono">
+                                            <span class="text-[11px] ${days <= 60 ? 'text-amber-600 dark:text-amber-400' : 'text-emerald-600 dark:text-emerald-400'} font-bold">ينتهي: ${l.expiry}</span>
+                                            <span class="block text-[10px] text-slate-500">متبقي: ${days} يوم</span>
+                                        </div>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    </div>
+                `;
+            } else if (type === 'vehicles') {
+                titleEl.textContent = 'توزيع أسطول المركبات والمعدات';
+                const zawayaCount = state.vehicles.filter(v=>v.company.includes('زاوية')).length;
+                const rasmCount = state.vehicles.filter(v=>v.company.includes('رسم')).length;
+                const tamayozCount = state.vehicles.filter(v=>v.company.includes('تميز')).length;
+                contentEl.innerHTML = `
+                    <div class="space-y-3">
+                        <p class="text-slate-700 dark:text-slate-300 font-medium">إجمالي الأسطول: <b class="text-slate-900 dark:text-white font-mono text-sm">${state.vehicles.length} مركبة</b></p>
+                        <div class="grid grid-cols-3 gap-2.5 my-2">
+                            <div class="p-3 bg-slate-50 dark:bg-slate-950 rounded-xl border border-slate-200 dark:border-slate-800 text-center">
+                                <span class="text-[11px] text-slate-600 dark:text-slate-400 block font-bold">زاوية أمل</span>
+                                <span class="text-lg font-black text-emerald-600 dark:text-emerald-400 font-mono">${zawayaCount}</span>
+                            </div>
+                            <div class="p-3 bg-slate-50 dark:bg-slate-950 rounded-xl border border-slate-200 dark:border-slate-800 text-center">
+                                <span class="text-[11px] text-slate-600 dark:text-slate-400 block font-bold">رسم الحلول</span>
+                                <span class="text-lg font-black text-purple-600 dark:text-purple-400 font-mono">${rasmCount}</span>
+                            </div>
+                            <div class="p-3 bg-slate-50 dark:bg-slate-950 rounded-xl border border-slate-200 dark:border-slate-800 text-center">
+                                <span class="text-[11px] text-slate-600 dark:text-slate-400 block font-bold">تميز زاوية</span>
+                                <span class="text-lg font-black text-amber-600 dark:text-amber-400 font-mono">${tamayozCount}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else if (type === 'completed') {
+                titleEl.textContent = 'البطاقات ذات السعة المكتملة (3/3)';
+                const completedVehs = state.vehicles.filter(v => v.mode === 'users' && (v.drivers||[]).length === 3);
+                contentEl.innerHTML = `
+                    <div class="space-y-2">
+                        <p class="text-slate-700 dark:text-slate-300 font-medium">عدد البطاقات المستوفية لكامل السعة: <b class="text-emerald-600 dark:text-emerald-400 font-mono text-sm">${completedVehs.length}</b></p>
+                        <div class="space-y-1.5 max-h-48 overflow-y-auto">
+                            ${completedVehs.map(v => `
+                                <div class="p-2 bg-slate-50 dark:bg-slate-950 rounded-lg border border-slate-200 dark:border-slate-800 flex justify-between items-center text-xs">
+                                    <span class="font-bold text-slate-900 dark:text-white">${v.plateNum} - ${v.company}</span>
+                                    <span class="font-mono text-emerald-600 dark:text-emerald-400 font-bold">3 من 3 يوزرات</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            } else {
+                titleEl.textContent = 'الشواغر المتاحة للتسكين والتشغيل';
+                const vacantVehs = state.vehicles.filter(v => v.mode === 'users' && (v.drivers||[]).length < 3);
+                contentEl.innerHTML = `
+                    <div class="space-y-2">
+                        <p class="text-slate-700 dark:text-slate-300 font-medium">قائمة المركبات التي بها شواغر متاحة:</p>
+                        <div class="space-y-1.5 max-h-48 overflow-y-auto">
+                            ${vacantVehs.map(v => {
+                                const left = 3 - (v.drivers||[]).length;
+                                return `
+                                    <div class="p-2 bg-slate-50 dark:bg-slate-950 rounded-lg border border-slate-200 dark:border-slate-800 flex justify-between items-center text-xs">
+                                        <span class="font-bold text-slate-900 dark:text-white">${v.plateNum} (${v.project})</span>
+                                        <span class="font-mono text-amber-600 dark:text-amber-400 font-bold">شاغر لـ ${left} سائق</span>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+
+            openModal('modal-kpi');
+            lucide.createIcons();
+        }
+
+        async function exportData() {
+            // Prepare complete backup including actual docs
+            const fullLicenses = [...state.licenses];
+            for (let lic of fullLicenses) {
+                if (!lic.doc || lic.doc === 'stored_in_idb') {
+                    lic.doc = await getDocFromDB(lic.id);
+                }
+            }
+
+            const fullVehicles = [...state.vehicles];
+            for (let veh of fullVehicles) {
+                if (!veh.doc || veh.doc === 'stored_in_idb') {
+                    veh.doc = await getDocFromDB(veh.id);
+                }
+            }
+
+            const data = {
+                licenses: fullLicenses,
+                vehicles: fullVehicles,
+                exportDate: new Date().toISOString()
+            };
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `zawaya_fleet_backup_${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function importData(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = async function(evt) {
+                try {
+                    const parsed = JSON.parse(evt.target.result);
+                    if (parsed.licenses && parsed.vehicles) {
+                        state.licenses = parsed.licenses;
+                        state.vehicles = parsed.vehicles;
+                        await persistState();
+                        renderLicenses();
+                        renderVehicles();
+                        alert('✓ تم استيراد وحفظ قاعدة البيانات والمرفقات بنجاح!');
+                    } else {
+                        alert('ملف النسخة الاحتياطية غير صالح.');
+                    }
+                } catch(err) {
+                    alert('حدث خطأ أثناء قراءة الملف.');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function openModal(id) {
+            document.getElementById(id).classList.remove('hidden');
+        }
+        function closeModal(id) {
+            document.getElementById(id).classList.add('hidden');
+        }
+    </script>
 </body>
 </html>
