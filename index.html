@@ -30,6 +30,44 @@
             transition: background-color 0.3s ease, color 0.3s ease;
         }
 
+        /* شريط تمرير زجاجي ناعم وشفاف للموقع بالكامل وجميع النوافذ والمرفقات */
+        * {
+            scrollbar-width: thin;
+            scrollbar-color: rgba(148, 163, 184, 0.25) transparent;
+        }
+
+        ::-webkit-scrollbar {
+            width: 7px;
+            height: 7px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent !important;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(148, 163, 184, 0.22);
+            border-radius: 9999px;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1.5px solid transparent;
+            background-clip: padding-box;
+            transition: background-color 0.25s ease, transform 0.2s ease;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(148, 163, 184, 0.45);
+        }
+
+        .dark ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.16);
+            border-radius: 9999px;
+        }
+
+        .dark ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.32);
+        }
+
         .saudi-plate {
             background: #ffffff !important;
             color: #0f172a !important;
@@ -135,7 +173,7 @@
             color: #d8b4fe !important;
             box-shadow: 0 0 20px rgba(168, 85, 247, 0.4) !important;
         }
-        .dark .comp-btn-tamayoz.active {
+        .dark .comp-btn-contract.active {
             background: rgba(245, 158, 11, 0.25) !important;
             border-color: #f59e0b !important;
             color: #fde68a !important;
@@ -160,7 +198,7 @@
             color: #ffffff !important;
             box-shadow: 0 4px 14px rgba(124, 58, 237, 0.35) !important;
         }
-        html:not(.dark) .comp-btn-tamayoz.active {
+        html:not(.dark) .comp-btn-contract.active {
             background: #d97706 !important;
             border-color: #b45309 !important;
             color: #ffffff !important;
@@ -417,6 +455,28 @@
             color: #ffffff;
         }
 
+        .action-view-doc {
+            background: rgba(59, 130, 246, 0.15);
+            border: 1px solid rgba(59, 130, 246, 0.35);
+            color: #60a5fa;
+            transition: all 0.2s ease;
+        }
+        .action-view-doc:hover {
+            background: rgba(59, 130, 246, 0.3);
+            box-shadow: 0 0 12px rgba(59, 130, 246, 0.4);
+            color: #ffffff;
+        }
+
+        html:not(.dark) .action-view-doc {
+            background: #eff6ff !important;
+            border-color: #bfdbfe !important;
+            color: #1d4ed8 !important;
+        }
+        html:not(.dark) .action-view-doc:hover {
+            background: #dbeafe !important;
+            color: #1e40af !important;
+        }
+
         html:not(.dark) .glow-action-edit {
             background: #eff6ff !important;
             border-color: #bfdbfe !important;
@@ -488,6 +548,10 @@
             0%, 100% { opacity: 1; transform: scale(1); }
             50% { opacity: 0.85; transform: scale(1.04); }
         }
+
+        body:not(.is-admin) .admin-only {
+            display: none !important;
+        }
     </style>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col antialiased selection:bg-blue-600 selection:text-white">
@@ -501,30 +565,36 @@
             <div>
                 <h1 class="font-extrabold text-base lg:text-lg leading-snug flex items-center gap-2">
                     <span>منظومة إدارة تراخيص الأسطول وبطاقات التشغيل</span>
-                    <span class="text-[11px] px-2.5 py-0.5 rounded-full bg-blue-500/10 text-blue-500 dark:text-blue-400 border border-blue-500/20 font-bold">إشراف ورقابة</span>
+                    <span id="role-badge" class="text-[11px] px-2.5 py-0.5 rounded-full bg-slate-500/10 text-slate-400 border border-slate-500/20 font-bold">وضع العرض فقط</span>
                 </h1>
                 <p class="text-xs text-slate-500 dark:text-slate-400">المتابعة اللوجستية والنظامية للتراخيص وبطاقات التشغيل وسعة المستخدمين</p>
             </div>
         </div>
 
         <div class="flex items-center gap-2.5">
+            <!-- Admin Lock / Unlock Button -->
+            <button onclick="toggleAdminPrompt()" id="admin-lock-btn" class="p-2.5 bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 rounded-xl border border-slate-300 dark:border-slate-700 text-xs transition flex items-center justify-center active:scale-90" title="تسجيل دخول كمسؤول (للتعديل والحفظ)">
+                <i data-lucide="lock" id="admin-icon" class="w-4 h-4"></i>
+            </button>
+
             <!-- Theme Toggle Button -->
             <button onclick="toggleTheme()" id="theme-toggle-btn" class="p-2.5 bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200 dark:hover:bg-slate-700 text-amber-500 dark:text-amber-400 rounded-xl border border-slate-300 dark:border-slate-700 text-xs transition flex items-center justify-center active:scale-90" title="تبديل الوضع النهاري / الليلي">
                 <i data-lucide="sun" id="theme-icon" class="w-4 h-4"></i>
             </button>
 
-            <button onclick="openLicenseModal()" class="flex items-center gap-1.5 px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition shadow-lg shadow-emerald-600/20 active:scale-95">
+            <!-- Admin Only Action Buttons -->
+            <button onclick="openLicenseModal()" class="admin-only flex items-center gap-1.5 px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition shadow-lg shadow-emerald-600/20 active:scale-95">
                 <i data-lucide="plus-circle" class="w-4 h-4"></i>
                 <span>إضافة ترخيص</span>
             </button>
-            <button onclick="openVehicleModal()" class="flex items-center gap-1.5 px-3.5 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold transition shadow-lg shadow-blue-600/20 active:scale-95">
+            <button onclick="openVehicleModal()" class="admin-only flex items-center gap-1.5 px-3.5 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold transition shadow-lg shadow-blue-600/20 active:scale-95">
                 <i data-lucide="truck" class="w-4 h-4"></i>
                 <span>إضافة مركبة</span>
             </button>
             <button onclick="exportData()" class="p-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl border border-slate-300 dark:border-slate-700 text-xs transition" title="تصدير نسخة JSON">
                 <i data-lucide="download" class="w-4 h-4"></i>
             </button>
-            <label class="p-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl border border-slate-300 dark:border-slate-700 text-xs transition cursor-pointer" title="استيراد نسخة JSON">
+            <label class="admin-only p-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl border border-slate-300 dark:border-slate-700 text-xs transition cursor-pointer" title="استيراد نسخة JSON">
                 <i data-lucide="upload" class="w-4 h-4"></i>
                 <input type="file" accept=".json" onchange="importData(event)" class="hidden">
             </label>
@@ -610,9 +680,9 @@
                     <i data-lucide="boxes" class="w-4 h-4"></i>
                     <span>رسم الحلول اللوجستية</span>
                 </button>
-                <button onclick="setCompanyFilter('تميز زاوية')" id="comp-btn-tamayoz" class="company-filter-card comp-btn-tamayoz px-4 py-3 rounded-2xl border border-slate-300 dark:border-slate-800 text-xs font-bold flex items-center justify-center gap-2">
-                    <i data-lucide="zap" class="w-4 h-4"></i>
-                    <span>تميز زاوية (الكهرباء)</span>
+                <button onclick="setCompanyFilter('شركة زاوية أمل للمقاولات')" id="comp-btn-contract" class="company-filter-card comp-btn-contract px-4 py-3 rounded-2xl border border-slate-300 dark:border-slate-800 text-xs font-bold flex items-center justify-center gap-2">
+                    <i data-lucide="hard-hat" class="w-4 h-4"></i>
+                    <span>شركة زاوية أمل للمقاولات</span>
                 </button>
             </div>
         </section>
@@ -655,6 +725,31 @@
 
     </main>
 
+    <!-- Modal: Admin Password Prompt -->
+    <div id="modal-admin-auth" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 w-full max-w-xs rounded-2xl shadow-2xl p-5 space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
+                <h3 class="font-bold text-sm text-slate-900 dark:text-white flex items-center gap-2">
+                    <i data-lucide="key-round" class="w-4 h-4 text-blue-600 dark:text-blue-400"></i>
+                    <span>دخول المسؤول (Admin)</span>
+                </h3>
+                <button onclick="closeModal('modal-admin-auth')" class="text-slate-400 hover:text-slate-600 dark:hover:text-white">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            </div>
+            <form onsubmit="handleAdminLogin(event)" class="space-y-3 text-xs">
+                <div>
+                    <label class="block font-bold text-slate-600 dark:text-slate-400 mb-1">الرقم السري للمشرف</label>
+                    <input type="password" id="admin-password-input" required placeholder="أدخل الرقم السري..." class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white font-mono text-center tracking-widest text-lg">
+                </div>
+                <div class="pt-2 flex justify-end gap-2">
+                    <button type="button" onclick="closeModal('modal-admin-auth')" class="px-4 py-2 bg-slate-200 dark:bg-slate-800 text-slate-800 dark:text-slate-300 rounded-xl text-xs font-bold">إلغاء</button>
+                    <button type="submit" class="px-5 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold">تفعيل التعديل</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- Modal: License Form -->
     <div id="modal-license" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
         <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
@@ -671,17 +766,17 @@
                     <select id="lic-company" required class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 dark:text-white">
                         <option value="زاوية أمل اللوجستية">زاوية أمل اللوجستية</option>
                         <option value="رسم الحلول اللوجستية">رسم الحلول اللوجستية</option>
-                        <option value="تميز زاوية">تميز زاوية</option>
+                        <option value="شركة زاوية أمل للمقاولات">شركة زاوية أمل للمقاولات</option>
                     </select>
                 </div>
                 <div>
                     <label class="block font-bold text-slate-600 dark:text-slate-400 mb-1">اسم النشاط الرسمي</label>
-                    <input type="text" id="lic-activity" required placeholder="مثال: النقل الخفيف للبضائع على الطرق" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 dark:text-white">
+                    <input type="text" id="lic-activity" required placeholder="مثال: نقل البضائع عبر الدراجات الآلية لأغراض تجارية" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 dark:text-white">
                 </div>
                 <div class="grid grid-cols-2 gap-3">
                     <div>
                         <label class="block font-bold text-slate-600 dark:text-slate-400 mb-1">رقم الترخيص الوزاري</label>
-                        <input type="text" id="lic-number" required placeholder="مثال: 010211003400" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 dark:text-white font-mono">
+                        <input type="text" id="lic-number" required placeholder="مثال: 010211005200" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 dark:text-white font-mono">
                     </div>
                     <div>
                         <label class="block font-bold text-slate-600 dark:text-slate-400 mb-1">تاريخ الانتهاء</label>
@@ -726,7 +821,7 @@
                         <select id="veh-company" required onchange="updateLicenseDropdownForVehicle()" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 dark:text-white">
                             <option value="زاوية أمل اللوجستية">زاوية أمل اللوجستية</option>
                             <option value="رسم الحلول اللوجستية">رسم الحلول اللوجستية</option>
-                            <option value="تميز زاوية">تميز زاوية</option>
+                            <option value="شركة زاوية أمل للمقاولات">شركة زاوية أمل للمقاولات</option>
                         </select>
                     </div>
                     <div>
@@ -735,7 +830,6 @@
                             <option value="مشروع التوصيل">مشروع التوصيل</option>
                             <option value="مشروع الدينات">مشروع الدينات</option>
                             <option value="مشروع الكهرباء">مشروع الكهرباء</option>
-                            <option value="نقل طرود (دراجات)">نقل طرود (دراجات)</option>
                         </select>
                     </div>
                 </div>
@@ -769,7 +863,7 @@
                         <select id="veh-type" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 dark:text-white">
                             <option value="light">نقل خفيف (شريط أصفر في المنتصف)</option>
                             <option value="heavy">نقل ثقيل (شريط أزرق في المنتصف)</option>
-                            <option value="general">نقل طرود / دبابات (شريط أخضر في المنتصف)</option>
+                            <option value="general">دراجات آلية (شريط أخضر في المنتصف)</option>
                         </select>
                     </div>
                     <div>
@@ -856,7 +950,7 @@
                     <span>تفاصيل المؤشر التشغيلي</span>
                 </h3>
                 <button onclick="closeModal('modal-kpi')" class="text-slate-400 hover:text-slate-600 dark:hover:text-white">
-                    <i data-lucide="x" class="w-5 h-5"></i>
+                    <i data-lucide="x" class="w-4 h-4"></i>
                 </button>
             </div>
             <div class="text-xs text-slate-700 dark:text-slate-300 leading-relaxed space-y-3 max-h-[60vh] overflow-y-auto" id="kpi-modal-content"></div>
@@ -868,6 +962,8 @@
 
     <!-- Application Script with High-Capacity Persistent Storage (IndexedDB + LocalStorage) -->
     <script>
+        const ADMIN_PIN = '1234';
+
         const defaultLicenses = [
             {
                 id: 'lic-zawaya-light',
@@ -877,7 +973,7 @@
                 expiry: '2026-12-19',
                 issuer: 'الهيئة العامة للنقل (TGA)',
                 theme: 'emerald',
-                notes: 'يغطي أسطول الدينات الـ 10 لشركة زاوية أمل اللوجستية (تشغيل مباشر بدون يوزرات)',
+                notes: 'يغطي أسطول الدينات الـ 10 لشركة زاوية أمل اللوجستية (مشروع الدينات - تشغيل مباشر بدون يوزرات)',
                 doc: null
             },
             {
@@ -888,18 +984,18 @@
                 expiry: '2029-01-05',
                 issuer: 'الهيئة العامة للنقل (TGA)',
                 theme: 'purple',
-                notes: 'يغطي سيارات التوصيل الخفيف (21 مركبة - نظام السعة 3 يوزرات)',
+                notes: 'يغطي سيارات التوصيل الخفيف (21 مركبة - مشروع التوصيل - نظام السعة 3 يوزرات)',
                 doc: null
             },
             {
                 id: 'lic-rasm-bikes',
                 company: 'رسم الحلول اللوجستية',
-                activity: 'نقل الطرود بالدراجات الآلية',
+                activity: 'نقل البضائع عبر الدراجات الآلية لأغراض تجارية',
                 number: '010211005200',
                 expiry: '2027-08-24',
                 issuer: 'الهيئة العامة للنقل (TGA)',
                 theme: 'cyan',
-                notes: 'يغطي دبابات التوصيل الـ 10 (نظام السعة 3 يوزرات لكل دراجة)',
+                notes: 'يغطي دبابات مشروع التوصيل الـ 10 (نظام السعة 3 يوزرات لكل دراجة)',
                 doc: null
             },
             {
@@ -910,27 +1006,27 @@
                 expiry: '2029-04-24',
                 issuer: 'الهيئة العامة للنقل (TGA)',
                 theme: 'blue',
-                notes: 'النقل الثقيل للبضائع لأغراض تجارية (للغير - منشآت) شاحنات تميز زاوية 6557 و 6559',
+                notes: 'النقل الثقيل للبضائع لأغراض تجارية (للغير - منشآت) شاحنات ومعدات شركة زاوية أمل للمقاولات 6557 و 6559',
                 doc: null
             }
         ];
 
         const defaultVehicles = [
-            // 1. دبابات التوصيل (10)
-            { id: 'v-bike-5108', company: 'رسم الحلول اللوجستية', project: 'نقل طرود (دراجات)', licenseId: 'lic-rasm-bikes', plateNum: '5108', plateLetters: 'د ب | BD', cardNum: '81-00010540', expiry: '2027-08-24', owner: 'رسم الحلول اللوجستية', type: 'general', mode: 'users', drivers: [{ name: 'M DAUD GHULAM SAFDAR', iqama: '2587251501', user: '2472804' }, { name: 'ABID HUSSAIN M HUSSAIN', iqama: '2588578928', user: '2480297' }, { name: 'MD RUBEL MIAH', iqama: '2541814741', user: '1942230' }], doc: null },
-            { id: 'v-bike-5109', company: 'رسم الحلول اللوجستية', project: 'نقل طرود (دراجات)', licenseId: 'lic-rasm-bikes', plateNum: '5109', plateLetters: 'د ب | BD', cardNum: '81-00010538', expiry: '2027-08-24', owner: 'رسم الحلول اللوجستية', type: 'general', mode: 'users', drivers: [{ name: 'M WALEED M MAJEED', iqama: '2587881737', user: '2472785' }, { name: 'MD MEHEDI HASAN', iqama: '2526001942', user: '2016759' }, { name: 'HUZAIFA FARAZ FARAZ UL HAQ', iqama: '2565941081', user: '2063655' }], doc: null },
-            { id: 'v-bike-5110', company: 'رسم الحلول اللوجستية', project: 'نقل طرود (دراجات)', licenseId: 'lic-rasm-bikes', plateNum: '5110', plateLetters: 'د ب | BD', cardNum: '81-00010615', expiry: '2027-08-24', owner: 'رسم الحلول اللوجستية', type: 'general', mode: 'users', drivers: [{ name: 'SAQIB ALI SAHIQ HUSSAIN', iqama: '2597079660', user: '4624014' }, { name: 'UMAR KHATTAB M SADIQ', iqama: '2594571404', user: '4585987' }, { name: 'M HASNAIN NAWAZ RAB NAWAZ', iqama: '2591404401', user: '2539306' }], doc: null },
-            { id: 'v-bike-5112', company: 'رسم الحلول اللوجستية', project: 'نقل طرود (دراجات)', licenseId: 'lic-rasm-bikes', plateNum: '5112', plateLetters: 'د ب | BD', cardNum: '81-00010701', expiry: '2027-08-24', owner: 'رسم الحلول اللوجستية', type: 'general', mode: 'users', drivers: [{ name: 'M HAMMAD FERDOS', iqama: '2588578605', user: '2480283' }, { name: 'MEHEDI HASAN', iqama: '2551540343', user: '2026833' }, { name: 'IBTESAM M AHMAD', iqama: '2591403965', user: '2539262' }], doc: null },
-            { id: 'v-bike-5113', company: 'رسم الحلول اللوجستية', project: 'نقل طرود (دراجات)', licenseId: 'lic-rasm-bikes', plateNum: '5113', plateLetters: 'د ب | BD', cardNum: '81-00010536', expiry: '2027-08-24', owner: 'رسم الحلول اللوجستية', type: 'general', mode: 'users', drivers: [{ name: 'JAQBOOL HUSSAIN MANZOOR HUSSAIN', iqama: '2584309591', user: '2436254' }, { name: 'ZAIN ALI QAISAR AZAD', iqama: '2591404732', user: '4486215' }, { name: 'SHAHBAZ MURAD ALI', iqama: '2591404922', user: '4486279' }], doc: null },
-            { id: 'v-bike-5114', company: 'رسم الحلول اللوجستية', project: 'نقل طرود (دراجات)', licenseId: 'lic-rasm-bikes', plateNum: '5114', plateLetters: 'د ب | BD', cardNum: '81-00010663', expiry: '2027-08-24', owner: 'رسم الحلول اللوجستية', type: 'general', mode: 'users', drivers: [{ name: 'SAJID MEHMOOD MANZOOR HUSSAIN', iqama: '2558764623', user: '2009400' }, { name: 'MD SALIM', iqama: '2583941436', user: '2412689' }, { name: 'M FAIZAN M SALEEM', iqama: '2596643888', user: '4596789' }], doc: null },
-            { id: 'v-bike-2423', company: 'رسم الحلول اللوجستية', project: 'نقل طرود (دراجات)', licenseId: 'lic-rasm-bikes', plateNum: '2423', plateLetters: 'د ب | BD', cardNum: '81-00010537', expiry: '2027-08-24', owner: 'رسم الحلول اللوجستية', type: 'general', mode: 'users', drivers: [{ name: 'M ZARAR NASIR MAHMOOD', iqama: '2603407533', user: '4486298' }, { name: 'M AYUB CHAN MEHBOOB', iqama: '2591404435', user: '4609242' }, { name: 'MUNEER ALI MUHAMMAD SHARIF', iqama: '2645755931', user: '5004680' }], doc: null },
-            { id: 'v-bike-2425', company: 'رسم الحلول اللوجستية', project: 'نقل طرود (دراجات)', licenseId: 'lic-rasm-bikes', plateNum: '2425', plateLetters: 'د ب | BD', cardNum: '81-00010614', expiry: '2027-08-24', owner: 'رسم الحلول اللوجستية', type: 'general', mode: 'users', drivers: [{ name: 'ATIF AZIZ ABDUL AZIZ', iqama: '2562358099', user: '2029196' }, { name: 'M KAMRAN MEHR KHAN', iqama: '2589108204', user: '2474570' }, { name: 'ARSLAN AHMAD IRSHAD HUSSAIN', iqama: '2621753652', user: 'USR-2425' }], doc: null },
-            { id: 'v-bike-2427', company: 'رسم الحلول اللوجستية', project: 'نقل طرود (دراجات)', licenseId: 'lic-rasm-bikes', plateNum: '2427', plateLetters: 'د ب | BD', cardNum: '81-00010692', expiry: '2027-08-24', owner: 'رسم الحلول اللوجستية', type: 'general', mode: 'users', drivers: [{ name: 'MD ABU YOUNUS', iqama: '2551914696', user: '2026977' }, { name: 'SUSANTO CHANDRA DAS', iqama: '2516097777', user: '1963461' }, { name: 'M AFZAAL IBRAHIM', iqama: '2591404815', user: '2590465' }], doc: null },
-            { id: 'v-bike-2429', company: 'رسم الحلول اللوجستية', project: 'نقل طرود (دراجات)', licenseId: 'lic-rasm-bikes', plateNum: '2429', plateLetters: 'د ب | BD', cardNum: '81-00010539', expiry: '2027-08-24', owner: 'رسم الحلول اللوجستية', type: 'general', mode: 'users', drivers: [{ name: 'TANJIR AHAMMED RASEL', iqama: '2545227890', user: '2015858' }, { name: 'MD ISMAIL HOSSAIN', iqama: '2539220398', user: '1942253' }, { name: 'UMAR QAYYUM ABDUL QAYYUM', iqama: '2562359246', user: '2029291' }], doc: null },
+            // 1. دبابات التوصيل (10) - مشروع التوصيل
+            { id: 'v-bike-5108', company: 'رسم الحلول اللوجستية', project: 'مشروع التوصيل', licenseId: 'lic-rasm-bikes', plateNum: '5108', plateLetters: 'د ب | BD', cardNum: '81-00010540', expiry: '2027-08-24', owner: 'رسم الحلول اللوجستية', type: 'general', mode: 'users', drivers: [{ name: 'M DAUD GHULAM SAFDAR', iqama: '2587251501', user: '2472804' }, { name: 'ABID HUSSAIN M HUSSAIN', iqama: '2588578928', user: '2480297' }, { name: 'MD RUBEL MIAH', iqama: '2541814741', user: '1942230' }], doc: null },
+            { id: 'v-bike-5109', company: 'رسم الحلول اللوجستية', project: 'مشروع التوصيل', licenseId: 'lic-rasm-bikes', plateNum: '5109', plateLetters: 'د ب | BD', cardNum: '81-00010538', expiry: '2027-08-24', owner: 'رسم الحلول اللوجستية', type: 'general', mode: 'users', drivers: [{ name: 'M WALEED M MAJEED', iqama: '2587881737', user: '2472785' }, { name: 'MD MEHEDI HASAN', iqama: '2526001942', user: '2016759' }, { name: 'HUZAIFA FARAZ FARAZ UL HAQ', iqama: '2565941081', user: '2063655' }], doc: null },
+            { id: 'v-bike-5110', company: 'رسم الحلول اللوجستية', project: 'مشروع التوصيل', licenseId: 'lic-rasm-bikes', plateNum: '5110', plateLetters: 'د ب | BD', cardNum: '81-00010615', expiry: '2027-08-24', owner: 'رسم الحلول اللوجستية', type: 'general', mode: 'users', drivers: [{ name: 'SAQIB ALI SAHIQ HUSSAIN', iqama: '2597079660', user: '4624014' }, { name: 'UMAR KHATTAB M SADIQ', iqama: '2594571404', user: '4585987' }, { name: 'M HASNAIN NAWAZ RAB NAWAZ', iqama: '2591404401', user: '2539306' }], doc: null },
+            { id: 'v-bike-5112', company: 'رسم الحلول اللوجستية', project: 'مشروع التوصيل', licenseId: 'lic-rasm-bikes', plateNum: '5112', plateLetters: 'د ب | BD', cardNum: '81-00010701', expiry: '2027-08-24', owner: 'رسم الحلول اللوجستية', type: 'general', mode: 'users', drivers: [{ name: 'M HAMMAD FERDOS', iqama: '2588578605', user: '2480283' }, { name: 'MEHEDI HASAN', iqama: '2551540343', user: '2026833' }, { name: 'IBTESAM M AHMAD', iqama: '2591403965', user: '2539262' }], doc: null },
+            { id: 'v-bike-5113', company: 'رسم الحلول اللوجستية', project: 'مشروع التوصيل', licenseId: 'lic-rasm-bikes', plateNum: '5113', plateLetters: 'د ب | BD', cardNum: '81-00010536', expiry: '2027-08-24', owner: 'رسم الحلول اللوجستية', type: 'general', mode: 'users', drivers: [{ name: 'JAQBOOL HUSSAIN MANZOOR HUSSAIN', iqama: '2584309591', user: '2436254' }, { name: 'ZAIN ALI QAISAR AZAD', iqama: '2591404732', user: '4486215' }, { name: 'SHAHBAZ MURAD ALI', iqama: '2591404922', user: '4486279' }], doc: null },
+            { id: 'v-bike-5114', company: 'رسم الحلول اللوجستية', project: 'مشروع التوصيل', licenseId: 'lic-rasm-bikes', plateNum: '5114', plateLetters: 'د ب | BD', cardNum: '81-00010663', expiry: '2027-08-24', owner: 'رسم الحلول اللوجستية', type: 'general', mode: 'users', drivers: [{ name: 'SAJID MEHMOOD MANZOOR HUSSAIN', iqama: '2558764623', user: '2009400' }, { name: 'MD SALIM', iqama: '2583941436', user: '2412689' }, { name: 'M FAIZAN M SALEEM', iqama: '2596643888', user: '4596789' }], doc: null },
+            { id: 'v-bike-2423', company: 'رسم الحلول اللوجستية', project: 'مشروع التوصيل', licenseId: 'lic-rasm-bikes', plateNum: '2423', plateLetters: 'د ب | BD', cardNum: '81-00010537', expiry: '2027-08-24', owner: 'رسم الحلول اللوجستية', type: 'general', mode: 'users', drivers: [{ name: 'M ZARAR NASIR MAHMOOD', iqama: '2603407533', user: '4486298' }, { name: 'M AYUB CHAN MEHBOOB', iqama: '2591404435', user: '4609242' }, { name: 'MUNEER ALI MUHAMMAD SHARIF', iqama: '2645755931', user: '5004680' }], doc: null },
+            { id: 'v-bike-2425', company: 'رسم الحلول اللوجستية', project: 'مشروع التوصيل', licenseId: 'lic-rasm-bikes', plateNum: '2425', plateLetters: 'د ب | BD', cardNum: '81-00010614', expiry: '2027-08-24', owner: 'رسم الحلول اللوجستية', type: 'general', mode: 'users', drivers: [{ name: 'ATIF AZIZ ABDUL AZIZ', iqama: '2562358099', user: '2029196' }, { name: 'M KAMRAN MEHR KHAN', iqama: '2589108204', user: '2474570' }, { name: 'ARSLAN AHMAD IRSHAD HUSSAIN', iqama: '2621753652', user: 'USR-2425' }], doc: null },
+            { id: 'v-bike-2427', company: 'رسم الحلول اللوجستية', project: 'مشروع التوصيل', licenseId: 'lic-rasm-bikes', plateNum: '2427', plateLetters: 'د ب | BD', cardNum: '81-00010692', expiry: '2027-08-24', owner: 'رسم الحلول اللوجستية', type: 'general', mode: 'users', drivers: [{ name: 'MD ABU YOUNUS', iqama: '2551914696', user: '2026977' }, { name: 'SUSANTO CHANDRA DAS', iqama: '2516097777', user: '1963461' }, { name: 'M AFZAAL IBRAHIM', iqama: '2591404815', user: '2590465' }], doc: null },
+            { id: 'v-bike-2429', company: 'رسم الحلول اللوجستية', project: 'مشروع التوصيل', licenseId: 'lic-rasm-bikes', plateNum: '2429', plateLetters: 'د ب | BD', cardNum: '81-00010539', expiry: '2027-08-24', owner: 'رسم الحلول اللوجستية', type: 'general', mode: 'users', drivers: [{ name: 'TANJIR AHAMMED RASEL', iqama: '2545227890', user: '2015858' }, { name: 'MD ISMAIL HOSSAIN', iqama: '2539220398', user: '1942253' }, { name: 'UMAR QAYYUM ABDUL QAYYUM', iqama: '2562359246', user: '2029291' }], doc: null },
 
-            // 2. سيارات النقل الخفيف (21)
+            // 2. سيارات النقل الخفيف (21) - مشروع التوصيل
             { id: 'v-rasm-1442', company: 'رسم الحلول اللوجستية', project: 'مشروع التوصيل', licenseId: 'lic-rasm-light', plateNum: '1442', plateLetters: 'أ ص ص | XXA', cardNum: '38-00059641', expiry: '2027-01-09', owner: 'رسم الحلول اللوجستية', type: 'light', mode: 'users', drivers: [{ name: 'M ISMAIL FAZAL HUSSAIN', iqama: '2587251600', user: '2474629' }, { name: 'M ANSAR SHAHZAD GULAM M', iqama: '2594571222', user: '3922919' }, { name: 'M DULAL MIA', iqama: '2535342113', user: '1843272' }], doc: null },
-            { id: 'v-rasm-1443', company: 'رسم الحلول اللوجستية', project: 'مشروع التوصيل', licenseId: 'lic-rasm-light', plateNum: '1443', plateLetters: 'أ ص ص | XXA', cardNum: '38-00059642', expiry: '2027-01-09', owner: 'رسم الحلول اللوجستية', type: 'light', mode: 'users', drivers: [{ name: 'GAYASUDEEN ERRABALLI', iqama: '2483002123', user: '1151727' }, { name: 'QAISER SHEHZAD M FIDA', iqama: '2591404021', user: '3438504' }], doc: null },
+            { id: 'v-rasm-1443', company: 'رسم الحلول اللوجستية', project: 'مشروع التوصيل', licenseId: 'lic-rasm-light', plateNum: '1443', plateLetters: 'أ ص ص | XXA', cardNum: '38-00059642', expiry: '2027-01-09', owner: 'رسم الحلول اللوجستية', type: 'light', mode: 'users', drivers: [{ name: 'GAYASUDEEN ERRABALLI', iqama: '2483002123', user: '1151727' }, { name: 'QAISER SHEHZAD M扩大', iqama: '2591404021', user: '3438504' }], doc: null },
             { id: 'v-rasm-1444', company: 'رسم الحلول اللوجستية', project: 'مشروع التوصيل', licenseId: 'lic-rasm-light', plateNum: '1444', plateLetters: 'أ ص ص | XXA', cardNum: '38-00059643', expiry: '2027-01-09', owner: 'رسم الحلول اللوجستية', type: 'light', mode: 'users', drivers: [{ name: 'MOHAMMAD NAZIM UDDIN', iqama: '2541182727', user: '1738459' }, { name: 'HAROON RASHEED', iqama: '2152443079', user: '456534' }], doc: null },
             { id: 'v-rasm-1933', company: 'رسم الحلول اللوجستية', project: 'مشروع التوصيل', licenseId: 'lic-rasm-light', plateNum: '1933', plateLetters: 'أ ص ص | XXA', cardNum: '38-00059644', expiry: '2027-01-09', owner: 'رسم الحلول اللوجستية', type: 'light', mode: 'users', drivers: [], doc: null },
             { id: 'v-rasm-1935', company: 'رسم الحلول اللوجستية', project: 'مشروع التوصيل', licenseId: 'lic-rasm-light', plateNum: '1935', plateLetters: 'أ ص ص | XXA', cardNum: '38-00059645', expiry: '2027-01-09', owner: 'رسم الحلول اللوجستية', type: 'light', mode: 'users', drivers: [{ name: 'SAKIL AHAMMED MD SOHIDUL ISLAM', iqama: '2527292060', user: '4480961' }, { name: 'MOHAMMAD ASLAM SHAH', iqama: '2250122104', user: '112047' }, { name: 'M KHALID M SHAFI', iqama: '2591404583', user: '2590451' }], doc: null },
@@ -951,11 +1047,11 @@
             { id: 'v-rasm-9193', company: 'رسم الحلول اللوجستية', project: 'مشروع التوصيل', licenseId: 'lic-rasm-light', plateNum: '9193', plateLetters: 'أ ط ب | BTA', cardNum: '38-00066116', expiry: '2027-01-06', owner: 'رسم الحلول اللوجستية', type: 'light', mode: 'users', drivers: [{ name: 'SHAHZAIB SARWAR', iqama: '2570400529', user: '2113072' }, { name: 'SAMSUL HAQUE', iqama: '2576642306', user: '2161854' }, { name: 'MOHAMMAD SHOHIDUL ISLAM', iqama: '2439928595', user: '4504279' }], doc: null },
             { id: 'v-rasm-9194', company: 'رسم الحلول اللوجستية', project: 'مشروع التوصيل', licenseId: 'lic-rasm-light', plateNum: '9194', plateLetters: 'أ ط ب | BTA', cardNum: '38-00066005', expiry: '2027-01-06', owner: 'رسم الحلول اللوجستية', type: 'light', mode: 'users', drivers: [{ name: 'MD NURUL ALOM HOWLADER', iqama: '2449200795', user: '4548141' }, { name: 'ABDUS SHAHID', iqama: '2534242272', user: '1774719' }], doc: null },
 
-            // 3. النقل الثقيل (2)
-            { id: 'v-heavy-6557', company: 'رسم الحلول اللوجستية', project: 'مشروع التوصيل', licenseId: 'lic-rasm-heavy', plateNum: '6557', plateLetters: 'أ ع أ | AEA', cardNum: '11-00760321', expiry: '2027-11-19', owner: 'رسم الحلول اللوجستية (تميز زاوية)', type: 'heavy', mode: 'direct', drivers: [], doc: null },
-            { id: 'v-heavy-6559', company: 'رسم الحلول اللوجستية', project: 'مشروع التوصيل', licenseId: 'lic-rasm-heavy', plateNum: '6559', plateLetters: 'أ ع أ | AEA', cardNum: '11-00747436', expiry: '2027-10-21', owner: 'رسم الحلول اللوجستية (تميز زاوية)', type: 'heavy', mode: 'direct', drivers: [], doc: null },
+            // 3. النقل الثقيل (2) - شركة زاوية أمل للمقاولات - مشروع الكهرباء
+            { id: 'v-heavy-6557', company: 'شركة زاوية أمل للمقاولات', project: 'مشروع الكهرباء', licenseId: 'lic-rasm-heavy', plateNum: '6557', plateLetters: 'أ ع أ | AEA', cardNum: '11-00760321', expiry: '2027-11-19', owner: 'شركة زاوية أمل للمقاولات', type: 'heavy', mode: 'direct', drivers: [], doc: null },
+            { id: 'v-heavy-6559', company: 'شركة زاوية أمل للمقاولات', project: 'مشروع الكهرباء', licenseId: 'lic-rasm-heavy', plateNum: '6559', plateLetters: 'أ ع أ | AEA', cardNum: '11-00747436', expiry: '2027-10-21', owner: 'شركة زاوية أمل للمقاولات', type: 'heavy', mode: 'direct', drivers: [], doc: null },
 
-            // 4. مشروع الدينات (10)
+            // 4. مشروع الدينات (10) - زاوية أمل اللوجستية
             { id: 'v-dyna-8623', company: 'زاوية أمل اللوجستية', project: 'مشروع الدينات', licenseId: 'lic-zawaya-light', plateNum: '8623', plateLetters: 'أ ط ص | XTA', cardNum: '38-00068896', expiry: '2026-12-19', owner: 'زاوية أمل اللوجستية', type: 'light', mode: 'direct', drivers: [], doc: null },
             { id: 'v-dyna-8624', company: 'زاوية أمل اللوجستية', project: 'مشروع الدينات', licenseId: 'lic-zawaya-light', plateNum: '8624', plateLetters: 'أ ط ص | XTA', cardNum: '38-00068897', expiry: '2026-12-19', owner: 'زاوية أمل اللوجستية', type: 'light', mode: 'direct', drivers: [], doc: null },
             { id: 'v-dyna-8625', company: 'زاوية أمل اللوجستية', project: 'مشروع الدينات', licenseId: 'lic-zawaya-light', plateNum: '8625', plateLetters: 'أ ط ص | XTA', cardNum: '38-00068898', expiry: '2026-12-19', owner: 'زاوية أمل اللوجستية', type: 'light', mode: 'direct', drivers: [], doc: null },
@@ -968,8 +1064,8 @@
             { id: 'v-dyna-8632', company: 'زاوية أمل اللوجستية', project: 'مشروع الدينات', licenseId: 'lic-zawaya-light', plateNum: '8632', plateLetters: 'أ ط ص | XTA', cardNum: '38-00068905', expiry: '2026-12-19', owner: 'زاوية أمل اللوجستية', type: 'light', mode: 'direct', drivers: [], doc: null }
         ];
 
-        // IndexedDB High-Capacity Storage System for PDF and Heavy Attachments
-        const DB_NAME = 'ZawayaFleetDB_v2';
+        // IndexedDB High-Capacity Storage System
+        const DB_NAME = 'ZawayaFleetDB_v3';
         const DB_STORE = 'fleet_attachments';
         let dbInstance = null;
 
@@ -987,7 +1083,6 @@
                     resolve(dbInstance);
                 };
                 req.onerror = () => {
-                    console.warn('IndexedDB unavailable, falling back to LocalStorage');
                     resolve(null);
                 };
             });
@@ -1021,14 +1116,20 @@
             activeCompany: 'all',
             activeLicenseFilter: null,
             activeProjectFilter: 'all',
-            theme: localStorage.getItem('zawaya_theme') || 'dark'
+            theme: localStorage.getItem('zawaya_theme') || 'dark',
+            isAdmin: sessionStorage.getItem('zawaya_is_admin') === 'true'
         };
 
-        // Load Persistent State on Startup (Always prioritized over default data)
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('admin') === 'true') {
+            state.isAdmin = true;
+            sessionStorage.setItem('zawaya_is_admin', 'true');
+        }
+
         async function loadPersistentState() {
             await initDatabase();
-            const storedLic = localStorage.getItem('zawaya_licenses_live_v4');
-            const storedVeh = localStorage.getItem('zawaya_vehicles_live_v4');
+            const storedLic = localStorage.getItem('zawaya_licenses_live_v5');
+            const storedVeh = localStorage.getItem('zawaya_vehicles_live_v5');
 
             if (storedLic) {
                 try { 
@@ -1037,7 +1138,7 @@
                         state.licenses = parsedLic;
                     }
                 } catch (e) {
-                    console.error('Error parsing stored licenses', e);
+                    console.error(e);
                 }
             }
             if (storedVeh) {
@@ -1047,11 +1148,10 @@
                         state.vehicles = parsedVeh;
                     }
                 } catch (e) {
-                    console.error('Error parsing stored vehicles', e);
+                    console.error(e);
                 }
             }
 
-            // Restore attachments from IndexedDB
             for (let lic of state.licenses) {
                 const doc = await getDocFromDB(lic.id);
                 if (doc) lic.doc = doc;
@@ -1061,24 +1161,25 @@
                 if (doc) veh.doc = doc;
             }
 
+            updateAdminUI();
             updateKPIs();
             renderLicenses();
             renderVehicles();
         }
 
         async function persistState() {
-            // Save metadata without massive base64 in localStorage to ensure it NEVER fails or gets wiped
+            if (!state.isAdmin) return;
+
             const cleanLicenses = state.licenses.map(l => ({ ...l, doc: l.doc ? 'stored_in_idb' : null }));
             const cleanVehicles = state.vehicles.map(v => ({ ...v, doc: v.doc ? 'stored_in_idb' : null }));
 
             try {
-                localStorage.setItem('zawaya_licenses_live_v4', JSON.stringify(cleanLicenses));
-                localStorage.setItem('zawaya_vehicles_live_v4', JSON.stringify(cleanVehicles));
+                localStorage.setItem('zawaya_licenses_live_v5', JSON.stringify(cleanLicenses));
+                localStorage.setItem('zawaya_vehicles_live_v5', JSON.stringify(cleanVehicles));
             } catch (err) {
-                console.error('LocalStorage write error:', err);
+                console.error(err);
             }
 
-            // Save actual documents in IndexedDB (Unlimited capacity)
             for (let lic of state.licenses) {
                 if (lic.doc && lic.doc !== 'stored_in_idb') {
                     await saveDocToDB(lic.id, lic.doc);
@@ -1091,6 +1192,65 @@
             }
 
             updateKPIs();
+        }
+
+        function updateAdminUI() {
+            const body = document.body;
+            const badge = document.getElementById('role-badge');
+            const lockIcon = document.getElementById('admin-icon');
+            const lockBtn = document.getElementById('admin-lock-btn');
+
+            if (state.isAdmin) {
+                body.classList.add('is-admin');
+                badge.textContent = 'وضع المسؤول (Admin)';
+                badge.className = 'text-[11px] px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-500 dark:text-emerald-400 border border-emerald-500/20 font-bold';
+                if (lockIcon) lockIcon.setAttribute('data-lucide', 'unlock');
+                if (lockBtn) {
+                    lockBtn.className = 'p-2.5 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 rounded-xl border border-emerald-300 dark:border-emerald-600/40 text-xs transition flex items-center justify-center active:scale-90';
+                    lockBtn.title = 'مسؤول مفعل (انقر لتسجيل الخروج والقفل)';
+                }
+            } else {
+                body.classList.remove('is-admin');
+                badge.textContent = 'وضع العرض فقط';
+                badge.className = 'text-[11px] px-2.5 py-0.5 rounded-full bg-slate-500/10 text-slate-500 dark:text-slate-400 border border-slate-500/20 font-bold';
+                if (lockIcon) lockIcon.setAttribute('data-lucide', 'lock');
+                if (lockBtn) {
+                    lockBtn.className = 'p-2.5 bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 rounded-xl border border-slate-300 dark:border-slate-700 text-xs transition flex items-center justify-center active:scale-90';
+                    lockBtn.title = 'تسجيل دخول كمسؤول (للتعديل والحفظ)';
+                }
+            }
+            lucide.createIcons();
+        }
+
+        function toggleAdminPrompt() {
+            if (state.isAdmin) {
+                if (confirm('هل ترغب في قفل الموقع والرجوع لوضع العرض فقط؟')) {
+                    state.isAdmin = false;
+                    sessionStorage.removeItem('zawaya_is_admin');
+                    updateAdminUI();
+                    renderLicenses();
+                    renderVehicles();
+                }
+            } else {
+                document.getElementById('admin-password-input').value = '';
+                openModal('modal-admin-auth');
+            }
+        }
+
+        function handleAdminLogin(e) {
+            e.preventDefault();
+            const entered = document.getElementById('admin-password-input').value.trim();
+            if (entered === ADMIN_PIN) {
+                state.isAdmin = true;
+                sessionStorage.setItem('zawaya_is_admin', 'true');
+                closeModal('modal-admin-auth');
+                updateAdminUI();
+                renderLicenses();
+                renderVehicles();
+                alert('✓ تم تفعيل وضع المسؤول بنجاح! يمكنك الآن التعديل والإضافة والحفظ.');
+            } else {
+                alert('❌ الرقم السري غير صحيح!');
+            }
         }
 
         function getDaysDiff(targetDateStr) {
@@ -1156,7 +1316,7 @@
 
             let filtered = state.licenses;
             if (state.activeCompany !== 'all') {
-                if (state.activeCompany === 'تميز زاوية') {
+                if (state.activeCompany === 'شركة زاوية أمل للمقاولات') {
                     filtered = state.licenses.filter(l => l.id === 'lic-rasm-heavy');
                 } else {
                     filtered = filtered.filter(l => l.company === state.activeCompany);
@@ -1212,10 +1372,13 @@
                             </div>
                         </div>
                         <div class="flex items-center gap-1.5">
-                            <button onclick="event.stopPropagation(); triggerAttachmentUpload('${lic.id}', 'license')" class="glow-action-attach p-1.5 rounded-lg" title="إرفاق مستند جديد"><i data-lucide="paperclip" class="w-3.5 h-3.5"></i></button>
-                            ${lic.doc ? `<button onclick="event.stopPropagation(); viewAttachment('${lic.activity}', '${lic.id}')" class="p-1.5 rounded-lg bg-blue-50 dark:bg-blue-500/15 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-500/30 hover:bg-blue-100" title="استعراض الوثيقة"><i data-lucide="eye" class="w-3.5 h-3.5"></i></button>` : ''}
-                            <button onclick="event.stopPropagation(); editLicense('${lic.id}')" class="glow-action-edit p-1.5 rounded-lg" title="تعديل الترخيص"><i data-lucide="pencil" class="w-3.5 h-3.5"></i></button>
-                            <button onclick="event.stopPropagation(); deleteLicense('${lic.id}')" class="glow-action-delete p-1.5 rounded-lg" title="حذف الترخيص"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+                            <!-- زر استعراض الوثيقة متاح ومفعل للجميع في وضع العرض والمسؤول -->
+                            <button onclick="event.stopPropagation(); viewAttachment('${lic.activity}', '${lic.id}')" class="action-view-doc p-1.5 rounded-lg flex items-center justify-center" title="استعراض وثيقة الترخيص"><i data-lucide="eye" class="w-3.5 h-3.5"></i></button>
+                            ${state.isAdmin ? `
+                                <button onclick="event.stopPropagation(); triggerAttachmentUpload('${lic.id}', 'license')" class="glow-action-attach p-1.5 rounded-lg" title="إرفاق مستند جديد"><i data-lucide="paperclip" class="w-3.5 h-3.5"></i></button>
+                                <button onclick="event.stopPropagation(); editLicense('${lic.id}')" class="glow-action-edit p-1.5 rounded-lg" title="تعديل الترخيص"><i data-lucide="pencil" class="w-3.5 h-3.5"></i></button>
+                                <button onclick="event.stopPropagation(); deleteLicense('${lic.id}')" class="glow-action-delete p-1.5 rounded-lg" title="حذف الترخيص"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+                            ` : ''}
                         </div>
                     </div>
 
@@ -1390,9 +1553,9 @@
 
                 let stripClass = 'strip-light';
                 let stripSymbol = '▲';
-                if (veh.type === 'heavy' || veh.project?.includes('كهرباء') || veh.project?.includes('دينات')) {
+                if (veh.type === 'heavy' || veh.project === 'مشروع الكهرباء') {
                     stripClass = 'strip-heavy';
-                } else if (veh.type === 'general' || veh.project?.includes('دراجات')) {
+                } else if (veh.type === 'general') {
                     stripClass = 'strip-motorcycle';
                     stripSymbol = '●';
                 }
@@ -1448,10 +1611,13 @@
                         </div>
 
                         <div class="lg:col-span-3 flex items-center justify-end gap-2 border-t lg:border-t-0 pt-2 lg:pt-0 border-slate-200 dark:border-slate-800">
-                            <button onclick="triggerAttachmentUpload('${veh.id}', 'vehicle')" class="glow-action-attach p-1.5 rounded-lg" title="إرفاق وثيقة"><i data-lucide="paperclip" class="w-3.5 h-3.5"></i></button>
-                            ${veh.doc ? `<button onclick="viewAttachment('بطاقة مركبة ${veh.plateNum}', '${veh.id}')" class="p-1.5 rounded-lg bg-blue-50 dark:bg-blue-500/15 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-500/30 hover:bg-blue-100" title="استعراض بطاقة التشغيل"><i data-lucide="eye" class="w-3.5 h-3.5"></i></button>` : ''}
-                            <button onclick="editVehicle('${veh.id}')" class="glow-action-edit p-1.5 rounded-lg" title="تعديل"><i data-lucide="pencil" class="w-3.5 h-3.5"></i></button>
-                            <button onclick="deleteVehicle('${veh.id}')" class="glow-action-delete p-1.5 rounded-lg" title="حذف"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+                            <!-- زر استعراض الوثيقة متاح ومفعل للجميع في وضع العرض والمسؤول -->
+                            <button onclick="viewAttachment('بطاقة مركبة ${veh.plateNum}', '${veh.id}')" class="action-view-doc p-1.5 rounded-lg flex items-center justify-center" title="استعراض بطاقة التشغيل"><i data-lucide="eye" class="w-3.5 h-3.5"></i></button>
+                            ${state.isAdmin ? `
+                                <button onclick="triggerAttachmentUpload('${veh.id}', 'vehicle')" class="glow-action-attach p-1.5 rounded-lg" title="إرفاق وثيقة"><i data-lucide="paperclip" class="w-3.5 h-3.5"></i></button>
+                                <button onclick="editVehicle('${veh.id}')" class="glow-action-edit p-1.5 rounded-lg" title="تعديل"><i data-lucide="pencil" class="w-3.5 h-3.5"></i></button>
+                                <button onclick="deleteVehicle('${veh.id}')" class="glow-action-delete p-1.5 rounded-lg" title="حذف"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+                            ` : ''}
                             <button onclick="toggleAccordion('acc-${veh.id}')" class="p-1.5 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition" title="المستخدمين واليوزرات"><i data-lucide="chevron-down" class="w-4 h-4"></i></button>
                         </div>
                     </div>
@@ -1461,7 +1627,7 @@
                             <span class="text-xs font-bold text-slate-600 dark:text-slate-400 flex items-center gap-1.5">
                                 <i data-lucide="users" class="w-3.5 h-3.5 text-blue-600 dark:text-blue-400"></i> المستخدمين والسائقين المرتبطين ببطاقة التشغيل:
                             </span>
-                            ${veh.mode === 'users' ? `<button onclick="openDriverModal('${veh.id}')" class="text-xs px-3 py-1 bg-emerald-50 dark:bg-emerald-600/20 hover:bg-emerald-100 dark:hover:bg-emerald-600/30 text-emerald-700 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-500/30 rounded-xl font-bold flex items-center gap-1.5 transition"><i data-lucide="user-plus" class="w-3.5 h-3.5"></i> إضافة مستخدم</button>` : ''}
+                            ${(veh.mode === 'users' && state.isAdmin) ? `<button onclick="openDriverModal('${veh.id}')" class="text-xs px-3 py-1 bg-emerald-50 dark:bg-emerald-600/20 hover:bg-emerald-100 dark:hover:bg-emerald-600/30 text-emerald-700 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-500/30 rounded-xl font-bold flex items-center gap-1.5 transition"><i data-lucide="user-plus" class="w-3.5 h-3.5"></i> إضافة مستخدم</button>` : ''}
                         </div>
 
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -1472,7 +1638,7 @@
                                             <span class="w-5 h-5 rounded-full bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-400 border border-blue-300 dark:border-blue-500/30 text-[11px] font-black flex items-center justify-center font-mono">${idx+1}</span>
                                             <span class="font-extrabold text-slate-900 dark:text-white text-xs tracking-tight">${drv.name}</span>
                                         </div>
-                                        <button onclick="removeDriver('${veh.id}', ${idx})" class="glow-action-delete p-1 rounded-lg text-slate-400 hover:text-rose-500" title="حذف المستخدم"><i data-lucide="x" class="w-3.5 h-3.5"></i></button>
+                                        ${state.isAdmin ? `<button onclick="removeDriver('${veh.id}', ${idx})" class="glow-action-delete p-1 rounded-lg text-slate-400 hover:text-rose-500" title="حذف المستخدم"><i data-lucide="x" class="w-3.5 h-3.5"></i></button>` : ''}
                                     </div>
                                     <div class="grid grid-cols-2 gap-2 mt-0.5">
                                         <div class="driver-capsule bg-slate-100 dark:bg-slate-950/70 p-2 rounded-xl border border-slate-200 dark:border-slate-800/80">
@@ -1501,7 +1667,7 @@
 
         function renderProjectFilterPills() {
             const container = document.getElementById('project-filter-pills');
-            const projects = ['all', 'مشروع التوصيل', 'مشروع الدينات', 'مشروع الكهرباء', 'نقل طرود (دراجات)'];
+            const projects = ['all', 'مشروع التوصيل', 'مشروع الدينات', 'مشروع الكهرباء'];
             
             container.innerHTML = projects.map(p => {
                 const label = p === 'all' ? 'جميع المشاريع' : p;
@@ -1519,7 +1685,7 @@
             state.activeLicenseFilter = null;
             document.getElementById('license-filter-badge-box').classList.add('hidden');
             
-            ['all', 'zawaya', 'rasm', 'tamayoz'].forEach(k => {
+            ['all', 'zawaya', 'rasm', 'contract'].forEach(k => {
                 const btn = document.getElementById(`comp-btn-${k}`);
                 if (btn) btn.classList.remove('active');
             });
@@ -1527,14 +1693,14 @@
             if (comp === 'all') {
                 document.getElementById('comp-btn-all').classList.add('active');
                 document.getElementById('active-filter-badge').textContent = 'جميع المنشآت';
-            } else if (comp.includes('زاوية أمل')) {
+            } else if (comp.includes('زاوية أمل اللوجستية')) {
                 document.getElementById('comp-btn-zawaya').classList.add('active');
                 document.getElementById('active-filter-badge').textContent = comp;
             } else if (comp.includes('رسم الحلول')) {
                 document.getElementById('comp-btn-rasm').classList.add('active');
                 document.getElementById('active-filter-badge').textContent = comp;
             } else {
-                document.getElementById('comp-btn-tamayoz').classList.add('active');
+                document.getElementById('comp-btn-contract').classList.add('active');
                 document.getElementById('active-filter-badge').textContent = comp;
             }
 
@@ -1579,6 +1745,7 @@
         }
 
         function triggerAttachmentUpload(id, type) {
+            if (!state.isAdmin) return;
             const fileInput = document.createElement('input');
             fileInput.type = 'file';
             fileInput.accept = 'image/*,.pdf';
@@ -1608,20 +1775,18 @@
         async function viewAttachment(title, targetId) {
             let docData = null;
             
-            // Check in memory first
             const lic = state.licenses.find(l => l.id === targetId);
             if (lic && lic.doc && lic.doc !== 'stored_in_idb') docData = lic.doc;
 
             const veh = state.vehicles.find(v => v.id === targetId);
             if (veh && veh.doc && veh.doc !== 'stored_in_idb') docData = veh.doc;
 
-            // Fetch from IndexedDB if needed
             if (!docData) {
                 docData = await getDocFromDB(targetId);
             }
 
             if (!docData) {
-                alert('لم يتم العثور على الوثيقة المرفقة');
+                alert('لا يوجد مستند مرفق مسجل لهذا العنصر حالياً.');
                 return;
             }
 
@@ -1639,6 +1804,7 @@
         }
 
         function openLicenseModal(id = null) {
+            if (!state.isAdmin) return;
             document.getElementById('lic-id').value = id || '';
             document.getElementById('lic-file').value = '';
             document.getElementById('lic-doc-base64').value = '';
@@ -1668,6 +1834,7 @@
         }
 
         async function deleteLicense(id) {
+            if (!state.isAdmin) return;
             if (confirm('هل أنت متأكد من حذف هذا الترخيص؟ سيتم فك ارتباط المركبات التابعة له.')) {
                 state.licenses = state.licenses.filter(l => l.id !== id);
                 if (state.activeLicenseFilter === id) state.activeLicenseFilter = null;
@@ -1679,6 +1846,7 @@
 
         async function saveLicenseForm(e) {
             e.preventDefault();
+            if (!state.isAdmin) return;
             const id = document.getElementById('lic-id').value;
             const existing = state.licenses.find(l => l.id === id);
 
@@ -1712,7 +1880,7 @@
             const select = document.getElementById('veh-license-id');
             let licList = [];
             
-            if (comp === 'تميز زاوية') {
+            if (comp === 'شركة زاوية أمل للمقاولات') {
                 licList = state.licenses.filter(l => l.id === 'lic-rasm-heavy');
             } else {
                 licList = state.licenses.filter(l => l.company === comp);
@@ -1724,6 +1892,7 @@
         }
 
         function openVehicleModal(id = null) {
+            if (!state.isAdmin) return;
             document.getElementById('veh-id').value = id || '';
             document.getElementById('veh-file').value = '';
             document.getElementById('veh-doc-base64').value = '';
@@ -1761,6 +1930,7 @@
         }
 
         async function deleteVehicle(id) {
+            if (!state.isAdmin) return;
             if (confirm('هل أنت متأكد من حذف هذه المركبة وبطاقة التشغيل الخاصة بها؟')) {
                 state.vehicles = state.vehicles.filter(v => v.id !== id);
                 await persistState();
@@ -1770,6 +1940,7 @@
 
         async function saveVehicleForm(e) {
             e.preventDefault();
+            if (!state.isAdmin) return;
             const id = document.getElementById('veh-id').value;
             const existing = state.vehicles.find(v => v.id === id);
 
@@ -1790,7 +1961,7 @@
             };
 
             if (id) {
-                const index = state.vehicles.findIndex(v => v.id === id);
+                const index = state.vehicles.findIndex(l => l.id === id);
                 if (index > -1) state.vehicles[index] = newVeh;
             } else {
                 state.vehicles.push(newVeh);
@@ -1802,6 +1973,7 @@
         }
 
         function openDriverModal(vehId) {
+            if (!state.isAdmin) return;
             document.getElementById('drv-veh-id').value = vehId;
             document.getElementById('drv-name').value = '';
             document.getElementById('drv-iqama').value = '';
@@ -1811,6 +1983,7 @@
 
         async function saveDriverForm(e) {
             e.preventDefault();
+            if (!state.isAdmin) return;
             const vehId = document.getElementById('drv-veh-id').value;
             const veh = state.vehicles.find(v => v.id === vehId);
             if (!veh) return;
@@ -1828,6 +2001,7 @@
         }
 
         async function removeDriver(vehId, driverIndex) {
+            if (!state.isAdmin) return;
             const veh = state.vehicles.find(v => v.id === vehId);
             if (veh && veh.drivers) {
                 veh.drivers.splice(driverIndex, 1);
@@ -1866,24 +2040,24 @@
                 `;
             } else if (type === 'vehicles') {
                 titleEl.textContent = 'توزيع أسطول المركبات والمعدات';
-                const zawayaCount = state.vehicles.filter(v=>v.company.includes('زاوية')).length;
+                const zawayaCount = state.vehicles.filter(v=>v.company.includes('زاوية أمل اللوجستية')).length;
                 const rasmCount = state.vehicles.filter(v=>v.company.includes('رسم')).length;
-                const tamayozCount = state.vehicles.filter(v=>v.company.includes('تميز')).length;
+                const contractCount = state.vehicles.filter(v=>v.company.includes('المقاولات')).length;
                 contentEl.innerHTML = `
                     <div class="space-y-3">
                         <p class="text-slate-700 dark:text-slate-300 font-medium">إجمالي الأسطول: <b class="text-slate-900 dark:text-white font-mono text-sm">${state.vehicles.length} مركبة</b></p>
                         <div class="grid grid-cols-3 gap-2.5 my-2">
                             <div class="p-3 bg-slate-50 dark:bg-slate-950 rounded-xl border border-slate-200 dark:border-slate-800 text-center">
-                                <span class="text-[11px] text-slate-600 dark:text-slate-400 block font-bold">زاوية أمل</span>
+                                <span class="text-[11px] text-slate-600 dark:text-slate-400 block font-bold">زاوية أمل اللوجستية</span>
                                 <span class="text-lg font-black text-emerald-600 dark:text-emerald-400 font-mono">${zawayaCount}</span>
                             </div>
                             <div class="p-3 bg-slate-50 dark:bg-slate-950 rounded-xl border border-slate-200 dark:border-slate-800 text-center">
-                                <span class="text-[11px] text-slate-600 dark:text-slate-400 block font-bold">رسم الحلول</span>
+                                <span class="text-[11px] text-slate-600 dark:text-slate-400 block font-bold">رسم الحلول اللوجستية</span>
                                 <span class="text-lg font-black text-purple-600 dark:text-purple-400 font-mono">${rasmCount}</span>
                             </div>
                             <div class="p-3 bg-slate-50 dark:bg-slate-950 rounded-xl border border-slate-200 dark:border-slate-800 text-center">
-                                <span class="text-[11px] text-slate-600 dark:text-slate-400 block font-bold">تميز زاوية</span>
-                                <span class="text-lg font-black text-amber-600 dark:text-amber-400 font-mono">${tamayozCount}</span>
+                                <span class="text-[11px] text-slate-600 dark:text-slate-400 block font-bold">زاوية أمل للمقاولات</span>
+                                <span class="text-lg font-black text-amber-600 dark:text-amber-400 font-mono">${contractCount}</span>
                             </div>
                         </div>
                     </div>
@@ -1930,7 +2104,6 @@
         }
 
         async function exportData() {
-            // Prepare complete backup including actual docs
             const fullLicenses = [...state.licenses];
             for (let lic of fullLicenses) {
                 if (!lic.doc || lic.doc === 'stored_in_idb') {
@@ -1960,6 +2133,7 @@
         }
 
         function importData(e) {
+            if (!state.isAdmin) return;
             const file = e.target.files[0];
             if (!file) return;
 
