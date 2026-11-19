@@ -23,7 +23,14 @@
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet">
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
-    <!-- Tesseract OCR for extracting card details -->
+    <!-- PDF.js للقراءة الفورية الدقيقة لملفات PDF لهيئة النقل TGA -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script>
+        if (window.pdfjsLib) {
+            pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+        }
+    </script>
+    <!-- Tesseract OCR for extracting card details from images -->
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 
     <style>
@@ -969,16 +976,16 @@
                 <div>
                     <label class="block font-bold text-slate-600 dark:text-slate-400 mb-1 flex items-center justify-between">
                         <span class="flex items-center gap-1.5">
-                            <i data-lucide="paperclip" class="w-3.5 h-3.5 text-blue-600 dark:text-blue-400"></i>
-                            <span>إرفاق وثيقة بطاقة التشغيل (قراءة ذكية تلقائية)</span>
+                            <i data-lucide="paperclip" class="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400"></i>
+                            <span>إرفاق وثيقة الترخيص (قراءة تلقائية لرقم وتاريخ الترخيص)</span>
                         </span>
-                        <span id="ocr-loader-veh" class="hidden text-blue-500 font-bold flex items-center gap-1 animate-pulse">
+                        <span id="ocr-loader-lic" class="hidden text-emerald-500 font-bold flex items-center gap-1 animate-pulse">
                             <i data-lucide="loader-2" class="w-3.5 h-3.5 animate-spin"></i> جاري استخراج البيانات...
                         </span>
                     </label>
-                    <input type="file" id="veh-file" accept="image/*,.pdf" onchange="handleVehicleFileWithOCR(event)" class="w-full text-xs text-slate-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-slate-200 dark:file:bg-slate-800 file:text-slate-800 dark:file:text-white hover:file:bg-slate-300">
-                    <input type="hidden" id="veh-doc-base64">
-                    <div id="veh-doc-preview" class="mt-2 text-[11px] text-emerald-600 dark:text-emerald-400 font-bold"></div>
+                    <input type="file" id="lic-file" accept="image/*,.pdf" onchange="handleLicenseFileWithOCR(event)" class="w-full text-xs text-slate-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-slate-200 dark:file:bg-slate-800 file:text-slate-800 dark:file:text-white hover:file:bg-slate-300">
+                    <input type="hidden" id="lic-doc-base64">
+                    <div id="lic-doc-preview" class="mt-2 text-[11px] text-emerald-600 dark:text-emerald-400 font-bold"></div>
                 </div>
                 <div class="pt-3 border-t border-slate-200 dark:border-slate-800 flex justify-end gap-2">
                     <button type="button" onclick="closeModal('modal-vehicle')" class="px-4 py-2 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-300 rounded-xl text-xs font-bold">إلغاء</button>
@@ -1938,49 +1945,153 @@
             if (el) el.classList.toggle('hidden');
         }
 
-        function handleFileUpload(event, previewId, hiddenInputId) {
+        // استخراج النصوص من ملفات PDF المرفوعة مباشرة
+        async function extractTextFromPDF(arrayBuffer) {
+            try {
+                const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
+                const pdf = await loadingTask.promise;
+                let fullText = '';
+                for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+                    const page = await pdf.getPage(pageNum);
+                    const textContent = await page.getTextContent();
+                    const pageText = textContent.items.map(item => item.str).join(' ');
+                    fullText += ' ' + pageText;
+                }
+                return fullText;
+            } catch (err) {
+                console.error("PDF parse error:", err);
+                return '';
+            }
+        }
+
+        // استخراج النصوص من الصور عبر Tesseract
+        async function extractTextFromImage(base64Image) {
+            if (!window.Tesseract) return '';
+            try {
+                const res = await Tesseract.recognize(base64Image, 'ara+eng', { logger: () => {} });
+                return res.data.text || '';
+            } catch (err) {
+                console.error("Image OCR error:", err);
+                return '';
+            }
+        }
+
+        // تحليل ذكي لنصوص بطاقة التشغيل (TGA Operation Card)
+        function parseOperationCardText(text) {
+            let cardNum = null;
+            let expiryDate = null;
+            let plateNum = null;
+            let plateLetters = null;
+
+            // 1. استخراج رقم بطاقة التشغيل: يطابق 38-00068896 أو 81-00010540 أو صيغة 38/00068896
+            const cardMatch = text.match(/Card\s*Number\s*[:\s|]*([0-9]{2}[\/-][0-9]{8})/i) ||
+                              text.match(/رقم\s*البطاقة\s*[:\s|]*([0-9]{2}[\/-][0-9]{8})/i) ||
+                              text.match(/\b([0-9]{2}[\/-][0-9]{8})\b/);
+            if (cardMatch) {
+                cardNum = cardMatch[1].replace('/', '-').trim();
+            }
+
+            // 2. استخراج تاريخ انتهاء البطاقة: Card Expiry Date: 2026-12-19 أو تاريخ انتهاء البطاقة
+            const expMatch = text.match(/Card\s*Expiry\s*Date\s*[:\s|]*(202[4-9][\/-][0-1]?[0-9][\/-][0-3]?[0-9])/i) ||
+                             text.match(/تاريخ\s*انتهاء\s*البطاقة\s*[:\s|]*(202[4-9][\/-][0-1]?[0-9][\/-][0-3]?[0-9])/i) ||
+                             text.match(/Expiry\s*Date\s*[:\s|]*(202[4-9][\/-][0-1]?[0-9][\/-][0-3]?[0-9])/i);
+            if (expMatch) {
+                expiryDate = expMatch[1].replace(/\//g, '-').trim();
+            } else {
+                // محاولة البحث عن أي تاريخ يقع بين 2025 و 2035
+                const anyDate = text.match(/\b(202[5-9]|203[0-5])[\/-](0[1-9]|1[0-2])[\/-](0[1-9]|[12][0-9]|3[01])\b/);
+                if (anyDate) expiryDate = anyDate[0].replace(/\//g, '-').trim();
+            }
+
+            // 3. استخراج رقم اللوحة والحروف إن وجدت (مثل: أ ط ص 8623)
+            const plateMatch = text.match(/Plate\s*Number\s*[:\s|]*([^\n\r|]+)/i) ||
+                               text.match(/رقم\s*اللوحة\s*[:\s|]*([^\n\r|]+)/i);
+            if (plateMatch) {
+                const rawPlate = plateMatch[1].trim();
+                const numMatch = rawPlate.match(/[0-9]{3,4}/);
+                if (numMatch) plateNum = numMatch[0];
+                const lettersMatch = rawPlate.replace(/[0-9]/g, '').trim();
+                if (lettersMatch) plateLetters = lettersMatch;
+            }
+
+            return { cardNum, expiryDate, plateNum, plateLetters };
+        }
+
+        // تحليل ذكي لنصوص وثيقة الترخيص (TGA License)
+        function parseLicenseText(text) {
+            let licNumber = null;
+            let expiryDate = null;
+
+            // 1. استخراج رقم الترخيص: License Number: 38/00022184 أو 38/00004951 أو 010211003400
+            const licMatch = text.match(/Licen[sc]e\s*Number\s*[:\s|]*([0-9]{2}[\/-][0-9]{8}|[0-9]{10,14})/i) ||
+                             text.match(/رقم\s*الترخيص\s*[:\s|]*([0-9]{2}[\/-][0-9]{8}|[0-9]{10,14})/i) ||
+                             text.match(/\b([0-9]{2}\/[0-9]{8})\b/) ||
+                             text.match(/\b([0-9]{12})\b/);
+            if (licMatch) {
+                licNumber = licMatch[1].trim();
+            }
+
+            // 2. استخراج تاريخ انتهاء الترخيص: Expiration Date: 2029-01-05
+            const expMatch = text.match(/Expir(?:ation)?\s*Date\s*[:\s|]*(202[4-9][\/-][0-1]?[0-9][\/-][0-3]?[0-9])/i) ||
+                             text.match(/تاريخ\s*الانتهاء\s*[:\s|]*(202[4-9][\/-][0-1]?[0-9][\/-][0-3]?[0-9])/i);
+            if (expMatch) {
+                expiryDate = expMatch[1].replace(/\//g, '-').trim();
+            } else {
+                const anyDate = text.match(/\b(202[5-9]|203[0-5])[\/-](0[1-9]|1[0-2])[\/-](0[1-9]|[12][0-9]|3[01])\b/);
+                if (anyDate) expiryDate = anyDate[0].replace(/\//g, '-').trim();
+            }
+
+            return { licNumber, expiryDate };
+        }
+
+        // معالجة ملف الترخيص وسحب البيانات تلقائياً
+        async function handleLicenseFileWithOCR(event) {
             const file = event.target.files[0];
             if (!file) return;
 
+            const loader = document.getElementById('ocr-loader-lic');
+            const preview = document.getElementById('lic-doc-preview');
+            const hiddenInput = document.getElementById('lic-doc-base64');
+
             const reader = new FileReader();
-            reader.onload = function(e) {
-                document.getElementById(hiddenInputId).value = e.target.result;
-                document.getElementById(previewId).textContent = `✓ تم تجهيز المستند: ${file.name} (${(file.size/1024).toFixed(1)} KB)`;
-                showToast(`تم تجهيز الوثيقة (${file.name})`);
+            reader.onload = async function(e) {
+                hiddenInput.value = e.target.result;
+                preview.textContent = `✓ تم إرفاق وتجهيز المستند: ${file.name}`;
+                showToast(`تم إرفاق وثيقة الترخيص (${file.name}) بنجاح`);
+
+                if (loader) loader.classList.remove('hidden');
+
+                let extractedText = '';
+                if (file.type === 'application/pdf') {
+                    extractedText = await extractTextFromPDF(await file.arrayBuffer());
+                } else if (file.type.startsWith('image/')) {
+                    extractedText = await extractTextFromImage(e.target.result);
+                }
+
+                if (loader) loader.classList.add('hidden');
+
+                if (extractedText) {
+                    const parsed = parseLicenseText(extractedText);
+                    let filledCount = 0;
+
+                    if (parsed.licNumber && !document.getElementById('lic-number').value) {
+                        document.getElementById('lic-number').value = parsed.licNumber;
+                        filledCount++;
+                    }
+                    if (parsed.expiryDate && !document.getElementById('lic-expiry').value) {
+                        document.getElementById('lic-expiry').value = parsed.expiryDate;
+                        filledCount++;
+                    }
+
+                    if (filledCount > 0) {
+                        showToast('تمت قراءة رقم الترخيص وتاريخ الانتهاء تلقائياً من المستند!', 'sparkles');
+                    }
+                }
             };
             reader.readAsDataURL(file);
         }
 
-        // قراءة ذكية (OCR) لبطاقة التشغيل المستخرجة
-        async function extractCardDataFromImage(base64Image) {
-            if (!window.Tesseract) return null;
-            try {
-                const res = await Tesseract.recognize(base64Image, 'ara+eng', {
-                    logger: m => {}
-                });
-                const text = res.data.text || '';
-                
-                // البحث عن رقم البطاقة (مثال: 38-00059641 أو 81-00010540 أو أرقام متتالية)
-                let cardNum = null;
-                const cardMatch = text.match(/\b\d{2}[-\s]?\d{7,8}\b/) || text.match(/\b\d{8,10}\b/);
-                if (cardMatch) {
-                    cardNum = cardMatch[0].replace(/\s+/g, '-');
-                }
-
-                // البحث عن تاريخ الانتهاء (YYYY-MM-DD أو YYYY/MM/DD)
-                let expiryDate = null;
-                const dateMatch = text.match(/202[4-9][\/-](0[1-9]|1[0-2])[\/-](0[1-9]|[12][0-9]|3[01])/);
-                if (dateMatch) {
-                    expiryDate = dateMatch[0].replace(/\//g, '-');
-                }
-
-                return { cardNum, expiryDate };
-            } catch (err) {
-                console.error("OCR parse error:", err);
-                return null;
-            }
-        }
-
+        // معالجة ملف بطاقة التشغيل وسحب البيانات تلقائياً
         async function handleVehicleFileWithOCR(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -1992,22 +2103,43 @@
             const reader = new FileReader();
             reader.onload = async function(e) {
                 hiddenInput.value = e.target.result;
-                preview.textContent = `✓ تم تجهيز المستند: ${file.name}`;
-                showToast(`تم إرفاق الوثيقة (${file.name}) بنجاح`);
+                preview.textContent = `✓ تم إرفاق وتجهيز المستند: ${file.name}`;
+                showToast(`تم إرفاق وثيقة بطاقة التشغيل (${file.name}) بنجاح`);
 
-                if (file.type.startsWith('image/')) {
-                    if (loader) loader.classList.remove('hidden');
-                    const parsed = await extractCardDataFromImage(e.target.result);
-                    if (loader) loader.classList.add('hidden');
+                if (loader) loader.classList.remove('hidden');
 
-                    if (parsed) {
-                        if (parsed.cardNum && !document.getElementById('veh-card-num').value) {
-                            document.getElementById('veh-card-num').value = parsed.cardNum;
-                        }
-                        if (parsed.expiryDate && !document.getElementById('veh-expiry').value) {
-                            document.getElementById('veh-expiry').value = parsed.expiryDate;
-                        }
-                        showToast('تمت قراءة رقم البطاقة وتاريخ الانتهاء تلقائياً!', 'sparkles');
+                let extractedText = '';
+                if (file.type === 'application/pdf') {
+                    extractedText = await extractTextFromPDF(await file.arrayBuffer());
+                } else if (file.type.startsWith('image/')) {
+                    extractedText = await extractTextFromImage(e.target.result);
+                }
+
+                if (loader) loader.classList.add('hidden');
+
+                if (extractedText) {
+                    const parsed = parseOperationCardText(extractedText);
+                    let filledCount = 0;
+
+                    if (parsed.cardNum && !document.getElementById('veh-card-num').value) {
+                        document.getElementById('veh-card-num').value = parsed.cardNum;
+                        filledCount++;
+                    }
+                    if (parsed.expiryDate && !document.getElementById('veh-expiry').value) {
+                        document.getElementById('veh-expiry').value = parsed.expiryDate;
+                        filledCount++;
+                    }
+                    if (parsed.plateNum && !document.getElementById('veh-plate-num').value) {
+                        document.getElementById('veh-plate-num').value = parsed.plateNum;
+                        filledCount++;
+                    }
+                    if (parsed.plateLetters && !document.getElementById('veh-plate-letters').value) {
+                        document.getElementById('veh-plate-letters').value = parsed.plateLetters;
+                        filledCount++;
+                    }
+
+                    if (filledCount > 0) {
+                        showToast('تمت قراءة رقم البطاقة وتاريخ الانتهاء وتفاصيل اللوحة تلقائياً!', 'sparkles');
                     }
                 }
             };
@@ -2027,19 +2159,37 @@
                     const base64Data = uploadEvt.target.result;
                     if (type === 'license') {
                         const target = state.licenses.find(l => l.id === id);
-                        if (target) target.doc = base64Data;
+                        if (target) {
+                            target.doc = base64Data;
+                            let txt = '';
+                            if (file.type === 'application/pdf') {
+                                txt = await extractTextFromPDF(await file.arrayBuffer());
+                            } else if (file.type.startsWith('image/')) {
+                                txt = await extractTextFromImage(base64Data);
+                            }
+                            if (txt) {
+                                const parsed = parseLicenseText(txt);
+                                if (parsed.licNumber) target.number = parsed.licNumber;
+                                if (parsed.expiryDate) target.expiry = parsed.expiryDate;
+                                showToast('تم تحديث بيانات الترخيص تلقائياً من المستند!', 'sparkles');
+                            }
+                        }
                     } else {
                         const target = state.vehicles.find(v => v.id === id);
                         if (target) {
                             target.doc = base64Data;
-                            if (file.type.startsWith('image/')) {
-                                showToast('جاري استخراج بيانات البطاقة تلقائياً...');
-                                const parsed = await extractCardDataFromImage(base64Data);
-                                if (parsed) {
-                                    if (parsed.cardNum) target.cardNum = parsed.cardNum;
-                                    if (parsed.expiryDate) target.expiry = parsed.expiryDate;
-                                    showToast('تم تحديث رقم وتاريخ البطاقة تلقائياً!', 'sparkles');
-                                }
+                            let txt = '';
+                            if (file.type === 'application/pdf') {
+                                txt = await extractTextFromPDF(await file.arrayBuffer());
+                            } else if (file.type.startsWith('image/')) {
+                                txt = await extractTextFromImage(base64Data);
+                            }
+                            if (txt) {
+                                const parsed = parseOperationCardText(txt);
+                                if (parsed.cardNum) target.cardNum = parsed.cardNum;
+                                if (parsed.expiryDate) target.expiry = parsed.expiryDate;
+                                if (parsed.plateNum && !target.plateNum) target.plateNum = parsed.plateNum;
+                                showToast('تم تحديث رقم وتاريخ البطاقة تلقائياً!', 'sparkles');
                             }
                         }
                     }
