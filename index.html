@@ -23,6 +23,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet">
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Tesseract OCR for extracting card details -->
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+
     <style>
         body {
             font-family: 'Cairo', sans-serif;
@@ -30,7 +33,7 @@
             transition: background-color 0.3s ease, color 0.3s ease;
         }
 
-        /* شريط تمرير زجاجي ناعم وشفاف للموقع بالكامل وجميع النوافذ والمرفقات */
+        /* شريط تمرير زجاجي ناعم */
         * {
             scrollbar-width: thin;
             scrollbar-color: rgba(148, 163, 184, 0.25) transparent;
@@ -68,6 +71,7 @@
             background: rgba(255, 255, 255, 0.32);
         }
 
+        /* تصميم لوحة المركبة السعودية الواقعية */
         .saudi-plate {
             background: #ffffff !important;
             color: #0f172a !important;
@@ -552,9 +556,57 @@
         body:not(.is-admin) .admin-only {
             display: none !important;
         }
+
+        /* حاوية الإشعارات التلقائية (Toast) */
+        #toast-container {
+            position: fixed;
+            bottom: 24px;
+            left: 24px;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            pointer-events: none;
+        }
+
+        .toast-msg {
+            background: rgba(15, 23, 42, 0.92);
+            color: #ffffff;
+            border: 1px solid rgba(59, 130, 246, 0.35);
+            backdrop-filter: blur(12px);
+            padding: 10px 18px;
+            border-radius: 14px;
+            font-size: 12px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
+            animation: toast-in 0.3s cubic-bezier(0.16, 1, 0.3, 1), toast-out 0.3s cubic-bezier(0.16, 1, 0.3, 1) 2.4s forwards;
+        }
+
+        html:not(.dark) .toast-msg {
+            background: #ffffff;
+            color: #0f172a;
+            border-color: #cbd5e1;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.12);
+        }
+
+        @keyframes toast-in {
+            from { opacity: 0; transform: translateY(16px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes toast-out {
+            from { opacity: 1; transform: translateY(0); }
+            to { opacity: 0; transform: translateY(-10px); }
+        }
     </style>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col antialiased selection:bg-blue-600 selection:text-white">
+
+    <!-- Toast Container -->
+    <div id="toast-container"></div>
 
     <!-- Top Navigation Header -->
     <header class="bg-slate-900/90 border-b border-slate-800 sticky top-0 z-40 px-4 lg:px-8 py-3 flex flex-wrap items-center justify-between gap-3 shadow-xl backdrop-blur-md">
@@ -572,6 +624,27 @@
         </div>
 
         <div class="flex items-center gap-2.5">
+            <!-- جرس التنبيهات مع نافذة منسدلة للصلاحيات التي قاربت على الانتهاء -->
+            <div class="relative">
+                <button onclick="toggleNotificationDropdown()" id="notif-btn" class="relative p-2.5 bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl border border-slate-300 dark:border-slate-700 text-xs transition flex items-center justify-center active:scale-90" title="التنبيهات والصلاحيات القريبة من الانتهاء">
+                    <i data-lucide="bell" class="w-4 h-4"></i>
+                    <span id="notif-badge" class="hidden absolute -top-1 -right-1 w-4 h-4 bg-rose-500 text-white rounded-full text-[9px] font-black flex items-center justify-center animate-pulse">0</span>
+                </button>
+
+                <!-- نافذة التنبيهات المنسدلة -->
+                <div id="notif-dropdown" class="hidden absolute left-0 mt-2 w-80 sm:w-96 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl z-50 p-3.5 space-y-2.5">
+                    <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-2">
+                        <span class="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                            <i data-lucide="alert-triangle" class="w-3.5 h-3.5 text-amber-500"></i> تنبيهات الصلاحيات المنتهية والقريبة (أقل من 60 يوم)
+                        </span>
+                        <span id="notif-count-text" class="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-500 border border-amber-500/20 font-bold">0 تنبيه</span>
+                    </div>
+                    <div id="notif-list" class="max-h-60 overflow-y-auto space-y-2 text-xs">
+                        <!-- عناصر التنبيهات تُبنى ديناميكياً -->
+                    </div>
+                </div>
+            </div>
+
             <!-- Admin Lock / Unlock Button -->
             <button onclick="toggleAdminPrompt()" id="admin-lock-btn" class="p-2.5 bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 rounded-xl border border-slate-300 dark:border-slate-700 text-xs transition flex items-center justify-center active:scale-90" title="تسجيل دخول كمسؤول (للتعديل والحفظ)">
                 <i data-lucide="lock" id="admin-icon" class="w-4 h-4"></i>
@@ -591,10 +664,29 @@
                 <i data-lucide="truck" class="w-4 h-4"></i>
                 <span>إضافة مركبة</span>
             </button>
-            <button onclick="exportData()" class="p-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl border border-slate-300 dark:border-slate-700 text-xs transition" title="تصدير نسخة JSON">
-                <i data-lucide="download" class="w-4 h-4"></i>
-            </button>
-            <label class="admin-only p-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl border border-slate-300 dark:border-slate-700 text-xs transition cursor-pointer" title="استيراد نسخة JSON">
+
+            <!-- زر التصدير مع خيارات متعددة (JSON, كود HTML كامل, Excel CSV) -->
+            <div class="relative">
+                <button onclick="toggleExportMenu()" class="p-2.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl border border-slate-300 dark:border-slate-700 text-xs transition flex items-center justify-center active:scale-90" title="خيارات التصدير والتحميل">
+                    <i data-lucide="download" class="w-4 h-4"></i>
+                </button>
+                <div id="export-dropdown" class="hidden absolute left-0 mt-2 w-48 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl z-50 p-2 space-y-1 text-xs font-bold">
+                    <button onclick="exportData()" class="w-full text-right px-3 py-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-2">
+                        <i data-lucide="file-json" class="w-4 h-4 text-blue-500"></i>
+                        <span>نسخة بيانات (JSON)</span>
+                    </button>
+                    <button onclick="exportAsSelfContainedHTML()" class="w-full text-right px-3 py-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-2">
+                        <i data-lucide="code" class="w-4 h-4 text-emerald-500"></i>
+                        <span>ملف كود كامل (.html)</span>
+                    </button>
+                    <button onclick="exportToCSV()" class="w-full text-right px-3 py-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-2">
+                        <i data-lucide="table" class="w-4 h-4 text-amber-500"></i>
+                        <span>جدول إكسل (CSV)</span>
+                    </button>
+                </div>
+            </div>
+
+            <label class="admin-only p-2.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl border border-slate-300 dark:border-slate-700 text-xs transition cursor-pointer flex items-center justify-center active:scale-90" title="استيراد نسخة JSON">
                 <i data-lucide="upload" class="w-4 h-4"></i>
                 <input type="file" accept=".json" onchange="importData(event)" class="hidden">
             </label>
@@ -875,11 +967,16 @@
                     </div>
                 </div>
                 <div>
-                    <label class="block font-bold text-slate-600 dark:text-slate-400 mb-1 flex items-center gap-1.5">
-                        <i data-lucide="paperclip" class="w-3.5 h-3.5 text-blue-600 dark:text-blue-400"></i>
-                        <span>إرفاق وثيقة بطاقة التشغيل (PDF أو صورة)</span>
+                    <label class="block font-bold text-slate-600 dark:text-slate-400 mb-1 flex items-center justify-between">
+                        <span class="flex items-center gap-1.5">
+                            <i data-lucide="paperclip" class="w-3.5 h-3.5 text-blue-600 dark:text-blue-400"></i>
+                            <span>إرفاق وثيقة بطاقة التشغيل (قراءة ذكية تلقائية)</span>
+                        </span>
+                        <span id="ocr-loader-veh" class="hidden text-blue-500 font-bold flex items-center gap-1 animate-pulse">
+                            <i data-lucide="loader-2" class="w-3.5 h-3.5 animate-spin"></i> جاري استخراج البيانات...
+                        </span>
                     </label>
-                    <input type="file" id="veh-file" accept="image/*,.pdf" onchange="handleFileUpload(event, 'veh-doc-preview', 'veh-doc-base64')" class="w-full text-xs text-slate-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-slate-200 dark:file:bg-slate-800 file:text-slate-800 dark:file:text-white hover:file:bg-slate-300">
+                    <input type="file" id="veh-file" accept="image/*,.pdf" onchange="handleVehicleFileWithOCR(event)" class="w-full text-xs text-slate-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-slate-200 dark:file:bg-slate-800 file:text-slate-800 dark:file:text-white hover:file:bg-slate-300">
                     <input type="hidden" id="veh-doc-base64">
                     <div id="veh-doc-preview" class="mt-2 text-[11px] text-emerald-600 dark:text-emerald-400 font-bold"></div>
                 </div>
@@ -960,7 +1057,7 @@
         </div>
     </div>
 
-    <!-- Application Script with High-Capacity Persistent Storage (IndexedDB + LocalStorage) -->
+    <!-- Application Script -->
     <script>
         const ADMIN_PIN = '2899';
 
@@ -1126,6 +1223,22 @@
             sessionStorage.setItem('zawaya_is_admin', 'true');
         }
 
+        // إشعار عائم وتلقائي (Toast)
+        function showToast(text, icon = 'check-circle') {
+            const container = document.getElementById('toast-container');
+            if (!container) return;
+            const toast = document.createElement('div');
+            toast.className = 'toast-msg';
+            toast.innerHTML = `<i data-lucide="${icon}" class="w-4 h-4 text-emerald-500"></i> <span>${text}</span>`;
+            container.appendChild(toast);
+            lucide.createIcons();
+            setTimeout(() => {
+                if (toast && toast.parentNode) {
+                    toast.parentNode.removeChild(toast);
+                }
+            }, 2600);
+        }
+
         async function loadPersistentState() {
             await initDatabase();
             const storedLic = localStorage.getItem('zawaya_licenses_live_v5');
@@ -1165,6 +1278,7 @@
             updateKPIs();
             renderLicenses();
             renderVehicles();
+            updateNotifications();
         }
 
         async function persistState() {
@@ -1192,6 +1306,7 @@
             }
 
             updateKPIs();
+            updateNotifications();
         }
 
         function updateAdminUI() {
@@ -1230,6 +1345,7 @@
                     updateAdminUI();
                     renderLicenses();
                     renderVehicles();
+                    showToast('تم الرجوع لوضع العرض فقط', 'lock');
                 }
             } else {
                 document.getElementById('admin-password-input').value = '';
@@ -1247,7 +1363,7 @@
                 updateAdminUI();
                 renderLicenses();
                 renderVehicles();
-                alert('✓ تم تفعيل وضع المسؤول بنجاح! يمكنك الآن التعديل والإضافة والحفظ.');
+                showToast('تم تفعيل وضع المسؤول بنجاح!', 'unlock');
             } else {
                 alert('❌ الرقم السري غير صحيح!');
             }
@@ -1268,6 +1384,18 @@
             applyTheme(state.theme);
             await loadPersistentState();
             lucide.createIcons();
+
+            document.addEventListener('click', (e) => {
+                const notifBtn = document.getElementById('notif-btn');
+                const notifDrop = document.getElementById('notif-dropdown');
+                if (notifBtn && notifDrop && !notifBtn.contains(e.target) && !notifDrop.contains(e.target)) {
+                    notifDrop.classList.add('hidden');
+                }
+                const expDrop = document.getElementById('export-dropdown');
+                if (expDrop && !e.target.closest('#export-dropdown') && !e.target.closest('button[onclick="toggleExportMenu()"]')) {
+                    expDrop.classList.add('hidden');
+                }
+            });
         });
 
         function toggleTheme() {
@@ -1289,6 +1417,77 @@
             renderLicenses();
             renderVehicles();
             lucide.createIcons();
+        }
+
+        // تحديث جرس التنبيهات
+        function updateNotifications() {
+            const badge = document.getElementById('notif-badge');
+            const list = document.getElementById('notif-list');
+            const countText = document.getElementById('notif-count-text');
+            if (!badge || !list) return;
+
+            let alerts = [];
+
+            state.licenses.forEach(l => {
+                const days = getDaysDiff(l.expiry);
+                if (days <= 60) {
+                    alerts.push({
+                        title: l.activity,
+                        sub: l.company + ' (ترخيص: ' + l.number + ')',
+                        days: days,
+                        date: l.expiry,
+                        type: 'license'
+                    });
+                }
+            });
+
+            state.vehicles.forEach(v => {
+                const days = getDaysDiff(v.expiry);
+                if (days <= 60) {
+                    alerts.push({
+                        title: 'لوحة: ' + v.plateNum + ' (' + v.project + ')',
+                        sub: v.company + ' (بطاقة: ' + v.cardNum + ')',
+                        days: days,
+                        date: v.expiry,
+                        type: 'vehicle'
+                    });
+                }
+            });
+
+            alerts.sort((a, b) => a.days - b.days);
+
+            if (alerts.length > 0) {
+                badge.textContent = alerts.length;
+                badge.classList.remove('hidden');
+                countText.textContent = `${alerts.length} تنبيه`;
+                list.innerHTML = alerts.map(a => `
+                    <div class="p-2 rounded-xl ${a.days <= 0 ? 'bg-rose-500/10 border-rose-500/30 text-rose-500' : 'bg-amber-500/10 border-amber-500/30 text-amber-500'} border flex items-center justify-between">
+                        <div>
+                            <div class="font-bold text-slate-900 dark:text-white">${a.title}</div>
+                            <div class="text-[10px] text-slate-500 dark:text-slate-400">${a.sub}</div>
+                        </div>
+                        <div class="text-left font-mono font-bold whitespace-nowrap text-[11px]">
+                            ${a.days <= 0 ? '<span class="text-rose-500">منتهي!</span>' : `متبقي ${a.days} يوم`}
+                            <span class="block text-[9px] text-slate-400 font-normal">${a.date}</span>
+                        </div>
+                    </div>
+                `).join('');
+            } else {
+                badge.classList.add('hidden');
+                countText.textContent = '0 تنبيه';
+                list.innerHTML = `<div class="py-4 text-center text-slate-400 text-xs">✓ جميع التراخيص والبطاقات سارية ومحدثة!</div>`;
+            }
+            lucide.createIcons();
+        }
+
+        function toggleNotificationDropdown() {
+            const drop = document.getElementById('notif-dropdown');
+            drop.classList.toggle('hidden');
+        }
+
+        function toggleExportMenu() {
+            const drop = document.getElementById('export-dropdown');
+            drop.classList.toggle('hidden');
         }
 
         function updateKPIs() {
@@ -1356,6 +1555,7 @@
                 const isSelected = state.activeLicenseFilter === lic.id;
                 const cardTheme = themeClasses[lic.theme || 'blue'] || 'lic-theme-blue';
                 const iconTheme = iconBgClasses[lic.theme || 'blue'] || 'bg-blue-500/15 text-blue-400 border-blue-500/30';
+                const hasDoc = !!lic.doc;
 
                 const card = document.createElement('div');
                 card.className = `license-card-interactive ${cardTheme} p-4 rounded-2xl border cursor-pointer relative ${isSelected ? 'ring-2 ring-blue-500 shadow-xl shadow-blue-500/20' : ''}`;
@@ -1372,8 +1572,10 @@
                             </div>
                         </div>
                         <div class="flex items-center gap-1.5">
-                            <!-- زر استعراض الوثيقة متاح ومفعل للجميع في وضع العرض والمسؤول -->
-                            <button onclick="event.stopPropagation(); viewAttachment('${lic.activity}', '${lic.id}')" class="action-view-doc p-1.5 rounded-lg flex items-center justify-center" title="استعراض وثيقة الترخيص"><i data-lucide="eye" class="w-3.5 h-3.5"></i></button>
+                            <!-- زر استعراض الوثيقة يظهر فقط عند وجود مرفق -->
+                            ${hasDoc ? `
+                                <button onclick="event.stopPropagation(); viewAttachment('${lic.activity}', '${lic.id}')" class="action-view-doc p-1.5 rounded-lg flex items-center justify-center" title="استعراض وثيقة الترخيص"><i data-lucide="eye" class="w-3.5 h-3.5"></i></button>
+                            ` : ''}
                             ${state.isAdmin ? `
                                 <button onclick="event.stopPropagation(); triggerAttachmentUpload('${lic.id}', 'license')" class="glow-action-attach p-1.5 rounded-lg" title="إرفاق مستند جديد"><i data-lucide="paperclip" class="w-3.5 h-3.5"></i></button>
                                 <button onclick="event.stopPropagation(); editLicense('${lic.id}')" class="glow-action-edit p-1.5 rounded-lg" title="تعديل الترخيص"><i data-lucide="pencil" class="w-3.5 h-3.5"></i></button>
@@ -1560,6 +1762,8 @@
                     stripSymbol = '●';
                 }
 
+                const hasDoc = !!veh.doc;
+
                 cardEl.innerHTML = `
                     <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-center">
                         <div class="lg:col-span-5 flex items-center gap-3.5">
@@ -1611,8 +1815,10 @@
                         </div>
 
                         <div class="lg:col-span-3 flex items-center justify-end gap-2 border-t lg:border-t-0 pt-2 lg:pt-0 border-slate-200 dark:border-slate-800">
-                            <!-- زر استعراض الوثيقة متاح ومفعل للجميع في وضع العرض والمسؤول -->
-                            <button onclick="viewAttachment('بطاقة مركبة ${veh.plateNum}', '${veh.id}')" class="action-view-doc p-1.5 rounded-lg flex items-center justify-center" title="استعراض بطاقة التشغيل"><i data-lucide="eye" class="w-3.5 h-3.5"></i></button>
+                            <!-- زر استعراض الوثيقة يظهر فقط عند وجود مرفق -->
+                            ${hasDoc ? `
+                                <button onclick="viewAttachment('بطاقة مركبة ${veh.plateNum}', '${veh.id}')" class="action-view-doc p-1.5 rounded-lg flex items-center justify-center" title="استعراض بطاقة التشغيل"><i data-lucide="eye" class="w-3.5 h-3.5"></i></button>
+                            ` : ''}
                             ${state.isAdmin ? `
                                 <button onclick="triggerAttachmentUpload('${veh.id}', 'vehicle')" class="glow-action-attach p-1.5 rounded-lg" title="إرفاق وثيقة"><i data-lucide="paperclip" class="w-3.5 h-3.5"></i></button>
                                 <button onclick="editVehicle('${veh.id}')" class="glow-action-edit p-1.5 rounded-lg" title="تعديل"><i data-lucide="pencil" class="w-3.5 h-3.5"></i></button>
@@ -1740,6 +1946,70 @@
             reader.onload = function(e) {
                 document.getElementById(hiddenInputId).value = e.target.result;
                 document.getElementById(previewId).textContent = `✓ تم تجهيز المستند: ${file.name} (${(file.size/1024).toFixed(1)} KB)`;
+                showToast(`تم تجهيز الوثيقة (${file.name})`);
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // قراءة ذكية (OCR) لبطاقة التشغيل المستخرجة
+        async function extractCardDataFromImage(base64Image) {
+            if (!window.Tesseract) return null;
+            try {
+                const res = await Tesseract.recognize(base64Image, 'ara+eng', {
+                    logger: m => {}
+                });
+                const text = res.data.text || '';
+                
+                // البحث عن رقم البطاقة (مثال: 38-00059641 أو 81-00010540 أو أرقام متتالية)
+                let cardNum = null;
+                const cardMatch = text.match(/\b\d{2}[-\s]?\d{7,8}\b/) || text.match(/\b\d{8,10}\b/);
+                if (cardMatch) {
+                    cardNum = cardMatch[0].replace(/\s+/g, '-');
+                }
+
+                // البحث عن تاريخ الانتهاء (YYYY-MM-DD أو YYYY/MM/DD)
+                let expiryDate = null;
+                const dateMatch = text.match(/202[4-9][\/-](0[1-9]|1[0-2])[\/-](0[1-9]|[12][0-9]|3[01])/);
+                if (dateMatch) {
+                    expiryDate = dateMatch[0].replace(/\//g, '-');
+                }
+
+                return { cardNum, expiryDate };
+            } catch (err) {
+                console.error("OCR parse error:", err);
+                return null;
+            }
+        }
+
+        async function handleVehicleFileWithOCR(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const loader = document.getElementById('ocr-loader-veh');
+            const preview = document.getElementById('veh-doc-preview');
+            const hiddenInput = document.getElementById('veh-doc-base64');
+
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                hiddenInput.value = e.target.result;
+                preview.textContent = `✓ تم تجهيز المستند: ${file.name}`;
+                showToast(`تم إرفاق الوثيقة (${file.name}) بنجاح`);
+
+                if (file.type.startsWith('image/')) {
+                    if (loader) loader.classList.remove('hidden');
+                    const parsed = await extractCardDataFromImage(e.target.result);
+                    if (loader) loader.classList.add('hidden');
+
+                    if (parsed) {
+                        if (parsed.cardNum && !document.getElementById('veh-card-num').value) {
+                            document.getElementById('veh-card-num').value = parsed.cardNum;
+                        }
+                        if (parsed.expiryDate && !document.getElementById('veh-expiry').value) {
+                            document.getElementById('veh-expiry').value = parsed.expiryDate;
+                        }
+                        showToast('تمت قراءة رقم البطاقة وتاريخ الانتهاء تلقائياً!', 'sparkles');
+                    }
+                }
             };
             reader.readAsDataURL(file);
         }
@@ -1760,12 +2030,23 @@
                         if (target) target.doc = base64Data;
                     } else {
                         const target = state.vehicles.find(v => v.id === id);
-                        if (target) target.doc = base64Data;
+                        if (target) {
+                            target.doc = base64Data;
+                            if (file.type.startsWith('image/')) {
+                                showToast('جاري استخراج بيانات البطاقة تلقائياً...');
+                                const parsed = await extractCardDataFromImage(base64Data);
+                                if (parsed) {
+                                    if (parsed.cardNum) target.cardNum = parsed.cardNum;
+                                    if (parsed.expiryDate) target.expiry = parsed.expiryDate;
+                                    showToast('تم تحديث رقم وتاريخ البطاقة تلقائياً!', 'sparkles');
+                                }
+                            }
+                        }
                     }
                     await persistState();
                     renderLicenses();
                     renderVehicles();
-                    alert(`✓ تم إرفاق وحفظ الوثيقة (${file.name}) بنجاح دائم!`);
+                    showToast(`✓ تم إرفاق الوثيقة (${file.name}) بنجاح!`);
                 };
                 reader.readAsDataURL(file);
             };
@@ -1786,7 +2067,7 @@
             }
 
             if (!docData) {
-                alert('لا يوجد مستند مرفق مسجل لهذا العنصر حالياً.');
+                showToast('لا يوجد مستند مرفق مسجل لهذا العنصر حالياً.', 'alert-triangle');
                 return;
             }
 
@@ -1841,6 +2122,7 @@
                 await persistState();
                 renderLicenses();
                 renderVehicles();
+                showToast('تم حذف الترخيص بنجاح', 'trash-2');
             }
         }
 
@@ -1873,6 +2155,7 @@
             closeModal('modal-license');
             renderLicenses();
             renderVehicles();
+            showToast('تم حفظ الترخيص بنجاح');
         }
 
         function updateLicenseDropdownForVehicle() {
@@ -1935,6 +2218,7 @@
                 state.vehicles = state.vehicles.filter(v => v.id !== id);
                 await persistState();
                 renderVehicles();
+                showToast('تم حذف المركبة بنجاح', 'trash-2');
             }
         }
 
@@ -1970,6 +2254,7 @@
             await persistState();
             closeModal('modal-vehicle');
             renderVehicles();
+            showToast('تم حفظ بيانات المركبة بنجاح');
         }
 
         function openDriverModal(vehId) {
@@ -1998,6 +2283,7 @@
             await persistState();
             closeModal('modal-driver');
             renderVehicles();
+            showToast('تم ربط المستخدم بالمركبة بنجاح');
         }
 
         async function removeDriver(vehId, driverIndex) {
@@ -2007,6 +2293,7 @@
                 veh.drivers.splice(driverIndex, 1);
                 await persistState();
                 renderVehicles();
+                showToast('تم حذف المستخدم', 'user-minus');
             }
         }
 
@@ -2103,6 +2390,7 @@
             lucide.createIcons();
         }
 
+        // 1. تصدير JSON
         async function exportData() {
             const fullLicenses = [...state.licenses];
             for (let lic of fullLicenses) {
@@ -2124,10 +2412,74 @@
                 exportDate: new Date().toISOString()
             };
             const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+            downloadBlob(blob, `zawaya_fleet_backup_${new Date().toISOString().split('T')[0]}.json`);
+            showToast('تم تصدير نسخة JSON بنجاح');
+        }
+
+        // 2. تصدير ملف كود برمجي مستقل (.html) مدمج به كامل البيانات
+        async function exportAsSelfContainedHTML() {
+            const fullLicenses = [...state.licenses];
+            for (let lic of fullLicenses) {
+                if (!lic.doc || lic.doc === 'stored_in_idb') {
+                    lic.doc = await getDocFromDB(lic.id);
+                }
+            }
+            const fullVehicles = [...state.vehicles];
+            for (let veh of fullVehicles) {
+                if (!veh.doc || veh.doc === 'stored_in_idb') {
+                    veh.doc = await getDocFromDB(veh.id);
+                }
+            }
+
+            let currentHTML = document.documentElement.outerHTML;
+            
+            // تضمين البيانات المحدثة كقيم افتراضية داخل الكود البرمجي المصدّر
+            currentHTML = currentHTML.replace(
+                /const defaultLicenses = \[[\s\S]*?\];/,
+                `const defaultLicenses = ${JSON.stringify(fullLicenses, null, 4)};`
+            );
+            currentHTML = currentHTML.replace(
+                /const defaultVehicles = \[[\s\S]*?\];/,
+                `const defaultVehicles = ${JSON.stringify(fullVehicles, null, 4)};`
+            );
+
+            const blob = new Blob([`<!DOCTYPE html>\n${currentHTML}`], { type: 'text/html;charset=utf-8' });
+            downloadBlob(blob, `منظومة_إدارة_تراخيص_الأسطول_${new Date().toISOString().split('T')[0]}.html`);
+            showToast('تم تصدير ملف الكود البرمجي (.HTML) بنجاح');
+        }
+
+        // 3. تصدير Excel CSV
+        function exportToCSV() {
+            let csvContent = "\uFEFF"; // دعم اللغة العربية UTF-8 BOM
+            csvContent += "المنشأة,المشروع,رقم اللوحة,الحروف,رقم بطاقة التشغيل,تاريخ الانتهاء,النوع,النظام,عدد السائقين,بيانات السائقين واليوزرات\n";
+
+            state.vehicles.forEach(v => {
+                const driversStr = (v.drivers || []).map(d => `${d.name} (${d.user})`).join(' | ');
+                const row = [
+                    `"${v.company}"`,
+                    `"${v.project}"`,
+                    `"${v.plateNum}"`,
+                    `"${v.plateLetters}"`,
+                    `"${v.cardNum}"`,
+                    `"${v.expiry}"`,
+                    `"${v.type}"`,
+                    `"${v.mode}"`,
+                    `"${(v.drivers||[]).length}"`,
+                    `"${driversStr}"`
+                ];
+                csvContent += row.join(",") + "\n";
+            });
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            downloadBlob(blob, `تقرير_بطاقات_التشغيل_${new Date().toISOString().split('T')[0]}.csv`);
+            showToast('تم تصدير ملف Excel CSV بنجاح');
+        }
+
+        function downloadBlob(blob, filename) {
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `zawaya_fleet_backup_${new Date().toISOString().split('T')[0]}.json`;
+            a.download = filename;
             a.click();
             URL.revokeObjectURL(url);
         }
@@ -2147,7 +2499,7 @@
                         await persistState();
                         renderLicenses();
                         renderVehicles();
-                        alert('✓ تم استيراد وحفظ قاعدة البيانات والمرفقات بنجاح!');
+                        showToast('✓ تم استيراد قاعدة البيانات بنجاح!');
                     } else {
                         alert('ملف النسخة الاحتياطية غير صالح.');
                     }
