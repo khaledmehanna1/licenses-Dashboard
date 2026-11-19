@@ -887,13 +887,23 @@
                     <input type="text" id="lic-issuer" value="الهيئة العامة للنقل (TGA)" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 dark:text-white">
                 </div>
                 <div>
-                    <label class="block font-bold text-slate-600 dark:text-slate-400 mb-1 flex items-center gap-1.5">
-                        <i data-lucide="paperclip" class="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400"></i>
-                        <span>إرفاق وثيقة الترخيص (PDF أو صورة)</span>
+                    <label class="block font-bold text-slate-600 dark:text-slate-400 mb-1 flex items-center justify-between">
+                        <span class="flex items-center gap-1.5">
+                            <i data-lucide="paperclip" class="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400"></i>
+                            <span>إرفاق وثيقة الترخيص (PDF أو صورة)</span>
+                        </span>
+                        <span id="ocr-loader-lic" class="hidden text-emerald-500 font-bold flex items-center gap-1 animate-pulse">
+                            <i data-lucide="loader-2" class="w-3.5 h-3.5 animate-spin"></i> جاري سحب البيانات تلقائياً...
+                        </span>
                     </label>
-                    <input type="file" id="lic-file" accept="image/*,.pdf" onchange="handleFileUpload(event, 'lic-doc-preview', 'lic-doc-base64')" class="w-full text-xs text-slate-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-slate-200 dark:file:bg-slate-800 file:text-slate-800 dark:file:text-white hover:file:bg-slate-300">
+                    <input type="file" id="lic-file" accept="image/*,.pdf" onchange="handleLicenseFileWithOCR(event)" class="w-full text-xs text-slate-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-slate-200 dark:file:bg-slate-800 file:text-slate-800 dark:file:text-white hover:file:bg-slate-300">
                     <input type="hidden" id="lic-doc-base64">
-                    <div id="lic-doc-preview" class="mt-2 text-[11px] text-emerald-600 dark:text-emerald-400 font-bold"></div>
+                    <div class="flex items-center justify-between mt-2">
+                        <div id="lic-doc-preview" class="text-[11px] text-emerald-600 dark:text-emerald-400 font-bold"></div>
+                        <button type="button" id="btn-delete-lic-doc" onclick="removeLicenseAttachmentOnly()" class="hidden text-[11px] px-2.5 py-1 bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 rounded-lg border border-rose-500/20 font-bold flex items-center gap-1 transition">
+                            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> حذف المرفق الحالي
+                        </button>
+                    </div>
                 </div>
                 <div class="pt-3 border-t border-slate-200 dark:border-slate-800 flex justify-end gap-2">
                     <button type="button" onclick="closeModal('modal-license')" class="px-4 py-2 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-300 rounded-xl text-xs font-bold">إلغاء</button>
@@ -976,16 +986,21 @@
                 <div>
                     <label class="block font-bold text-slate-600 dark:text-slate-400 mb-1 flex items-center justify-between">
                         <span class="flex items-center gap-1.5">
-                            <i data-lucide="paperclip" class="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400"></i>
-                            <span>إرفاق وثيقة الترخيص (قراءة تلقائية لرقم وتاريخ الترخيص)</span>
+                            <i data-lucide="paperclip" class="w-3.5 h-3.5 text-blue-600 dark:text-blue-400"></i>
+                            <span>إرفاق وثيقة بطاقة التشغيل (PDF أو صورة)</span>
                         </span>
-                        <span id="ocr-loader-lic" class="hidden text-emerald-500 font-bold flex items-center gap-1 animate-pulse">
-                            <i data-lucide="loader-2" class="w-3.5 h-3.5 animate-spin"></i> جاري استخراج البيانات...
+                        <span id="ocr-loader-veh" class="hidden text-blue-500 font-bold flex items-center gap-1 animate-pulse">
+                            <i data-lucide="loader-2" class="w-3.5 h-3.5 animate-spin"></i> جاري سحب البيانات تلقائياً...
                         </span>
                     </label>
-                    <input type="file" id="lic-file" accept="image/*,.pdf" onchange="handleLicenseFileWithOCR(event)" class="w-full text-xs text-slate-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-slate-200 dark:file:bg-slate-800 file:text-slate-800 dark:file:text-white hover:file:bg-slate-300">
-                    <input type="hidden" id="lic-doc-base64">
-                    <div id="lic-doc-preview" class="mt-2 text-[11px] text-emerald-600 dark:text-emerald-400 font-bold"></div>
+                    <input type="file" id="veh-file" accept="image/*,.pdf" onchange="handleVehicleFileWithOCR(event)" class="w-full text-xs text-slate-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-slate-200 dark:file:bg-slate-800 file:text-slate-800 dark:file:text-white hover:file:bg-slate-300">
+                    <input type="hidden" id="veh-doc-base64">
+                    <div class="flex items-center justify-between mt-2">
+                        <div id="veh-doc-preview" class="text-[11px] text-emerald-600 dark:text-emerald-400 font-bold"></div>
+                        <button type="button" id="btn-delete-veh-doc" onclick="removeVehicleAttachmentOnly()" class="hidden text-[11px] px-2.5 py-1 bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 rounded-lg border border-rose-500/20 font-bold flex items-center gap-1 transition">
+                            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> حذف المرفق الحالي
+                        </button>
+                    </div>
                 </div>
                 <div class="pt-3 border-t border-slate-200 dark:border-slate-800 flex justify-end gap-2">
                     <button type="button" onclick="closeModal('modal-vehicle')" class="px-4 py-2 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-300 rounded-xl text-xs font-bold">إلغاء</button>
@@ -2074,17 +2089,18 @@
                     const parsed = parseLicenseText(extractedText);
                     let filledCount = 0;
 
-                    if (parsed.licNumber && !document.getElementById('lic-number').value) {
+                    // استبدال وتصحيح رقم الترخيص وتاريخ الانتهاء تلقائياً لضمان الدقة 100%
+                    if (parsed.licNumber) {
                         document.getElementById('lic-number').value = parsed.licNumber;
                         filledCount++;
                     }
-                    if (parsed.expiryDate && !document.getElementById('lic-expiry').value) {
+                    if (parsed.expiryDate) {
                         document.getElementById('lic-expiry').value = parsed.expiryDate;
                         filledCount++;
                     }
 
                     if (filledCount > 0) {
-                        showToast('تمت قراءة رقم الترخيص وتاريخ الانتهاء تلقائياً من المستند!', 'sparkles');
+                        showToast('تم التحقق وتصحيح رقم الترخيص وتاريخ الانتهاء تلقائياً من المستند!', 'sparkles');
                     }
                 }
             };
@@ -2121,25 +2137,26 @@
                     const parsed = parseOperationCardText(extractedText);
                     let filledCount = 0;
 
-                    if (parsed.cardNum && !document.getElementById('veh-card-num').value) {
+                    // استبدال وتصحيح البيانات تلقائياً وإلغاء أي مدخلات سابقة غير صحيحة
+                    if (parsed.cardNum) {
                         document.getElementById('veh-card-num').value = parsed.cardNum;
                         filledCount++;
                     }
-                    if (parsed.expiryDate && !document.getElementById('veh-expiry').value) {
+                    if (parsed.expiryDate) {
                         document.getElementById('veh-expiry').value = parsed.expiryDate;
                         filledCount++;
                     }
-                    if (parsed.plateNum && !document.getElementById('veh-plate-num').value) {
+                    if (parsed.plateNum) {
                         document.getElementById('veh-plate-num').value = parsed.plateNum;
                         filledCount++;
                     }
-                    if (parsed.plateLetters && !document.getElementById('veh-plate-letters').value) {
+                    if (parsed.plateLetters) {
                         document.getElementById('veh-plate-letters').value = parsed.plateLetters;
                         filledCount++;
                     }
 
                     if (filledCount > 0) {
-                        showToast('تمت قراءة رقم البطاقة وتاريخ الانتهاء وتفاصيل اللوحة تلقائياً!', 'sparkles');
+                        showToast('تم التحقق وتصحيح رقم البطاقة وتاريخ الانتهاء وتفاصيل اللوحة تلقائياً!', 'sparkles');
                     }
                 }
             };
@@ -2240,6 +2257,8 @@
             document.getElementById('lic-file').value = '';
             document.getElementById('lic-doc-base64').value = '';
             document.getElementById('lic-doc-preview').textContent = '';
+            const deleteDocBtn = document.getElementById('btn-delete-lic-doc');
+            if (deleteDocBtn) deleteDocBtn.classList.add('hidden');
 
             if (id) {
                 const lic = state.licenses.find(l => l.id === id);
@@ -2250,7 +2269,10 @@
                 document.getElementById('lic-expiry').value = lic.expiry;
                 document.getElementById('lic-issuer').value = lic.issuer;
                 document.getElementById('lic-doc-base64').value = lic.doc || '';
-                if (lic.doc) document.getElementById('lic-doc-preview').textContent = '✓ يوجد مستند مرفق مسجل بالفعل';
+                if (lic.doc) {
+                    document.getElementById('lic-doc-preview').textContent = '✓ يوجد مستند مرفق مسجل بالفعل';
+                    if (deleteDocBtn) deleteDocBtn.classList.remove('hidden');
+                }
             } else {
                 document.getElementById('modal-license-title').textContent = 'إضافة ترخيص وزاري جديد';
                 document.getElementById('lic-activity').value = '';
@@ -2258,21 +2280,100 @@
                 document.getElementById('lic-expiry').value = '';
             }
             openModal('modal-license');
+            lucide.createIcons();
         }
 
-        function editLicense(id) {
-            openLicenseModal(id);
+        async function removeLicenseAttachmentOnly() {
+            const id = document.getElementById('lic-id').value;
+            if (!id) {
+                document.getElementById('lic-doc-base64').value = '';
+                document.getElementById('lic-doc-preview').textContent = '';
+                document.getElementById('btn-delete-lic-doc').classList.add('hidden');
+                return;
+            }
+            if (confirm('هل أنت متأكد من حذف المستند المرفق لهذا الترخيص؟')) {
+                const lic = state.licenses.find(l => l.id === id);
+                if (lic) {
+                    lic.doc = null;
+                    if (dbInstance) {
+                        const tx = dbInstance.transaction(DB_STORE, 'readwrite');
+                        tx.objectStore(DB_STORE).delete(id);
+                    }
+                    await persistState();
+                    renderLicenses();
+                    renderVehicles();
+                }
+                document.getElementById('lic-doc-base64').value = '';
+                document.getElementById('lic-doc-preview').textContent = 'تم إزالة المرفق';
+                document.getElementById('btn-delete-lic-doc').classList.add('hidden');
+                showToast('تم حذف المستند المرفق بنجاح', 'trash-2');
+            }
         }
 
-        async function deleteLicense(id) {
+        function openVehicleModal(id = null) {
             if (!state.isAdmin) return;
-            if (confirm('هل أنت متأكد من حذف هذا الترخيص؟ سيتم فك ارتباط المركبات التابعة له.')) {
-                state.licenses = state.licenses.filter(l => l.id !== id);
-                if (state.activeLicenseFilter === id) state.activeLicenseFilter = null;
-                await persistState();
-                renderLicenses();
-                renderVehicles();
-                showToast('تم حذف الترخيص بنجاح', 'trash-2');
+            document.getElementById('veh-id').value = id || '';
+            document.getElementById('veh-file').value = '';
+            document.getElementById('veh-doc-base64').value = '';
+            document.getElementById('veh-doc-preview').textContent = '';
+            const deleteDocBtn = document.getElementById('btn-delete-veh-doc');
+            if (deleteDocBtn) deleteDocBtn.classList.add('hidden');
+
+            updateLicenseDropdownForVehicle();
+
+            if (id) {
+                const veh = state.vehicles.find(v => v.id === id);
+                document.getElementById('modal-vehicle-title').textContent = 'تعديل بيانات المركبة';
+                document.getElementById('veh-company').value = veh.company;
+                updateLicenseDropdownForVehicle();
+                document.getElementById('veh-license-id').value = veh.licenseId;
+                document.getElementById('veh-project').value = veh.project;
+                document.getElementById('veh-plate-num').value = veh.plateNum;
+                document.getElementById('veh-plate-letters').value = veh.plateLetters;
+                document.getElementById('veh-card-num').value = veh.cardNum;
+                document.getElementById('veh-expiry').value = veh.expiry;
+                document.getElementById('veh-type').value = veh.type || 'light';
+                document.getElementById('veh-mode').value = veh.mode || 'users';
+                document.getElementById('veh-doc-base64').value = veh.doc || '';
+                if (veh.doc) {
+                    document.getElementById('veh-doc-preview').textContent = '✓ يوجد مستند مرفق مسجل بالفعل';
+                    if (deleteDocBtn) deleteDocBtn.classList.remove('hidden');
+                }
+            } else {
+                document.getElementById('modal-vehicle-title').textContent = 'إضافة مركبة / بطاقة تشغيل جديدة';
+                document.getElementById('veh-plate-num').value = '';
+                document.getElementById('veh-plate-letters').value = '';
+                document.getElementById('veh-card-num').value = '';
+                document.getElementById('veh-expiry').value = '';
+            }
+            openModal('modal-vehicle');
+            lucide.createIcons();
+        }
+
+        async function removeVehicleAttachmentOnly() {
+            const id = document.getElementById('veh-id').value;
+            if (!id) {
+                document.getElementById('veh-doc-base64').value = '';
+                document.getElementById('veh-doc-preview').textContent = '';
+                document.getElementById('btn-delete-veh-doc').classList.add('hidden');
+                return;
+            }
+            if (confirm('هل أنت متأكد من حذف بطاقة التشغيل المرفقة لهذه المركبة؟')) {
+                const veh = state.vehicles.find(v => v.id === id);
+                if (veh) {
+                    veh.doc = null;
+                    if (dbInstance) {
+                        const tx = dbInstance.transaction(DB_STORE, 'readwrite');
+                        tx.objectStore(DB_STORE).delete(id);
+                    }
+                    await persistState();
+                    renderLicenses();
+                    renderVehicles();
+                }
+                document.getElementById('veh-doc-base64').value = '';
+                document.getElementById('veh-doc-preview').textContent = 'تم إزالة المرفق';
+                document.getElementById('btn-delete-veh-doc').classList.add('hidden');
+                showToast('تم حذف بطاقة التشغيل المرفقة بنجاح', 'trash-2');
             }
         }
 
