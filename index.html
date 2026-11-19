@@ -635,10 +635,10 @@
             </div>
             <div>
                 <h1 class="font-extrabold text-base lg:text-lg leading-snug flex items-center gap-2">
-                    <span>منظومة إدارة تراخيص الأسطول وبطاقات التشغيل</span>
+                    <span id="app-title-text">منظومة إدارة تراخيص الأسطول وبطاقات التشغيل</span>
                     <span id="role-badge" class="text-[11px] px-2.5 py-0.5 rounded-full bg-slate-500/10 text-slate-400 border border-slate-500/20 font-bold">وضع العرض فقط</span>
                 </h1>
-                <p class="text-xs text-slate-500 dark:text-slate-400">المتابعة اللوجستية والنظامية للتراخيص وبطاقات التشغيل وسعة المستخدمين</p>
+                <p id="app-subtitle-text" class="text-xs text-slate-500 dark:text-slate-400">المتابعة اللوجستية والنظامية للتراخيص وبطاقات التشغيل وسعة المستخدمين</p>
             </div>
         </div>
 
@@ -653,7 +653,7 @@
                 <!-- نافذة التنبيهات المنسدلة -->
                 <div id="notif-dropdown" class="hidden absolute left-0 mt-2 w-80 sm:w-96 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl z-50 p-3.5 space-y-2.5">
                     <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-2">
-                        <span class="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                        <span id="notif-header-title" class="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
                             <i data-lucide="alert-triangle" class="w-3.5 h-3.5 text-amber-500"></i> تنبيهات الصلاحيات المنتهية والقريبة (أقل من 60 يوم)
                         </span>
                         <span id="notif-count-text" class="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-500 border border-amber-500/20 font-bold">0 تنبيه</span>
@@ -663,6 +663,12 @@
                     </div>
                 </div>
             </div>
+
+            <!-- زر تغيير اللغة (كرة أرضية) -->
+            <button onclick="toggleLanguage()" id="lang-toggle-btn" class="p-2.5 bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200 dark:hover:bg-slate-700 text-blue-600 dark:text-blue-400 rounded-xl border border-slate-300 dark:border-slate-700 text-xs transition flex items-center gap-1.5 justify-center active:scale-90" title="تغيير اللغة / Switch Language">
+                <i data-lucide="globe" class="w-4 h-4"></i>
+                <span id="lang-btn-text" class="font-bold text-[11px] font-mono">EN</span>
+            </button>
 
             <!-- Admin Lock / Unlock Button -->
             <button onclick="toggleAdminPrompt()" id="admin-lock-btn" class="p-2.5 bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 rounded-xl border border-slate-300 dark:border-slate-700 text-xs transition flex items-center justify-center active:scale-90" title="تسجيل دخول كمسؤول (للتعديل والحفظ)">
@@ -677,11 +683,11 @@
             <!-- Admin Only Action Buttons -->
             <button onclick="openLicenseModal()" class="admin-only flex items-center gap-1.5 px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition shadow-lg shadow-emerald-600/20 active:scale-95">
                 <i data-lucide="plus-circle" class="w-4 h-4"></i>
-                <span>إضافة ترخيص</span>
+                <span id="txt-btn-add-lic">إضافة ترخيص</span>
             </button>
             <button onclick="openVehicleModal()" class="admin-only flex items-center gap-1.5 px-3.5 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold transition shadow-lg shadow-blue-600/20 active:scale-95">
                 <i data-lucide="truck" class="w-4 h-4"></i>
-                <span>إضافة مركبة</span>
+                <span id="txt-btn-add-veh">إضافة مركبة</span>
             </button>
 
             <!-- زر التصدير مع خيارات متعددة (JSON, كود HTML كامل, Excel CSV) -->
@@ -720,52 +726,54 @@
             <div onclick="showKpiModal('licenses')" class="kpi-card cursor-pointer bg-gradient-to-br from-slate-900 via-slate-900 to-blue-950/40 border border-slate-800 dark:border-slate-800 p-4 rounded-2xl shadow relative overflow-hidden group">
                 <div class="absolute -right-6 -bottom-6 w-20 h-20 bg-blue-500/10 rounded-full blur-xl group-hover:bg-blue-500/20 transition-all"></div>
                 <div class="flex items-center justify-between text-blue-600 dark:text-blue-400 mb-2">
-                    <span class="text-xs font-bold text-slate-600 dark:text-slate-400">التراخيص الوزارية</span>
+                    <span id="kpi-title-licenses" class="text-xs font-bold text-slate-600 dark:text-slate-400">التراخيص الوزارية</span>
                     <span class="p-1.5 rounded-lg bg-blue-500/10 border border-blue-500/20 text-blue-600 dark:text-blue-400"><i data-lucide="award" class="w-4 h-4"></i></span>
                 </div>
                 <div class="text-3xl font-black text-slate-900 dark:text-white font-mono tracking-tight" id="kpi-licenses">0</div>
                 <div class="text-[11px] text-emerald-600 dark:text-emerald-400 mt-2 flex items-center justify-between font-semibold">
-                    <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span> تراخيص سارية ومفعلة</span>
-                    <span class="text-slate-400 group-hover:text-blue-500 transition">&larr; التفاصيل</span>
+                    <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span> <span id="kpi-sub-licenses">تراخيص سارية ومفعلة</span></span>
+                    <span id="kpi-details-licenses" class="text-slate-400 group-hover:text-blue-500 transition">&larr; التفاصيل</span>
                 </div>
             </div>
 
-            <div onclick="showKpiModal('vehicles')" class="kpi-card cursor-pointer bg-gradient-to-br from-slate-900 via-slate-900 to-indigo-950/40 border border-slate-800 dark:border-slate-800 p-4 rounded-2xl shadow relative overflow-hidden group">
-                <div class="absolute -right-6 -bottom-6 w-20 h-20 bg-indigo-500/10 rounded-full blur-xl group-hover:bg-indigo-500/20 transition-all"></div>
-                <div class="flex items-center justify-between text-indigo-600 dark:text-indigo-400 mb-2">
-                    <span class="text-xs font-bold text-slate-600 dark:text-slate-400">إجمالي الأسطول</span>
-                    <span class="p-1.5 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-indigo-600 dark:text-indigo-400"><i data-lucide="truck" class="w-4 h-4"></i></span>
+            <!-- المربع الثاني: التراخيص وبطاقات التشغيل المنتهية -->
+            <div onclick="showKpiModal('expired')" class="kpi-card cursor-pointer bg-gradient-to-br from-slate-900 via-slate-900 to-rose-950/40 border border-slate-800 dark:border-slate-800 p-4 rounded-2xl shadow relative overflow-hidden group">
+                <div class="absolute -right-6 -bottom-6 w-20 h-20 bg-rose-500/10 rounded-full blur-xl group-hover:bg-rose-500/20 transition-all"></div>
+                <div class="flex items-center justify-between text-rose-600 dark:text-rose-400 mb-2">
+                    <span id="kpi-title-expired" class="text-xs font-bold text-slate-600 dark:text-slate-400">منتهية الصلاحية</span>
+                    <span class="p-1.5 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400"><i data-lucide="alert-octagon" class="w-4 h-4"></i></span>
                 </div>
-                <div class="text-3xl font-black text-slate-900 dark:text-white font-mono tracking-tight" id="kpi-vehicles">0</div>
-                <div class="text-[11px] text-indigo-600 dark:text-indigo-300 mt-2 flex items-center justify-between font-semibold">
-                    <span>مركبات ودبابات ومعدات</span>
-                    <span class="text-slate-400 group-hover:text-indigo-500 transition">&larr; التفاصيل</span>
-                </div>
-            </div>
-
-            <div onclick="showKpiModal('completed')" class="kpi-card cursor-pointer bg-gradient-to-br from-slate-900 via-slate-900 to-emerald-950/40 border border-slate-800 dark:border-slate-800 p-4 rounded-2xl shadow relative overflow-hidden group">
-                <div class="absolute -right-6 -bottom-6 w-20 h-20 bg-emerald-500/10 rounded-full blur-xl group-hover:bg-emerald-500/20 transition-all"></div>
-                <div class="flex items-center justify-between text-emerald-600 dark:text-emerald-400 mb-2">
-                    <span class="text-xs font-bold text-slate-600 dark:text-slate-400">سعة مكتملة (3/3)</span>
-                    <span class="p-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400"><i data-lucide="check-circle" class="w-4 h-4"></i></span>
-                </div>
-                <div class="text-3xl font-black text-emerald-600 dark:text-emerald-400 font-mono tracking-tight" id="kpi-completed">0</div>
-                <div class="text-[11px] text-emerald-600 dark:text-emerald-300 mt-2 flex items-center justify-between font-semibold">
-                    <span>تشغيل كامل بالطاقة القصوى</span>
-                    <span class="text-slate-400 group-hover:text-emerald-500 transition">&larr; التفاصيل</span>
+                <div class="text-3xl font-black text-rose-600 dark:text-rose-400 font-mono tracking-tight" id="kpi-expired">0</div>
+                <div class="text-[11px] text-rose-600 dark:text-rose-400 mt-2 flex items-center justify-between font-semibold">
+                    <span id="kpi-sub-expired">تراخيص أو بطاقات تشغيل انتهت</span>
+                    <span id="kpi-details-expired" class="text-slate-400 group-hover:text-rose-500 transition">&larr; التفاصيل</span>
                 </div>
             </div>
 
-            <div onclick="showKpiModal('vacant')" class="kpi-card cursor-pointer bg-gradient-to-br from-slate-900 via-slate-900 to-amber-950/40 border border-slate-800 dark:border-slate-800 p-4 rounded-2xl shadow relative overflow-hidden group">
+            <!-- المربع الثالث: قريبة من الانتهاء (أقل من 60 يوماً) -->
+            <div onclick="showKpiModal('near-expiry')" class="kpi-card cursor-pointer bg-gradient-to-br from-slate-900 via-slate-900 to-amber-950/40 border border-slate-800 dark:border-slate-800 p-4 rounded-2xl shadow relative overflow-hidden group">
                 <div class="absolute -right-6 -bottom-6 w-20 h-20 bg-amber-500/10 rounded-full blur-xl group-hover:bg-amber-500/20 transition-all"></div>
                 <div class="flex items-center justify-between text-amber-600 dark:text-amber-400 mb-2">
-                    <span class="text-xs font-bold text-slate-600 dark:text-slate-400">شواغر متاحة</span>
-                    <span class="p-1.5 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400"><i data-lucide="user-plus" class="w-4 h-4"></i></span>
+                    <span id="kpi-title-near" class="text-xs font-bold text-slate-600 dark:text-slate-400">قريبة من الانتهاء</span>
+                    <span class="p-1.5 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400"><i data-lucide="clock-alert" class="w-4 h-4"></i></span>
                 </div>
-                <div class="text-3xl font-black text-amber-600 dark:text-amber-400 font-mono tracking-tight" id="kpi-vacant">0</div>
-                <div class="text-[11px] text-amber-600 dark:text-amber-300 mt-2 flex items-center justify-between font-semibold">
-                    <span>مقاعد شاغرة قابلة للتسكين</span>
-                    <span class="text-slate-400 group-hover:text-amber-500 transition">&larr; التفاصيل</span>
+                <div class="text-3xl font-black text-amber-600 dark:text-amber-400 font-mono tracking-tight" id="kpi-near">0</div>
+                <div class="text-[11px] text-amber-600 dark:text-amber-400 mt-2 flex items-center justify-between font-semibold">
+                    <span id="kpi-sub-near">متبقي أقل من 60 يوماً</span>
+                    <span id="kpi-details-near" class="text-slate-400 group-hover:text-amber-500 transition">&larr; التفاصيل</span>
+                </div>
+            </div>
+
+            <div onclick="showKpiModal('vacant')" class="kpi-card cursor-pointer bg-gradient-to-br from-slate-900 via-slate-900 to-emerald-950/40 border border-slate-800 dark:border-slate-800 p-4 rounded-2xl shadow relative overflow-hidden group">
+                <div class="absolute -right-6 -bottom-6 w-20 h-20 bg-emerald-500/10 rounded-full blur-xl group-hover:bg-emerald-500/20 transition-all"></div>
+                <div class="flex items-center justify-between text-emerald-600 dark:text-emerald-400 mb-2">
+                    <span id="kpi-title-vacant" class="text-xs font-bold text-slate-600 dark:text-slate-400">شواغر متاحة</span>
+                    <span class="p-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400"><i data-lucide="user-plus" class="w-4 h-4"></i></span>
+                </div>
+                <div class="text-3xl font-black text-emerald-600 dark:text-emerald-400 font-mono tracking-tight" id="kpi-vacant">0</div>
+                <div class="text-[11px] text-emerald-600 dark:text-emerald-300 mt-2 flex items-center justify-between font-semibold">
+                    <span id="kpi-sub-vacant">مقاعد شاغرة قابلة للتسكين</span>
+                    <span id="kpi-details-vacant" class="text-slate-400 group-hover:text-emerald-500 transition">&larr; التفاصيل</span>
                 </div>
             </div>
         </section>
@@ -774,26 +782,26 @@
         <section class="space-y-2.5">
             <div class="flex items-center justify-between">
                 <span class="text-xs font-bold text-slate-600 dark:text-slate-400 flex items-center gap-1.5">
-                    <i data-lucide="layers" class="w-3.5 h-3.5 text-blue-500"></i> تصفية المنشأة والشركات
+                    <i data-lucide="layers" class="w-3.5 h-3.5 text-blue-500"></i> <span id="txt-filter-title">تصفية المنشأة والشركات</span>
                 </span>
                 <span id="active-filter-badge" class="text-[11px] px-3 py-1 rounded-xl bg-slate-200 dark:bg-slate-900 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-800 font-bold shadow-inner">جميع المنشآت</span>
             </div>
             <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 <button onclick="setCompanyFilter('all')" id="comp-btn-all" class="company-filter-card comp-btn-all active px-4 py-3 rounded-2xl border border-slate-300 dark:border-slate-800 text-xs font-bold flex items-center justify-center gap-2">
                     <i data-lucide="building-2" class="w-4 h-4"></i>
-                    <span>جميع المنشآت</span>
+                    <span id="txt-comp-all">جميع المنشآت</span>
                 </button>
                 <button onclick="setCompanyFilter('زاوية أمل اللوجستية')" id="comp-btn-zawaya" class="company-filter-card comp-btn-zawaya px-4 py-3 rounded-2xl border border-slate-300 dark:border-slate-800 text-xs font-bold flex items-center justify-center gap-2">
                     <i data-lucide="navigation" class="w-4 h-4"></i>
-                    <span>زاوية أمل اللوجستية</span>
+                    <span id="txt-comp-zawaya">زاوية أمل اللوجستية</span>
                 </button>
                 <button onclick="setCompanyFilter('رسم الحلول اللوجستية')" id="comp-btn-rasm" class="company-filter-card comp-btn-rasm px-4 py-3 rounded-2xl border border-slate-300 dark:border-slate-800 text-xs font-bold flex items-center justify-center gap-2">
                     <i data-lucide="boxes" class="w-4 h-4"></i>
-                    <span>رسم الحلول اللوجستية</span>
+                    <span id="txt-comp-rasm">رسم الحلول اللوجستية</span>
                 </button>
                 <button onclick="setCompanyFilter('شركة زاوية أمل للمقاولات')" id="comp-btn-contract" class="company-filter-card comp-btn-contract px-4 py-3 rounded-2xl border border-slate-300 dark:border-slate-800 text-xs font-bold flex items-center justify-center gap-2">
                     <i data-lucide="hard-hat" class="w-4 h-4"></i>
-                    <span>شركة زاوية أمل للمقاولات</span>
+                    <span id="txt-comp-contract">شركة زاوية أمل للمقاولات</span>
                 </button>
             </div>
         </section>
@@ -803,11 +811,11 @@
             <div class="flex items-center justify-between">
                 <h2 class="text-sm font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
                     <i data-lucide="file-check-2" class="w-4 h-4 text-emerald-600 dark:text-emerald-400"></i>
-                    <span>التراخيص الحكومية المعتمدة</span>
+                    <span id="txt-gov-licenses">التراخيص الحكومية المعتمدة</span>
                 </h2>
                 <div id="license-filter-badge-box" class="hidden">
                     <button onclick="clearLicenseFilter()" class="text-xs text-rose-500 hover:text-rose-600 flex items-center gap-1 font-bold bg-rose-50 dark:bg-rose-500/10 px-2.5 py-1 rounded-xl border border-rose-300 dark:border-rose-500/20 transition">
-                        <i data-lucide="x" class="w-3.5 h-3.5"></i> إلغاء تصفية الترخيص
+                        <i data-lucide="x" class="w-3.5 h-3.5"></i> <span id="txt-clear-lic-filter">إلغاء تصفية الترخيص</span>
                     </button>
                 </div>
             </div>
@@ -1248,16 +1256,50 @@
             activeLicenseFilter: null,
             activeProjectFilter: 'all',
             theme: localStorage.getItem('zawaya_theme') || 'dark',
-            isAdmin: localStorage.getItem('zawaya_is_admin') === 'true' || true // مفعّل لتسهيل التعديل المباشر
+            lang: localStorage.getItem('zawaya_lang') || 'ar',
+            isAdmin: localStorage.getItem('zawaya_is_admin') === 'true' || true
         };
 
-        const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.get('admin') === 'true') {
-            state.isAdmin = true;
-            localStorage.setItem('zawaya_is_admin', 'true');
+        // تحويل أي أرقام مشرقية إلى أرقام لاتينية قياسية
+        function toEnglishDigits(str) {
+            if (!str) return '';
+            const arDigits = '٠١٢٣٤٥٦٧٨٩';
+            return (str + '').replace(/[٠-٩]/g, d => arDigits.indexOf(d));
         }
 
-        // إشعار عائم وتلقائي (Toast)
+        function toArabicDigits(str) {
+            return (str + '').replace(/[0-9]/g, d => '٠١٢٣٤٥٦٧٨٩'[d]);
+        }
+
+        // تحويل وصياغة التواريخ بصيغة قياسية YYYY-MM-DD
+        function normalizeToISODate(dateStr) {
+            if (!dateStr) return null;
+            const cleaned = toEnglishDigits(dateStr).trim().replace(/[\/\.]/g, '-');
+            const parts = cleaned.split('-');
+            if (parts.length === 3) {
+                if (parts[0].length === 4) {
+                    const y = parts[0];
+                    const m = parts[1].padStart(2, '0');
+                    const d = parts[2].padStart(2, '0');
+                    return `${y}-${m}-${d}`;
+                } else if (parts[2].length === 4) {
+                    const y = parts[2];
+                    const m = parts[1].padStart(2, '0');
+                    const d = parts[0].padStart(2, '0');
+                    return `${y}-${m}-${d}`;
+                }
+            }
+            return null;
+        }
+
+        function getDaysDiff(targetDateStr) {
+            const now = new Date();
+            const target = new Date(targetDateStr);
+            const diffTime = target - now;
+            return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        }
+
+        // إشعار عائم وتلقائي (Toast) يختفي لوحده
         function showToast(text, icon = 'check-circle') {
             const container = document.getElementById('toast-container');
             if (!container) return;
@@ -1265,7 +1307,7 @@
             toast.className = 'toast-msg';
             toast.innerHTML = `<i data-lucide="${icon}" class="w-4 h-4 text-emerald-500"></i> <span>${text}</span>`;
             container.appendChild(toast);
-            lucide.createIcons();
+            if (window.lucide) lucide.createIcons();
             setTimeout(() => {
                 if (toast && toast.parentNode) {
                     toast.parentNode.removeChild(toast);
@@ -1281,22 +1323,14 @@
             if (storedLic) {
                 try { 
                     const parsedLic = JSON.parse(storedLic);
-                    if (Array.isArray(parsedLic) && parsedLic.length > 0) {
-                        state.licenses = parsedLic;
-                    }
-                } catch (e) {
-                    console.error(e);
-                }
+                    if (Array.isArray(parsedLic) && parsedLic.length > 0) state.licenses = parsedLic;
+                } catch (e) { console.error(e); }
             }
             if (storedVeh) {
                 try { 
                     const parsedVeh = JSON.parse(storedVeh);
-                    if (Array.isArray(parsedVeh) && parsedVeh.length > 0) {
-                        state.vehicles = parsedVeh;
-                    }
-                } catch (e) {
-                    console.error(e);
-                }
+                    if (Array.isArray(parsedVeh) && parsedVeh.length > 0) state.vehicles = parsedVeh;
+                } catch (e) { console.error(e); }
             }
 
             for (let lic of state.licenses) {
@@ -1309,24 +1343,17 @@
             }
 
             updateAdminUI();
-            updateKPIs();
-            renderLicenses();
-            renderVehicles();
-            updateNotifications();
+            applyLanguage(state.lang);
         }
 
         async function persistState() {
-            if (!state.isAdmin) return;
-
             const cleanLicenses = state.licenses.map(l => ({ ...l, doc: l.doc ? 'stored_in_idb' : null }));
             const cleanVehicles = state.vehicles.map(v => ({ ...v, doc: v.doc ? 'stored_in_idb' : null }));
 
             try {
                 localStorage.setItem('zawaya_licenses_live_v5', JSON.stringify(cleanLicenses));
                 localStorage.setItem('zawaya_vehicles_live_v5', JSON.stringify(cleanVehicles));
-            } catch (err) {
-                console.error(err);
-            }
+            } catch (err) { console.error(err); }
 
             for (let lic of state.licenses) {
                 if (lic.doc && lic.doc !== 'stored_in_idb') {
@@ -1348,38 +1375,43 @@
             const badge = document.getElementById('role-badge');
             const lockIcon = document.getElementById('admin-icon');
             const lockBtn = document.getElementById('admin-lock-btn');
+            const t = i18n[state.lang] || i18n.ar;
 
             if (state.isAdmin) {
                 body.classList.add('is-admin');
-                badge.textContent = 'وضع المسؤول (Admin)';
-                badge.className = 'text-[11px] px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-500 dark:text-emerald-400 border border-emerald-500/20 font-bold';
+                if (badge) {
+                    badge.textContent = t.adminMode;
+                    badge.className = 'text-[11px] px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-500 dark:text-emerald-400 border border-emerald-500/20 font-bold';
+                }
                 if (lockIcon) lockIcon.setAttribute('data-lucide', 'unlock');
                 if (lockBtn) {
                     lockBtn.className = 'p-2.5 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 rounded-xl border border-emerald-300 dark:border-emerald-600/40 text-xs transition flex items-center justify-center active:scale-90';
-                    lockBtn.title = 'مسؤول مفعل (انقر لتسجيل الخروج والقفل)';
+                    lockBtn.title = 'مسؤول مفعل (انقر للقفل)';
                 }
             } else {
                 body.classList.remove('is-admin');
-                badge.textContent = 'وضع العرض فقط';
-                badge.className = 'text-[11px] px-2.5 py-0.5 rounded-full bg-slate-500/10 text-slate-500 dark:text-slate-400 border border-slate-500/20 font-bold';
+                if (badge) {
+                    badge.textContent = t.viewOnly;
+                    badge.className = 'text-[11px] px-2.5 py-0.5 rounded-full bg-slate-500/10 text-slate-500 dark:text-slate-400 border border-slate-500/20 font-bold';
+                }
                 if (lockIcon) lockIcon.setAttribute('data-lucide', 'lock');
                 if (lockBtn) {
                     lockBtn.className = 'p-2.5 bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 rounded-xl border border-slate-300 dark:border-slate-700 text-xs transition flex items-center justify-center active:scale-90';
-                    lockBtn.title = 'تسجيل دخول كمسؤول (للتعديل والحفظ)';
+                    lockBtn.title = 'تسجيل دخول كمسؤول';
                 }
             }
-            lucide.createIcons();
+            if (window.lucide) lucide.createIcons();
         }
 
         function toggleAdminPrompt() {
             if (state.isAdmin) {
-                if (confirm('هل ترغب في قفل الموقع والرجوع لوضع العرض فقط؟')) {
+                if (confirm(state.lang === 'ar' ? 'هل ترغب في قفل الموقع والرجوع لوضع العرض فقط؟' : 'Lock site and switch to view-only mode?')) {
                     state.isAdmin = false;
                     localStorage.setItem('zawaya_is_admin', 'false');
                     updateAdminUI();
                     renderLicenses();
                     renderVehicles();
-                    showToast('تم الرجوع لوضع العرض فقط', 'lock');
+                    showToast(state.lang === 'ar' ? 'تم الرجوع لوضع العرض فقط' : 'Switched to view-only mode', 'lock');
                 }
             } else {
                 document.getElementById('admin-password-input').value = '';
@@ -1390,81 +1422,18 @@
         function handleAdminLogin(e) {
             e.preventDefault();
             const entered = document.getElementById('admin-password-input').value.trim();
-            if (entered === ADMIN_PIN || entered === '2899') {
+            if (entered === ADMIN_PIN) {
                 state.isAdmin = true;
                 localStorage.setItem('zawaya_is_admin', 'true');
                 closeModal('modal-admin-auth');
                 updateAdminUI();
                 renderLicenses();
                 renderVehicles();
-                showToast('تم تفعيل وضع المسؤول بنجاح!', 'unlock');
+                showToast(state.lang === 'ar' ? 'تم تفعيل وضع المسؤول بنجاح!' : 'Admin mode enabled successfully!', 'unlock');
             } else {
-                alert('❌ الرقم السري غير صحيح!');
+                alert(state.lang === 'ar' ? '❌ الرقم السري غير صحيح!' : '❌ Incorrect PIN code!');
             }
         }
-
-        function getDaysDiff(targetDateStr) {
-            const now = new Date();
-            const target = new Date(targetDateStr);
-            const diffTime = target - now;
-            return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        }
-
-        function toArabicDigits(str) {
-            return (str + '').replace(/[0-9]/g, d => '٠١٢٣٤٥٦٧٨٩'[d]);
-        }
-
-        // تحويل أي أرقام عربية مستخرجة من الوثائق إلى أرقام إنجليزية قياسية 0-9
-        function toEnglishDigits(str) {
-            if (!str) return '';
-            return (str + '')
-                .replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d))
-                .replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d));
-        }
-
-        // دالة موحدة ومعيارية لصياغة التاريخ إلى YYYY-MM-DD المقبول في input[type=date]
-        function normalizeToISODate(dateStr) {
-            if (!dateStr) return null;
-            const cleaned = toEnglishDigits(dateStr).trim().replace(/[\/\.]/g, '-');
-            
-            // نمط YYYY-MM-DD
-            const isoMatch = cleaned.match(/\b(202[4-9]|203[0-9])-(0?[1-9]|1[0-2])-(0?[1-9]|[12][0-9]|3[01])\b/);
-            if (isoMatch) {
-                const y = isoMatch[1];
-                const m = isoMatch[2].padStart(2, '0');
-                const d = isoMatch[3].padStart(2, '0');
-                return `${y}-${m}-${d}`;
-            }
-
-            // نمط DD-MM-YYYY
-            const dmyMatch = cleaned.match(/\b(0?[1-9]|[12][0-9]|3[01])-(0?[1-9]|1[0-2])-(202[4-9]|203[0-9])\b/);
-            if (dmyMatch) {
-                const d = dmyMatch[1].padStart(2, '0');
-                const m = dmyMatch[2].padStart(2, '0');
-                const y = dmyMatch[3];
-                return `${y}-${m}-${d}`;
-            }
-
-            return null;
-        }
-
-        window.addEventListener('DOMContentLoaded', async () => {
-            applyTheme(state.theme);
-            await loadPersistentState();
-            lucide.createIcons();
-
-            document.addEventListener('click', (e) => {
-                const notifBtn = document.getElementById('notif-btn');
-                const notifDrop = document.getElementById('notif-dropdown');
-                if (notifBtn && notifDrop && !notifBtn.contains(e.target) && !notifDrop.contains(e.target)) {
-                    notifDrop.classList.add('hidden');
-                }
-                const expDrop = document.getElementById('export-dropdown');
-                if (expDrop && !e.target.closest('#export-dropdown') && !e.target.closest('button[onclick="toggleExportMenu()"]')) {
-                    expDrop.classList.add('hidden');
-                }
-            });
-        });
 
         function toggleTheme() {
             state.theme = state.theme === 'dark' ? 'light' : 'dark';
@@ -1484,15 +1453,15 @@
             }
             renderLicenses();
             renderVehicles();
-            lucide.createIcons();
+            if (window.lucide) lucide.createIcons();
         }
 
-        // تحديث جرس التنبيهات
         function updateNotifications() {
             const badge = document.getElementById('notif-badge');
             const list = document.getElementById('notif-list');
             const countText = document.getElementById('notif-count-text');
             if (!badge || !list) return;
+            const isAr = state.lang === 'ar';
 
             let alerts = [];
 
@@ -1501,7 +1470,7 @@
                 if (days <= 60) {
                     alerts.push({
                         title: l.activity,
-                        sub: l.company + ' (ترخيص: ' + l.number + ')',
+                        sub: translateEntity(l.company) + ` (${l.number})`,
                         days: days,
                         date: l.expiry,
                         type: 'license'
@@ -1513,8 +1482,8 @@
                 const days = getDaysDiff(v.expiry);
                 if (days <= 60) {
                     alerts.push({
-                        title: 'لوحة: ' + v.plateNum + ' (' + v.project + ')',
-                        sub: v.company + ' (بطاقة: ' + v.cardNum + ')',
+                        title: `${isAr ? 'لوحة:' : 'Plate:'} ${v.plateNum} (${translateEntity(v.project)})`,
+                        sub: translateEntity(v.company) + ` (${v.cardNum})`,
                         days: days,
                         date: v.expiry,
                         type: 'vehicle'
@@ -1527,7 +1496,7 @@
             if (alerts.length > 0) {
                 badge.textContent = alerts.length;
                 badge.classList.remove('hidden');
-                countText.textContent = `${alerts.length} تنبيه`;
+                countText.textContent = `${alerts.length} ${isAr ? 'تنبيه' : 'alerts'}`;
                 list.innerHTML = alerts.map(a => `
                     <div class="p-2 rounded-xl ${a.days <= 0 ? 'bg-rose-500/10 border-rose-500/30 text-rose-500' : 'bg-amber-500/10 border-amber-500/30 text-amber-500'} border flex items-center justify-between">
                         <div>
@@ -1535,51 +1504,267 @@
                             <div class="text-[10px] text-slate-500 dark:text-slate-400">${a.sub}</div>
                         </div>
                         <div class="text-left font-mono font-bold whitespace-nowrap text-[11px]">
-                            ${a.days <= 0 ? '<span class="text-rose-500">منتهي!</span>' : `متبقي ${a.days} يوم`}
+                            ${a.days <= 0 ? `<span class="text-rose-500">${isAr ? 'منتهي!' : 'Expired!'}</span>` : `${isAr ? `متبقي ${a.days} يوم` : `${a.days} days left`}`}
                             <span class="block text-[9px] text-slate-400 font-normal">${a.date}</span>
                         </div>
                     </div>
                 `).join('');
             } else {
                 badge.classList.add('hidden');
-                countText.textContent = '0 تنبيه';
-                list.innerHTML = `<div class="py-4 text-center text-slate-400 text-xs">✓ جميع التراخيص والبطاقات سارية ومحدثة!</div>`;
+                countText.textContent = `0 ${isAr ? 'تنبيه' : 'alerts'}`;
+                list.innerHTML = `<div class="py-4 text-center text-slate-400 text-xs">${i18n[state.lang].notifZero}</div>`;
             }
-            lucide.createIcons();
+            if (window.lucide) lucide.createIcons();
         }
 
         function toggleNotificationDropdown() {
             const drop = document.getElementById('notif-dropdown');
-            drop.classList.toggle('hidden');
+            if (drop) drop.classList.toggle('hidden');
         }
 
         function toggleExportMenu() {
             const drop = document.getElementById('export-dropdown');
-            drop.classList.toggle('hidden');
+            if (drop) drop.classList.toggle('hidden');
+        }
+
+        window.addEventListener('DOMContentLoaded', async () => {
+            applyTheme(state.theme);
+            await loadPersistentState();
+
+            document.addEventListener('click', (e) => {
+                const notifBtn = document.getElementById('notif-btn');
+                const notifDrop = document.getElementById('notif-dropdown');
+                if (notifBtn && notifDrop && !notifBtn.contains(e.target) && !notifDrop.contains(e.target)) {
+                    notifDrop.classList.add('hidden');
+                }
+                const expDrop = document.getElementById('export-dropdown');
+                if (expDrop && !e.target.closest('#export-dropdown') && !e.target.closest('button[onclick="toggleExportMenu()"]')) {
+                    expDrop.classList.add('hidden');
+                }
+            });
+        });
+
+        const i18n = {
+            ar: {
+                appTitle: "منظومة إدارة تراخيص الأسطول وبطاقات التشغيل",
+                appSubtitle: "المتابعة اللوجستية والنظامية للتراخيص وبطاقات التشغيل وسعة المستخدمين",
+                viewOnly: "وضع العرض فقط",
+                adminMode: "وضع المسؤول (Admin)",
+                addLicense: "إضافة ترخيص",
+                addVehicle: "إضافة مركبة",
+                kpiLicenses: "التراخيص الوزارية",
+                kpiLicensesSub: "تراخيص سارية ومفعلة",
+                kpiExpired: "منتهية الصلاحية",
+                kpiExpiredSub: "تراخيص أو بطاقات تشغيل انتهت",
+                kpiNear: "قريبة من الانتهاء",
+                kpiNearSub: "متبقي أقل من 60 يوماً",
+                kpiVacant: "شواغر متاحة",
+                kpiVacantSub: "مقاعد شاغرة قابلة للتسكين",
+                filterTitle: "تصفية المنشأة والشركات",
+                allCompanies: "جميع المنشآت",
+                compZawaya: "زاوية أمل اللوجستية",
+                compRasm: "رسم الحلول اللوجستية",
+                compContract: "شركة زاوية أمل للمقاولات",
+                allProjects: "جميع المشاريع",
+                projDelivery: "مشروع التوصيل",
+                projDyna: "مشروع الدينات",
+                projElectric: "مشروع الكهرباء",
+                searchPlaceholder: "بحث برقم اللوحة، بطاقة التشغيل، السائق، أو اليوزر...",
+                licensedGov: "التراخيص الحكومية المعتمدة",
+                cancelLicFilter: "إلغاء تصفية الترخيص",
+                details: "← التفاصيل",
+                daysLeft: "متبقي {n} يوم",
+                expired: "منتهي",
+                licenseNum: "رقم:",
+                linkedVehicles: "{n} مركبة مرتبطة",
+                cardBadge: "بطاقة:",
+                ownership: "الملكية:",
+                expiryDate: "تاريخ الانتهاء",
+                usersTitle: "المستخدمين والسائقين المرتبطين ببطاقة التشغيل:",
+                addUser: "إضافة مستخدم",
+                iqamaNum: "رقم الإقامة",
+                userId: "اليوزر التشغيلي",
+                noUsers: "لا يوجد مستخدمين مسجلين لهذه البطاقة حالياً (أو نظام تشغيل مباشر بدون يوزرات).",
+                directMode: "تشغيل مباشر (بدون يوزرات)",
+                fullCapacity: "مكتمل (3/3)",
+                avail2: "متاح 2 (1/3)",
+                avail1: "متاح 1 (2/3)",
+                emptyCap: "فارغ (0/3)",
+                overCap: "تجاوز الحد ({n}/3) ⚠",
+                notifTitle: "تنبيهات الصلاحيات المنتهية والقريبة (أقل من 60 يوم)",
+                notifZero: "✓ جميع التراخيص والبطاقات سارية ومحدثة!",
+                exportJSON: "نسخة بيانات (JSON)",
+                exportHTML: "ملف كود كامل (.html)",
+                exportCSV: "جدول إكسل (CSV)"
+            },
+            en: {
+                appTitle: "Fleet Licenses & Operation Cards System",
+                appSubtitle: "Regulatory & Operational Tracking for TGA Licenses and Cards",
+                viewOnly: "View-only Mode",
+                adminMode: "Admin Mode",
+                addLicense: "Add License",
+                addVehicle: "Add Vehicle",
+                kpiLicenses: "TGA Licenses",
+                kpiLicensesSub: "Active Valid Licenses",
+                kpiExpired: "Expired Cards & Licenses",
+                kpiExpiredSub: "Expired TGA Licenses or Cards",
+                kpiNear: "Near Expiration",
+                kpiNearSub: "Expires in less than 60 days",
+                kpiVacant: "Vacant Slots",
+                kpiVacantSub: "Available Seats to Assign",
+                filterTitle: "Filter by Entity / Company",
+                allCompanies: "All Entities",
+                compZawaya: "Zawaya Amal Logistics",
+                compRasm: "Rasm Solutions Logistics",
+                compContract: "Zawaya Amal Contracting",
+                allProjects: "All Projects",
+                projDelivery: "Delivery Project",
+                projDyna: "Dyna Trucks Project",
+                projElectric: "Electricity Project",
+                searchPlaceholder: "Search plate, card number, driver, or user ID...",
+                licensedGov: "Government Accredited Licenses",
+                cancelLicFilter: "Clear License Filter",
+                details: "Details →",
+                daysLeft: "{n} days left",
+                expired: "Expired",
+                licenseNum: "No:",
+                linkedVehicles: "{n} linked vehicles",
+                cardBadge: "Card:",
+                ownership: "Owner:",
+                expiryDate: "Expiry Date",
+                usersTitle: "Drivers & System Users Assigned to Card:",
+                addUser: "Add User",
+                iqamaNum: "Iqama / ID No.",
+                userId: "Operational User ID",
+                noUsers: "No drivers assigned yet (or direct operation mode).",
+                directMode: "Direct Operation (No Users)",
+                fullCapacity: "Full (3/3)",
+                avail2: "2 Slots Available (1/3)",
+                avail1: "1 Slot Available (2/3)",
+                emptyCap: "Empty (0/3)",
+                overCap: "Over limit ({n}/3) ⚠",
+                notifTitle: "Expiry Alerts (Expired or < 60 days)",
+                notifZero: "✓ All licenses and cards are up to date!",
+                exportJSON: "Data Backup (JSON)",
+                exportHTML: "Self-contained File (.html)",
+                exportCSV: "Excel Sheet (CSV)"
+            }
+        };
+
+        function toggleLanguage() {
+            state.lang = state.lang === 'ar' ? 'en' : 'ar';
+            localStorage.setItem('zawaya_lang', state.lang);
+            applyLanguage(state.lang);
+        }
+
+        function translateEntity(val) {
+            if (!val) return '';
+            if (state.lang === 'ar') return val;
+            if (val.includes('زاوية أمل اللوجستية')) return 'Zawaya Amal Logistics';
+            if (val.includes('رسم الحلول')) return 'Rasm Solutions Logistics';
+            if (val.includes('المقاولات')) return 'Zawaya Amal Contracting';
+            if (val === 'مشروع التوصيل') return 'Delivery Project';
+            if (val === 'مشروع الدينات') return 'Dyna Trucks Project';
+            if (val === 'مشروع الكهرباء') return 'Electricity Project';
+            return val;
+        }
+
+        function applyLanguage(lang) {
+            const html = document.documentElement;
+            html.setAttribute('lang', lang);
+            html.setAttribute('dir', lang === 'ar' ? 'rtl' : 'ltr');
+
+            const btnText = document.getElementById('lang-btn-text');
+            if (btnText) btnText.textContent = lang === 'ar' ? 'EN' : 'عربي';
+
+            const t = i18n[lang];
+            const setTxt = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+
+            setTxt('app-title-text', t.appTitle);
+            setTxt('app-subtitle-text', t.appSubtitle);
+            setTxt('txt-btn-add-lic', t.addLicense);
+            setTxt('txt-btn-add-veh', t.addVehicle);
+            setTxt('txt-filter-title', t.filterTitle);
+            setTxt('txt-comp-all', t.allCompanies);
+            setTxt('txt-comp-zawaya', t.compZawaya);
+            setTxt('txt-comp-rasm', t.compRasm);
+            setTxt('txt-comp-contract', t.compContract);
+            setTxt('txt-gov-licenses', t.licensedGov);
+            setTxt('txt-clear-lic-filter', t.cancelLicFilter);
+
+            // KPIs
+            setTxt('kpi-title-licenses', t.kpiLicenses);
+            setTxt('kpi-sub-licenses', t.kpiLicensesSub);
+            setTxt('kpi-details-licenses', t.details);
+
+            setTxt('kpi-title-expired', t.kpiExpired);
+            setTxt('kpi-sub-expired', t.kpiExpiredSub);
+            setTxt('kpi-details-expired', t.details);
+
+            setTxt('kpi-title-near', t.kpiNear);
+            setTxt('kpi-sub-near', t.kpiNearSub);
+            setTxt('kpi-details-near', t.details);
+
+            setTxt('kpi-title-vacant', t.kpiVacant);
+            setTxt('kpi-sub-vacant', t.kpiVacantSub);
+            setTxt('kpi-details-vacant', t.details);
+
+            setTxt('notif-header-title', t.notifTitle);
+
+            const searchInput = document.getElementById('search-input');
+            if (searchInput) searchInput.placeholder = t.searchPlaceholder;
+
+            // تحديث شارة الفلتر الحالية
+            const activeBadge = document.getElementById('active-filter-badge');
+            if (activeBadge) {
+                if (state.activeCompany === 'all') activeBadge.textContent = t.allCompanies;
+                else activeBadge.textContent = translateEntity(state.activeCompany);
+            }
+
+            updateAdminUI();
+            updateKPIs();
+            renderLicenses();
+            renderVehicles();
+            updateNotifications();
+            if (window.lucide) lucide.createIcons();
         }
 
         function updateKPIs() {
+            const t = i18n[state.lang] || i18n.ar;
             document.getElementById('kpi-licenses').textContent = state.licenses.length;
-            document.getElementById('kpi-vehicles').textContent = state.vehicles.length;
 
-            let completed = 0;
+            let expiredCount = 0;
+            let nearExpiryCount = 0;
             let vacant = 0;
 
+            // فحص التراخيص
+            state.licenses.forEach(l => {
+                const days = getDaysDiff(l.expiry);
+                if (days <= 0) expiredCount++;
+                else if (days <= 60) nearExpiryCount++;
+            });
+
+            // فحص المركبات وبطاقات التشغيل
             state.vehicles.forEach(v => {
+                const days = getDaysDiff(v.expiry);
+                if (days <= 0) expiredCount++;
+                else if (days <= 60) nearExpiryCount++;
+
                 if (v.mode === 'users') {
                     const count = (v.drivers || []).length;
-                    if (count === 3) completed++;
                     if (count < 3) vacant += (3 - count);
                 }
             });
 
-            document.getElementById('kpi-completed').textContent = completed;
+            document.getElementById('kpi-expired').textContent = expiredCount;
+            document.getElementById('kpi-near').textContent = nearExpiryCount;
             document.getElementById('kpi-vacant').textContent = vacant;
         }
 
         function renderLicenses() {
             const container = document.getElementById('licenses-grid');
             container.innerHTML = '';
+            const t = i18n[state.lang] || i18n.ar;
 
             let filtered = state.licenses;
             if (state.activeCompany !== 'all') {
@@ -1609,14 +1794,14 @@
             filtered.forEach(lic => {
                 const days = getDaysDiff(lic.expiry);
                 let badgeClass = isDark ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30" : "bg-emerald-50 text-emerald-700 border-emerald-200";
-                let statusText = `متبقي ${days} يوم`;
+                let statusText = t.daysLeft.replace('{n}', days);
 
                 if (days <= 0) {
                     badgeClass = isDark ? "bg-rose-500/10 text-rose-400 border-rose-500/30" : "bg-rose-50 text-rose-700 border-rose-200";
-                    statusText = "منتهي";
+                    statusText = t.expired;
                 } else if (days <= 60) {
                     badgeClass = isDark ? "bg-amber-500/10 text-amber-400 border-amber-500/30" : "bg-amber-50 text-amber-700 border-amber-200";
-                    statusText = `${days} يوم متبقي`;
+                    statusText = t.daysLeft.replace('{n}', days);
                 }
 
                 const linkedCount = state.vehicles.filter(v => v.licenseId === lic.id).length;
@@ -1636,11 +1821,10 @@
                             </span>
                             <div>
                                 <h3 class="font-extrabold text-sm text-slate-900 dark:text-white leading-tight">${lic.activity}</h3>
-                                <p class="text-xs text-slate-600 dark:text-slate-400 font-semibold mt-0.5">${lic.company}</p>
+                                <p class="text-xs text-slate-600 dark:text-slate-400 font-semibold mt-0.5">${translateEntity(lic.company)}</p>
                             </div>
                         </div>
                         <div class="flex items-center gap-1.5">
-                            <!-- زر استعراض الوثيقة يظهر فقط عند وجود مرفق -->
                             ${hasDoc ? `
                                 <button onclick="event.stopPropagation(); viewAttachment('${lic.activity}', '${lic.id}')" class="action-view-doc p-1.5 rounded-lg flex items-center justify-center" title="استعراض وثيقة الترخيص"><i data-lucide="eye" class="w-3.5 h-3.5"></i></button>
                             ` : ''}
@@ -1654,12 +1838,12 @@
 
                     ${lic.notes ? `
                     <div class="text-[11px] text-slate-700 dark:text-slate-400 bg-slate-100 dark:bg-slate-950/50 px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800/60 mb-2.5 leading-relaxed">
-                        <span class="text-slate-500 font-bold">ملاحظة:</span> ${lic.notes}
+                        <span class="text-slate-500 font-bold">${state.lang === 'ar' ? 'ملاحظة:' : 'Note:'}</span> ${lic.notes}
                     </div>` : ''}
 
                     <div class="info-block bg-slate-50 dark:bg-slate-950/80 px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-800/90 my-2.5 flex items-center justify-between shadow-inner">
                         <div class="flex items-center gap-2">
-                            <span class="text-[11px] text-slate-500 dark:text-slate-400 font-bold">ينتهي:</span>
+                            <span class="text-[11px] text-slate-500 dark:text-slate-400 font-bold">${t.expiryDate}:</span>
                             <span class="font-mono text-slate-900 dark:text-white text-xs font-black tracking-wide">${lic.expiry}</span>
                         </div>
                         <div>
@@ -1668,9 +1852,9 @@
                     </div>
 
                     <div class="flex items-center justify-between pt-2 border-t border-slate-200 dark:border-slate-800/80 text-xs text-slate-500 dark:text-slate-400">
-                        <span class="flex items-center gap-1 font-mono text-[11px]">رقم: <b class="text-slate-800 dark:text-slate-300 font-bold">${lic.number}</b></span>
+                        <span class="flex items-center gap-1 font-mono text-[11px]">${t.licenseNum} <b class="text-slate-800 dark:text-slate-300 font-bold">${lic.number}</b></span>
                         <span class="text-blue-600 dark:text-blue-400 font-bold flex items-center gap-1.5 text-xs bg-blue-50 dark:bg-blue-500/10 px-2 py-0.5 rounded-lg border border-blue-200 dark:border-blue-500/20">
-                            <i data-lucide="truck" class="w-3.5 h-3.5"></i> ${linkedCount} مركبة مرتبطة
+                            <i data-lucide="truck" class="w-3.5 h-3.5"></i> ${t.linkedVehicles.replace('{n}', linkedCount)}
                         </span>
                     </div>
                 `;
@@ -1684,12 +1868,13 @@
 
         function renderCapacityIndicator(vehicle) {
             const isDark = document.documentElement.classList.contains('dark');
+            const t = i18n[state.lang] || i18n.ar;
 
             if (vehicle.mode === 'direct') {
                 return `
                     <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-blue-50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/20 text-blue-700 dark:text-blue-400 text-xs font-bold shadow-sm whitespace-nowrap">
                         <i data-lucide="gauge" class="w-3.5 h-3.5"></i>
-                        <span>تشغيل مباشر (بدون يوزرات)</span>
+                        <span>${t.directMode}</span>
                     </div>
                 `;
             }
@@ -1702,7 +1887,7 @@
 
             if (count === 0) {
                 pillClass = isDark ? "bg-slate-800 text-slate-400 border-slate-700" : "bg-slate-100 text-slate-600 border-slate-300";
-                labelText = "فارغ (0/3)";
+                labelText = t.emptyCap;
                 donutSvg = `
                     <svg class="w-5 h-5 transform -rotate-90" viewBox="0 0 36 36">
                         <circle cx="18" cy="18" r="14" fill="none" class="${trackColor}" stroke-width="4"></circle>
@@ -1710,7 +1895,7 @@
                 `;
             } else if (count === 1) {
                 pillClass = isDark ? "bg-yellow-400/10 text-yellow-300 border-yellow-400/30" : "bg-amber-50 text-amber-700 border-amber-200";
-                labelText = "متاح 2 (1/3)";
+                labelText = t.avail2;
                 donutSvg = `
                     <svg class="w-5 h-5 transform -rotate-90" viewBox="0 0 36 36">
                         <circle cx="18" cy="18" r="14" fill="none" class="${trackColor}" stroke-width="4"></circle>
@@ -1719,7 +1904,7 @@
                 `;
             } else if (count === 2) {
                 pillClass = isDark ? "bg-amber-500/10 text-amber-400 border-amber-500/30" : "bg-amber-100 text-amber-800 border-amber-300";
-                labelText = "متاح 1 (2/3)";
+                labelText = t.avail1;
                 donutSvg = `
                     <svg class="w-5 h-5 transform -rotate-90" viewBox="0 0 36 36">
                         <circle cx="18" cy="18" r="14" fill="none" class="${trackColor}" stroke-width="4"></circle>
@@ -1728,7 +1913,7 @@
                 `;
             } else if (count === 3) {
                 pillClass = isDark ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30" : "bg-emerald-50 text-emerald-700 border-emerald-200";
-                labelText = "مكتمل (3/3)";
+                labelText = t.fullCapacity;
                 donutSvg = `
                     <svg class="w-5 h-5 transform -rotate-90" viewBox="0 0 36 36">
                         <circle cx="18" cy="18" r="14" fill="none" class="${trackColor}" stroke-width="4"></circle>
@@ -1737,7 +1922,7 @@
                 `;
             } else {
                 pillClass = "bg-rose-500/20 text-rose-500 border-rose-500 pulse-danger";
-                labelText = `تجاوز الحد (${count}/3) ⚠`;
+                labelText = t.overCap.replace('{n}', count);
                 donutSvg = `
                     <svg class="w-5 h-5 transform -rotate-90" viewBox="0 0 36 36">
                         <circle cx="18" cy="18" r="14" fill="none" stroke="#ef4444" stroke-width="5" stroke-dasharray="88 0" stroke-dashoffset="0"></circle>
@@ -1759,6 +1944,7 @@
             const container = document.getElementById('vehicles-container');
             const searchVal = (document.getElementById('search-input')?.value || '').toLowerCase().trim();
             container.innerHTML = '';
+            const t = i18n[state.lang] || i18n.ar;
 
             let filtered = state.vehicles;
 
@@ -1791,7 +1977,7 @@
                 container.innerHTML = `
                     <div class="bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-2xl p-8 text-center text-slate-500 text-xs shadow-sm">
                         <i data-lucide="search-x" class="w-8 h-8 mx-auto mb-2 opacity-50"></i>
-                        لا توجد مركبات أو بطاقات تشغيل مطابقة لخيارات التصفية الحالية.
+                        ${state.lang === 'ar' ? 'لا توجد مركبات أو بطاقات تشغيل مطابقة لخيارات التصفية الحالية.' : 'No vehicles or operation cards match the current filter.'}
                     </div>
                 `;
                 lucide.createIcons();
@@ -1803,14 +1989,14 @@
             filtered.forEach(veh => {
                 const days = getDaysDiff(veh.expiry);
                 let badgeClass = isDark ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30" : "bg-emerald-50 text-emerald-700 border-emerald-200";
-                let statusText = `متبقي ${days} يوم`;
+                let statusText = t.daysLeft.replace('{n}', days);
 
                 if (days <= 0) {
                     badgeClass = isDark ? "bg-rose-500/10 text-rose-400 border-rose-500/30" : "bg-rose-50 text-rose-700 border-rose-200";
-                    statusText = "منتهي";
+                    statusText = t.expired;
                 } else if (days <= 60) {
                     badgeClass = isDark ? "bg-amber-500/10 text-amber-400 border-amber-500/30" : "bg-amber-50 text-amber-700 border-amber-200";
-                    statusText = `${days} يوم متبقي`;
+                    statusText = t.daysLeft.replace('{n}', days);
                 }
 
                 const cardEl = document.createElement('div');
@@ -1853,14 +2039,14 @@
 
                             <div class="space-y-1">
                                 <div class="flex items-center gap-2">
-                                    <span class="text-xs font-extrabold text-slate-900 dark:text-white">${veh.company}</span>
-                                    <span class="text-[10px] px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold border border-slate-200 dark:border-slate-700 whitespace-nowrap">${veh.project}</span>
+                                    <span class="text-xs font-extrabold text-slate-900 dark:text-white">${translateEntity(veh.company)}</span>
+                                    <span class="text-[10px] px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold border border-slate-200 dark:border-slate-700 whitespace-nowrap">${translateEntity(veh.project)}</span>
                                 </div>
                                 <div class="text-xs text-slate-500 dark:text-slate-400 font-mono flex items-center gap-1.5 flex-wrap">
-                                    <span>بطاقة:</span>
+                                    <span>${t.cardBadge}</span>
                                     <span class="card-num-badge">${veh.cardNum}</span>
                                     <span class="text-slate-400 dark:text-slate-600">•</span>
-                                    <span class="text-[11px] text-slate-600 dark:text-slate-400">الملكية: <b class="text-slate-900 dark:text-slate-300 font-bold">${veh.owner || 'المنشأة'}</b></span>
+                                    <span class="text-[11px] text-slate-600 dark:text-slate-400">${t.ownership} <b class="text-slate-900 dark:text-slate-300 font-bold">${translateEntity(veh.owner) || (state.lang === 'ar' ? 'المنشأة' : 'Company')}</b></span>
                                 </div>
                             </div>
                         </div>
@@ -1872,7 +2058,7 @@
 
                             <div class="veh-inner-box bg-slate-50 dark:bg-slate-950/70 px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-800 flex items-center gap-3 whitespace-nowrap min-w-fit shadow-inner">
                                 <div class="text-right">
-                                    <span class="text-[10px] text-slate-500 dark:text-slate-400 block font-semibold leading-tight">تاريخ الانتهاء</span>
+                                    <span class="text-[10px] text-slate-500 dark:text-slate-400 block font-semibold leading-tight">${t.expiryDate}</span>
                                     <span class="text-xs font-mono font-bold text-slate-900 dark:text-white tracking-wide">${veh.expiry}</span>
                                 </div>
                                 <div class="h-6 w-px bg-slate-200 dark:bg-slate-800/80"></div>
@@ -1883,7 +2069,6 @@
                         </div>
 
                         <div class="lg:col-span-3 flex items-center justify-end gap-2 border-t lg:border-t-0 pt-2 lg:pt-0 border-slate-200 dark:border-slate-800">
-                            <!-- زر استعراض الوثيقة يظهر فقط عند وجود مرفق -->
                             ${hasDoc ? `
                                 <button onclick="viewAttachment('بطاقة مركبة ${veh.plateNum}', '${veh.id}')" class="action-view-doc p-1.5 rounded-lg flex items-center justify-center" title="استعراض بطاقة التشغيل"><i data-lucide="eye" class="w-3.5 h-3.5"></i></button>
                             ` : ''}
@@ -1899,9 +2084,9 @@
                     <div id="acc-${veh.id}" class="mt-4 pt-3.5 border-t border-slate-200 dark:border-slate-800/80 hidden space-y-3">
                         <div class="flex items-center justify-between">
                             <span class="text-xs font-bold text-slate-600 dark:text-slate-400 flex items-center gap-1.5">
-                                <i data-lucide="users" class="w-3.5 h-3.5 text-blue-600 dark:text-blue-400"></i> المستخدمين والسائقين المرتبطين ببطاقة التشغيل:
+                                <i data-lucide="users" class="w-3.5 h-3.5 text-blue-600 dark:text-blue-400"></i> ${t.usersTitle}
                             </span>
-                            ${(veh.mode === 'users' && state.isAdmin) ? `<button onclick="openDriverModal('${veh.id}')" class="text-xs px-3 py-1 bg-emerald-50 dark:bg-emerald-600/20 hover:bg-emerald-100 dark:hover:bg-emerald-600/30 text-emerald-700 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-500/30 rounded-xl font-bold flex items-center gap-1.5 transition"><i data-lucide="user-plus" class="w-3.5 h-3.5"></i> إضافة مستخدم</button>` : ''}
+                            ${(veh.mode === 'users' && state.isAdmin) ? `<button onclick="openDriverModal('${veh.id}')" class="text-xs px-3 py-1 bg-emerald-50 dark:bg-emerald-600/20 hover:bg-emerald-100 dark:hover:bg-emerald-600/30 text-emerald-700 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-500/30 rounded-xl font-bold flex items-center gap-1.5 transition"><i data-lucide="user-plus" class="w-3.5 h-3.5"></i> ${t.addUser}</button>` : ''}
                         </div>
 
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -1916,17 +2101,17 @@
                                     </div>
                                     <div class="grid grid-cols-2 gap-2 mt-0.5">
                                         <div class="driver-capsule bg-slate-100 dark:bg-slate-950/70 p-2 rounded-xl border border-slate-200 dark:border-slate-800/80">
-                                            <span class="text-[10px] text-slate-500 dark:text-slate-400 block font-semibold leading-none mb-1">رقم الإقامة</span>
+                                            <span class="text-[10px] text-slate-500 dark:text-slate-400 block font-semibold leading-none mb-1">${t.iqamaNum}</span>
                                             <span class="driver-iqama-text font-mono text-slate-900 dark:text-slate-200 text-xs font-bold tracking-wide">${drv.iqama}</span>
                                         </div>
                                         <div class="driver-capsule bg-slate-100 dark:bg-slate-950/70 p-2 rounded-xl border border-slate-200 dark:border-slate-800/80">
-                                            <span class="text-[10px] text-slate-500 dark:text-slate-400 block font-semibold leading-none mb-1">اليوزر التشغيلي</span>
+                                            <span class="text-[10px] text-slate-500 dark:text-slate-400 block font-semibold leading-none mb-1">${t.userId}</span>
                                             <span class="driver-user-text font-mono text-blue-700 dark:text-blue-400 text-xs font-extrabold tracking-wide">${drv.user}</span>
                                         </div>
                                     </div>
                                 </div>
                             `).join('') : `
-                                <div class="col-span-3 text-xs text-slate-500 py-3 text-center bg-slate-50 dark:bg-slate-950/40 rounded-xl border border-slate-200 dark:border-slate-800/60 font-medium">لا يوجد مستخدمين مسجلين لهذه البطاقة حالياً (أو نظام تشغيل مباشر بدون يوزرات).</div>
+                                <div class="col-span-3 text-xs text-slate-500 py-3 text-center bg-slate-50 dark:bg-slate-950/40 rounded-xl border border-slate-200 dark:border-slate-800/60 font-medium">${t.noUsers}</div>
                             `}
                         </div>
                     </div>
@@ -1942,9 +2127,15 @@
         function renderProjectFilterPills() {
             const container = document.getElementById('project-filter-pills');
             const projects = ['all', 'مشروع التوصيل', 'مشروع الدينات', 'مشروع الكهرباء'];
+            const t = i18n[state.lang] || i18n.ar;
             
             container.innerHTML = projects.map(p => {
-                const label = p === 'all' ? 'جميع المشاريع' : p;
+                let label = p;
+                if (p === 'all') label = t.allProjects;
+                else if (p === 'مشروع التوصيل') label = t.projDelivery;
+                else if (p === 'مشروع الدينات') label = t.projDyna;
+                else if (p === 'مشروع الكهرباء') label = t.projElectric;
+
                 const active = state.activeProjectFilter === p;
                 return `
                     <button onclick="setProjectFilter('${p}')" class="whitespace-nowrap px-3.5 py-1.5 rounded-xl text-xs font-bold transition ${active ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30' : 'project-filter-pill-inactive bg-slate-100 dark:bg-slate-950 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800'}">
@@ -1958,24 +2149,26 @@
             state.activeCompany = comp;
             state.activeLicenseFilter = null;
             document.getElementById('license-filter-badge-box').classList.add('hidden');
+            const t = i18n[state.lang] || i18n.ar;
             
             ['all', 'zawaya', 'rasm', 'contract'].forEach(k => {
                 const btn = document.getElementById(`comp-btn-${k}`);
                 if (btn) btn.classList.remove('active');
             });
 
+            const badge = document.getElementById('active-filter-badge');
             if (comp === 'all') {
                 document.getElementById('comp-btn-all').classList.add('active');
-                document.getElementById('active-filter-badge').textContent = 'جميع المنشآت';
+                if (badge) badge.textContent = t.allCompanies;
             } else if (comp.includes('زاوية أمل اللوجستية')) {
                 document.getElementById('comp-btn-zawaya').classList.add('active');
-                document.getElementById('active-filter-badge').textContent = comp;
+                if (badge) badge.textContent = t.compZawaya;
             } else if (comp.includes('رسم الحلول')) {
                 document.getElementById('comp-btn-rasm').classList.add('active');
-                document.getElementById('active-filter-badge').textContent = comp;
+                if (badge) badge.textContent = t.compRasm;
             } else {
                 document.getElementById('comp-btn-contract').classList.add('active');
-                document.getElementById('active-filter-badge').textContent = comp;
+                if (badge) badge.textContent = t.compContract;
             }
 
             renderLicenses();
@@ -2048,36 +2241,42 @@
             const normalizedText = toEnglishDigits(text);
 
             // 1. استخراج رقم بطاقة التشغيل: يطابق 38-00068896 أو 81-00010540 أو صيغة 38/00068896
-            const cardMatch = normalizedText.match(/Card\s*Number\s*[:\s|]*([0-9]{2}[\/-][0-9]{8})/i) ||
-                              normalizedText.match(/رقم\s*البطاقة\s*[:\s|]*([0-9]{2}[\/-][0-9]{8})/i) ||
-                              normalizedText.match(/\b([0-9]{2}[\/-][0-9]{8})\b/);
+            const cardMatch = normalizedText.match(/Card\s*Number\s*[:\s|]*([0-9]{2}[\/-][0-9]{7,8})/i) ||
+                              normalizedText.match(/رقم\s*البطاقة\s*[:\s|]*([0-9]{2}[\/-][0-9]{7,8})/i) ||
+                              normalizedText.match(/\b([0-9]{2}[\/-][0-9]{7,8})\b/);
             if (cardMatch) {
                 cardNum = cardMatch[1].replace('/', '-').trim();
             }
 
-            // 2. استخراج تاريخ انتهاء البطاقة (Card Expiry Date)
-            // البحث بالقرب من الكلمات المفتاحية أولاً
-            const expKeywordMatch = normalizedText.match(/Card\s*Expiry\s*Date\s*[:\s|]*([0-9]{2,4}[\/-][0-9]{1,2}[\/-][0-9]{2,4})/i) ||
-                                    normalizedText.match(/تاريخ\s*انتهاء\s*البطاقة\s*[:\s|]*([0-9]{2,4}[\/-][0-9]{1,2}[\/-][0-9]{2,4})/i) ||
-                                    normalizedText.match(/Expiry\s*Date\s*[:\s|]*([0-9]{2,4}[\/-][0-9]{1,2}[\/-][0-9]{2,4})/i);
-            
-            if (expKeywordMatch) {
-                expiryDate = normalizeToISODate(expKeywordMatch[1]);
+            // 2. استخراج تاريخ انتهاء البطاقة (Card Expiry Date) بدقة متناهية
+            // محاولة التقاط التاريخ المقترن بكلمة Expiry Date أو انتهاء
+            const directExpMatch = normalizedText.match(/(?:Card\s*Expiry\s*Date|Expiry\s*Date|Expiration\s*Date|تاريخ\s*انتهاء\s*البطاقة|تاريخ\s*الانتهاء)\s*[:\s|]*([0-9]{2,4}[\/-][0-9]{1,2}[\/-][0-9]{2,4})/i);
+            if (directExpMatch) {
+                expiryDate = normalizeToISODate(directExpMatch[1]);
             }
 
-            // في حال لم يتم التقاط التاريخ من الكلمة المفتاحية، نبحث عن أي تاريخ مستقبلي (بين 2024 و 2035)
-            if (!expiryDate) {
-                const datesFound = normalizedText.match(/\b(202[4-9]|203[0-5])[\/-](0?[1-9]|1[0-2])[\/-](0?[1-9]|[12][0-9]|3[01])\b/g) ||
-                                   normalizedText.match(/\b(0?[1-9]|[12][0-9]|3[01])[\/-](0?[1-9]|1[0-2])[\/-](202[4-9]|203[0-5])\b/g);
-                if (datesFound && datesFound.length > 0) {
-                    // اختيار آخر تاريخ منطقي (حيث تاريخ الانتهاء يأتي بعد تاريخ الإصدار في بطاقات الهيئة)
-                    for (let i = datesFound.length - 1; i >= 0; i--) {
-                        const parsed = normalizeToISODate(datesFound[i]);
-                        if (parsed) {
-                            expiryDate = parsed;
-                            break;
-                        }
-                    }
+            // جمع كافة التواريخ الموجودة في الوثيقة وفرزها
+            const allDateMatches = [];
+            // نمط YYYY-MM-DD
+            const regYMD = /\b(202[4-9]|203[0-9])[\/\.-](0?[1-9]|1[0-2])[\/\.-](0?[1-9]|[12][0-9]|3[01])\b/g;
+            let r;
+            while ((r = regYMD.exec(normalizedText)) !== null) {
+                const parsed = normalizeToISODate(r[0]);
+                if (parsed) allDateMatches.push(parsed);
+            }
+            // نمط DD-MM-YYYY
+            const regDMY = /\b(0?[1-9]|[12][0-9]|3[01])[\/\.-](0?[1-9]|1[0-2])[\/\.-](202[4-9]|203[0-9])\b/g;
+            while ((r = regDMY.exec(normalizedText)) !== null) {
+                const parsed = normalizeToISODate(r[0]);
+                if (parsed) allDateMatches.push(parsed);
+            }
+
+            // إذا وجدنا تواريخ، نختار دائماً التاريخ الأحدث (تاريخ الانتهاء المستقبلي)
+            if (allDateMatches.length > 0) {
+                allDateMatches.sort(); // الفرز الأبجدي لـ YYYY-MM-DD يضع التاريخ الأحدث زمنياً في النهاية
+                const latestDate = allDateMatches[allDateMatches.length - 1];
+                if (!expiryDate || latestDate > expiryDate) {
+                    expiryDate = latestDate;
                 }
             }
 
@@ -2102,23 +2301,36 @@
 
             const normalizedText = toEnglishDigits(text);
 
-            // 1. استخراج رقم الترخيص: License Number: 38/00022184 أو 38/00004951 أو 010211003400
-            const licMatch = normalizedText.match(/Licen[sc]e\s*Number\s*[:\s|]*([0-9]{2}[\/-][0-9]{8}|[0-9]{10,14})/i) ||
-                             normalizedText.match(/رقم\s*الترخيص\s*[:\s|]*([0-9]{2}[\/-][0-9]{8}|[0-9]{10,14})/i) ||
-                             normalizedText.match(/\b([0-9]{2}\/[0-9]{8})\b/) ||
+            // 1. استخراج رقم الترخيص
+            const licMatch = normalizedText.match(/Licen[sc]e\s*Number\s*[:\s|]*([0-9]{2}[\/-][0-9]{7,8}|[0-9]{10,14})/i) ||
+                             normalizedText.match(/رقم\s*الترخيص\s*[:\s|]*([0-9]{2}[\/-][0-9]{7,8}|[0-9]{10,14})/i) ||
+                             normalizedText.match(/\b([0-9]{2}\/[0-9]{7,8})\b/) ||
                              normalizedText.match(/\b([0-9]{12})\b/);
             if (licMatch) {
                 licNumber = licMatch[1].trim();
             }
 
-            // 2. استخراج تاريخ انتهاء الترخيص: Expiration Date
+            // 2. استخراج تاريخ انتهاء الترخيص
             const expKeywordMatch = normalizedText.match(/Expir(?:ation)?\s*Date\s*[:\s|]*([0-9]{2,4}[\/-][0-9]{1,2}[\/-][0-9]{2,4})/i) ||
                                     normalizedText.match(/تاريخ\s*الانتهاء\s*[:\s|]*([0-9]{2,4}[\/-][0-9]{1,2}[\/-][0-9]{2,4})/i);
             if (expKeywordMatch) {
                 expiryDate = normalizeToISODate(expKeywordMatch[1]);
-            } else {
-                const anyDate = normalizedText.match(/\b(202[5-9]|203[0-5])[\/-](0?[1-9]|1[0-2])[\/-](0?[1-9]|[12][0-9]|3[01])\b/);
-                if (anyDate) expiryDate = normalizeToISODate(anyDate[0]);
+            }
+
+            // فحص إضافي لأي تواريخ بالوثيقة واختيار الأحدث
+            const licDates = [];
+            const rYMD = /\b(202[4-9]|203[0-9])[\/\.-](0?[1-9]|1[0-2])[\/\.-](0?[1-9]|[12][0-9]|3[01])\b/g;
+            let d;
+            while ((d = rYMD.exec(normalizedText)) !== null) {
+                const parsed = normalizeToISODate(d[0]);
+                if (parsed) licDates.push(parsed);
+            }
+            if (licDates.length > 0) {
+                licDates.sort();
+                const latest = licDates[licDates.length - 1];
+                if (!expiryDate || latest > expiryDate) {
+                    expiryDate = latest;
+                }
             }
 
             return { licNumber, expiryDate };
@@ -2380,8 +2592,23 @@
             }
         }
 
+        function updateLicenseDropdownForVehicle() {
+            const comp = document.getElementById('veh-company').value;
+            const select = document.getElementById('veh-license-id');
+            let licList = [];
+            
+            if (comp === 'شركة زاوية أمل للمقاولات') {
+                licList = state.licenses.filter(l => l.id === 'lic-rasm-heavy');
+            } else {
+                licList = state.licenses.filter(l => l.company === comp);
+            }
+            
+            select.innerHTML = licList.map(l => `
+                <option value="${l.id}">${l.activity} - ${l.company} (رقم: ${l.number})</option>
+            `).join('');
+        }
+
         function openVehicleModal(id = null) {
-            if (!state.isAdmin) return;
             document.getElementById('veh-id').value = id || '';
             document.getElementById('veh-file').value = '';
             document.getElementById('veh-doc-base64').value = '';
@@ -2393,21 +2620,23 @@
 
             if (id) {
                 const veh = state.vehicles.find(v => v.id === id);
-                document.getElementById('modal-vehicle-title').textContent = 'تعديل بيانات المركبة';
-                document.getElementById('veh-company').value = veh.company;
-                updateLicenseDropdownForVehicle();
-                document.getElementById('veh-license-id').value = veh.licenseId;
-                document.getElementById('veh-project').value = veh.project;
-                document.getElementById('veh-plate-num').value = veh.plateNum;
-                document.getElementById('veh-plate-letters').value = veh.plateLetters;
-                document.getElementById('veh-card-num').value = veh.cardNum;
-                document.getElementById('veh-expiry').value = veh.expiry;
-                document.getElementById('veh-type').value = veh.type || 'light';
-                document.getElementById('veh-mode').value = veh.mode || 'users';
-                document.getElementById('veh-doc-base64').value = veh.doc || '';
-                if (veh.doc) {
-                    document.getElementById('veh-doc-preview').textContent = '✓ يوجد مستند مرفق مسجل بالفعل';
-                    if (deleteDocBtn) deleteDocBtn.classList.remove('hidden');
+                if (veh) {
+                    document.getElementById('modal-vehicle-title').textContent = 'تعديل بيانات المركبة';
+                    document.getElementById('veh-company').value = veh.company || 'زاوية أمل اللوجستية';
+                    updateLicenseDropdownForVehicle();
+                    document.getElementById('veh-license-id').value = veh.licenseId || '';
+                    document.getElementById('veh-project').value = veh.project || 'مشروع التوصيل';
+                    document.getElementById('veh-plate-num').value = veh.plateNum || '';
+                    document.getElementById('veh-plate-letters').value = veh.plateLetters || '';
+                    document.getElementById('veh-card-num').value = veh.cardNum || '';
+                    document.getElementById('veh-expiry').value = veh.expiry || '';
+                    document.getElementById('veh-type').value = veh.type || 'light';
+                    document.getElementById('veh-mode').value = veh.mode || 'users';
+                    document.getElementById('veh-doc-base64').value = veh.doc || '';
+                    if (veh.doc) {
+                        document.getElementById('veh-doc-preview').textContent = '✓ يوجد مستند مرفق مسجل بالفعل';
+                        if (deleteDocBtn) deleteDocBtn.classList.remove('hidden');
+                    }
                 }
             } else {
                 document.getElementById('modal-vehicle-title').textContent = 'إضافة مركبة / بطاقة تشغيل جديدة';
@@ -2417,7 +2646,11 @@
                 document.getElementById('veh-expiry').value = '';
             }
             openModal('modal-vehicle');
-            lucide.createIcons();
+            if (window.lucide) lucide.createIcons();
+        }
+
+        function editVehicle(id) {
+            openVehicleModal(id);
         }
 
         async function removeVehicleAttachmentOnly() {
@@ -2477,67 +2710,6 @@
             renderLicenses();
             renderVehicles();
             showToast('تم حفظ الترخيص بنجاح');
-        }
-
-        function updateLicenseDropdownForVehicle() {
-            const comp = document.getElementById('veh-company').value;
-            const select = document.getElementById('veh-license-id');
-            let licList = [];
-            
-            if (comp === 'شركة زاوية أمل للمقاولات') {
-                licList = state.licenses.filter(l => l.id === 'lic-rasm-heavy');
-            } else {
-                licList = state.licenses.filter(l => l.company === comp);
-            }
-            
-            select.innerHTML = licList.map(l => `
-                <option value="${l.id}">${l.activity} - ${l.company} (رقم: ${l.number})</option>
-            `).join('');
-        }
-
-        function openVehicleModal(id = null) {
-            document.getElementById('veh-id').value = id || '';
-            document.getElementById('veh-file').value = '';
-            document.getElementById('veh-doc-base64').value = '';
-            document.getElementById('veh-doc-preview').textContent = '';
-            const deleteDocBtn = document.getElementById('btn-delete-veh-doc');
-            if (deleteDocBtn) deleteDocBtn.classList.add('hidden');
-
-            updateLicenseDropdownForVehicle();
-
-            if (id) {
-                const veh = state.vehicles.find(v => v.id === id);
-                if (veh) {
-                    document.getElementById('modal-vehicle-title').textContent = 'تعديل بيانات المركبة';
-                    document.getElementById('veh-company').value = veh.company || '';
-                    updateLicenseDropdownForVehicle();
-                    document.getElementById('veh-license-id').value = veh.licenseId || '';
-                    document.getElementById('veh-project').value = veh.project || 'مشروع التوصيل';
-                    document.getElementById('veh-plate-num').value = veh.plateNum || '';
-                    document.getElementById('veh-plate-letters').value = veh.plateLetters || '';
-                    document.getElementById('veh-card-num').value = veh.cardNum || '';
-                    document.getElementById('veh-expiry').value = veh.expiry || '';
-                    document.getElementById('veh-type').value = veh.type || 'light';
-                    document.getElementById('veh-mode').value = veh.mode || 'users';
-                    document.getElementById('veh-doc-base64').value = veh.doc || '';
-                    if (veh.doc) {
-                        document.getElementById('veh-doc-preview').textContent = '✓ يوجد مستند مرفق مسجل بالفعل';
-                        if (deleteDocBtn) deleteDocBtn.classList.remove('hidden');
-                    }
-                }
-            } else {
-                document.getElementById('modal-vehicle-title').textContent = 'إضافة مركبة / بطاقة تشغيل جديدة';
-                document.getElementById('veh-plate-num').value = '';
-                document.getElementById('veh-plate-letters').value = '';
-                document.getElementById('veh-card-num').value = '';
-                document.getElementById('veh-expiry').value = '';
-            }
-            openModal('modal-vehicle');
-            if (window.lucide) lucide.createIcons();
-        }
-
-        function editVehicle(id) {
-            openVehicleModal(id);
         }
 
         async function deleteVehicle(id) {
@@ -2628,12 +2800,13 @@
         function showKpiModal(type) {
             const titleEl = document.getElementById('kpi-modal-title');
             const contentEl = document.getElementById('kpi-modal-content');
+            const isAr = state.lang === 'ar';
 
             if (type === 'licenses') {
-                titleEl.textContent = 'بيانات وجدول التراخيص الحكومية المسجلة';
+                titleEl.textContent = isAr ? 'بيانات وجدول التراخيص الحكومية المسجلة' : 'Registered Government Licenses Details';
                 contentEl.innerHTML = `
                     <div class="space-y-3">
-                        <p class="text-slate-700 dark:text-slate-300 font-medium">إجمالي التراخيص الوزارية النشطة: <b class="text-slate-900 dark:text-white font-mono text-sm">${state.licenses.length} تراخيص</b></p>
+                        <p class="text-slate-700 dark:text-slate-300 font-medium">${isAr ? 'إجمالي التراخيص الوزارية النشطة:' : 'Total Active TGA Licenses:'} <b class="text-slate-900 dark:text-white font-mono text-sm">${state.licenses.length}</b></p>
                         <div class="space-y-2">
                             ${state.licenses.map(l => {
                                 const days = getDaysDiff(l.expiry);
@@ -2641,11 +2814,11 @@
                                     <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 flex items-center justify-between">
                                         <div>
                                             <div class="font-bold text-slate-900 dark:text-white text-xs">${l.activity}</div>
-                                            <div class="text-[11px] text-slate-600 dark:text-slate-400">${l.company} • رقم: <span class="font-mono">${l.number}</span></div>
+                                            <div class="text-[11px] text-slate-600 dark:text-slate-400">${translateEntity(l.company)} • ${isAr ? 'رقم:' : 'No:'} <span class="font-mono">${l.number}</span></div>
                                         </div>
                                         <div class="text-left font-mono">
-                                            <span class="text-[11px] ${days <= 60 ? 'text-amber-600 dark:text-amber-400' : 'text-emerald-600 dark:text-emerald-400'} font-bold">ينتهي: ${l.expiry}</span>
-                                            <span class="block text-[10px] text-slate-500">متبقي: ${days} يوم</span>
+                                            <span class="text-[11px] ${days <= 60 ? 'text-amber-600 dark:text-amber-400' : 'text-emerald-600 dark:text-emerald-400'} font-bold">${isAr ? 'ينتهي:' : 'Expires:'} ${l.expiry}</span>
+                                            <span class="block text-[10px] text-slate-500">${days <= 0 ? (isAr ? 'منتهي' : 'Expired') : (isAr ? `متبقي: ${days} يوم` : `${days} days left`)}</span>
                                         </div>
                                     </div>
                                 `;
@@ -2653,59 +2826,111 @@
                         </div>
                     </div>
                 `;
-            } else if (type === 'vehicles') {
-                titleEl.textContent = 'توزيع أسطول المركبات والمعدات';
-                const zawayaCount = state.vehicles.filter(v=>v.company.includes('زاوية أمل اللوجستية')).length;
-                const rasmCount = state.vehicles.filter(v=>v.company.includes('رسم')).length;
-                const contractCount = state.vehicles.filter(v=>v.company.includes('المقاولات')).length;
+            } else if (type === 'expired') {
+                titleEl.textContent = isAr ? 'التراخيص وبطاقات التشغيل المنتهية الصلاحية' : 'Expired Licenses & Operation Cards';
+                const expiredLics = state.licenses.filter(l => getDaysDiff(l.expiry) <= 0);
+                const expiredVehs = state.vehicles.filter(v => getDaysDiff(v.expiry) <= 0);
+                const totalExpired = expiredLics.length + expiredVehs.length;
+
                 contentEl.innerHTML = `
                     <div class="space-y-3">
-                        <p class="text-slate-700 dark:text-slate-300 font-medium">إجمالي الأسطول: <b class="text-slate-900 dark:text-white font-mono text-sm">${state.vehicles.length} مركبة</b></p>
-                        <div class="grid grid-cols-3 gap-2.5 my-2">
-                            <div class="p-3 bg-slate-50 dark:bg-slate-950 rounded-xl border border-slate-200 dark:border-slate-800 text-center">
-                                <span class="text-[11px] text-slate-600 dark:text-slate-400 block font-bold">زاوية أمل اللوجستية</span>
-                                <span class="text-lg font-black text-emerald-600 dark:text-emerald-400 font-mono">${zawayaCount}</span>
-                            </div>
-                            <div class="p-3 bg-slate-50 dark:bg-slate-950 rounded-xl border border-slate-200 dark:border-slate-800 text-center">
-                                <span class="text-[11px] text-slate-600 dark:text-slate-400 block font-bold">رسم الحلول اللوجستية</span>
-                                <span class="text-lg font-black text-purple-600 dark:text-purple-400 font-mono">${rasmCount}</span>
-                            </div>
-                            <div class="p-3 bg-slate-50 dark:bg-slate-950 rounded-xl border border-slate-200 dark:border-slate-800 text-center">
-                                <span class="text-[11px] text-slate-600 dark:text-slate-400 block font-bold">زاوية أمل للمقاولات</span>
-                                <span class="text-lg font-black text-amber-600 dark:text-amber-400 font-mono">${contractCount}</span>
-                            </div>
+                        <div class="p-3 bg-rose-500/10 border border-rose-500/30 rounded-xl text-rose-500 font-bold flex items-center justify-between">
+                            <span>${isAr ? 'إجمالي العناصر المنتهية:' : 'Total Expired Items:'}</span>
+                            <span class="text-lg font-mono">${totalExpired}</span>
+                        </div>
+                        <div class="space-y-2 max-h-64 overflow-y-auto">
+                            ${expiredLics.map(l => `
+                                <div class="p-2.5 bg-slate-50 dark:bg-slate-950 rounded-xl border border-rose-500/30 flex justify-between items-center text-xs">
+                                    <div>
+                                        <span class="px-2 py-0.5 rounded bg-rose-500/20 text-rose-500 text-[10px] font-bold mr-1.5">${isAr ? 'ترخيص' : 'License'}</span>
+                                        <b class="text-slate-900 dark:text-white">${l.activity}</b>
+                                        <span class="block text-[10px] text-slate-500">${translateEntity(l.company)} (${l.number})</span>
+                                    </div>
+                                    <span class="font-mono text-rose-500 font-bold text-xs">${l.expiry}</span>
+                                </div>
+                            `).join('')}
+                            ${expiredVehs.map(v => `
+                                <div class="p-2.5 bg-slate-50 dark:bg-slate-950 rounded-xl border border-rose-500/30 flex justify-between items-center text-xs">
+                                    <div>
+                                        <span class="px-2 py-0.5 rounded bg-blue-500/20 text-blue-500 text-[10px] font-bold mr-1.5">${isAr ? 'بطاقة' : 'Card'}</span>
+                                        <b class="text-slate-900 dark:text-white">${v.plateNum} - ${translateEntity(v.project)}</b>
+                                        <span class="block text-[10px] text-slate-500">${translateEntity(v.company)} (${v.cardNum})</span>
+                                    </div>
+                                    <span class="font-mono text-rose-500 font-bold text-xs">${v.expiry}</span>
+                                </div>
+                            `).join('')}
+                            ${totalExpired === 0 ? `<div class="py-4 text-center text-slate-500 text-xs">${isAr ? '✓ لا توجد أي تراخيص أو بطاقات تشغيل منتهية.' : '✓ No expired licenses or operation cards.'}</div>` : ''}
                         </div>
                     </div>
                 `;
-            } else if (type === 'completed') {
-                titleEl.textContent = 'البطاقات ذات السعة المكتملة (3/3)';
-                const completedVehs = state.vehicles.filter(v => v.mode === 'users' && (v.drivers||[]).length === 3);
+            } else if (type === 'near-expiry') {
+                titleEl.textContent = isAr ? 'التراخيص والبطاقات القريبة من الانتهاء (أقل من 60 يوماً)' : 'Licenses & Cards Near Expiration (< 60 Days)';
+                const nearLics = state.licenses.filter(l => {
+                    const d = getDaysDiff(l.expiry);
+                    return d > 0 && d <= 60;
+                });
+                const nearVehs = state.vehicles.filter(v => {
+                    const d = getDaysDiff(v.expiry);
+                    return d > 0 && d <= 60;
+                });
+                const totalNear = nearLics.length + nearVehs.length;
+
                 contentEl.innerHTML = `
-                    <div class="space-y-2">
-                        <p class="text-slate-700 dark:text-slate-300 font-medium">عدد البطاقات المستوفية لكامل السعة: <b class="text-emerald-600 dark:text-emerald-400 font-mono text-sm">${completedVehs.length}</b></p>
-                        <div class="space-y-1.5 max-h-48 overflow-y-auto">
-                            ${completedVehs.map(v => `
-                                <div class="p-2 bg-slate-50 dark:bg-slate-950 rounded-lg border border-slate-200 dark:border-slate-800 flex justify-between items-center text-xs">
-                                    <span class="font-bold text-slate-900 dark:text-white">${v.plateNum} - ${v.company}</span>
-                                    <span class="font-mono text-emerald-600 dark:text-emerald-400 font-bold">3 من 3 يوزرات</span>
-                                </div>
-                            `).join('')}
+                    <div class="space-y-3">
+                        <div class="p-3 bg-amber-500/10 border border-amber-500/30 rounded-xl text-amber-500 font-bold flex items-center justify-between">
+                            <span>${isAr ? 'إجمالي العناصر القريبة من الانتهاء:' : 'Total Items Near Expiry:'}</span>
+                            <span class="text-lg font-mono">${totalNear}</span>
+                        </div>
+                        <div class="space-y-2 max-h-64 overflow-y-auto">
+                            ${nearLics.map(l => {
+                                const d = getDaysDiff(l.expiry);
+                                return `
+                                    <div class="p-2.5 bg-slate-50 dark:bg-slate-950 rounded-xl border border-amber-500/30 flex justify-between items-center text-xs">
+                                        <div>
+                                            <span class="px-2 py-0.5 rounded bg-amber-500/20 text-amber-500 text-[10px] font-bold mr-1.5">${isAr ? 'ترخيص' : 'License'}</span>
+                                            <b class="text-slate-900 dark:text-white">${l.activity}</b>
+                                            <span class="block text-[10px] text-slate-500">${translateEntity(l.company)} (${l.number})</span>
+                                        </div>
+                                        <div class="text-left font-mono">
+                                            <span class="text-amber-500 font-bold">${isAr ? `متبقي ${d} يوم` : `${d} days`}</span>
+                                            <span class="block text-[10px] text-slate-500">${l.expiry}</span>
+                                        </div>
+                                    </div>
+                                `;
+                            }).join('')}
+                            ${nearVehs.map(v => {
+                                const d = getDaysDiff(v.expiry);
+                                return `
+                                    <div class="p-2.5 bg-slate-50 dark:bg-slate-950 rounded-xl border border-amber-500/30 flex justify-between items-center text-xs">
+                                        <div>
+                                            <span class="px-2 py-0.5 rounded bg-blue-500/20 text-blue-500 text-[10px] font-bold mr-1.5">${isAr ? 'بطاقة' : 'Card'}</span>
+                                            <b class="text-slate-900 dark:text-white">${v.plateNum} - ${translateEntity(v.project)}</b>
+                                            <span class="block text-[10px] text-slate-500">${translateEntity(v.company)} (${v.cardNum})</span>
+                                        </div>
+                                        <div class="text-left font-mono">
+                                            <span class="text-amber-500 font-bold">${isAr ? `متبقي ${d} يوم` : `${d} days`}</span>
+                                            <span class="block text-[10px] text-slate-500">${v.expiry}</span>
+                                        </div>
+                                    </div>
+                                `;
+                            }).join('')}
+                            ${totalNear === 0 ? `<div class="py-4 text-center text-slate-500 text-xs">${isAr ? '✓ لا توجد عناصر قاربت على الانتهاء في غضون 60 يوماً.' : '✓ No items expiring within 60 days.'}</div>` : ''}
                         </div>
                     </div>
                 `;
             } else {
-                titleEl.textContent = 'الشواغر المتاحة للتسكين والتشغيل';
+                titleEl.textContent = isAr ? 'الشواغر المتاحة للتسكين والتشغيل' : 'Available Vacant Driver Slots';
                 const vacantVehs = state.vehicles.filter(v => v.mode === 'users' && (v.drivers||[]).length < 3);
                 contentEl.innerHTML = `
                     <div class="space-y-2">
-                        <p class="text-slate-700 dark:text-slate-300 font-medium">قائمة المركبات التي بها شواغر متاحة:</p>
+                        <p class="text-slate-700 dark:text-slate-300 font-medium">${isAr ? 'قائمة المركبات التي بها شواغر متاحة:' : 'Vehicles with vacant driver slots:'}</p>
                         <div class="space-y-1.5 max-h-48 overflow-y-auto">
                             ${vacantVehs.map(v => {
                                 const left = 3 - (v.drivers||[]).length;
                                 return `
                                     <div class="p-2 bg-slate-50 dark:bg-slate-950 rounded-lg border border-slate-200 dark:border-slate-800 flex justify-between items-center text-xs">
-                                        <span class="font-bold text-slate-900 dark:text-white">${v.plateNum} (${v.project})</span>
-                                        <span class="font-mono text-amber-600 dark:text-amber-400 font-bold">شاغر لـ ${left} سائق</span>
+                                        <span class="font-bold text-slate-900 dark:text-white">${v.plateNum} (${translateEntity(v.project)})</span>
+                                        <span class="font-mono text-amber-600 dark:text-amber-400 font-bold">${isAr ? `شاغر لـ ${left} سائق` : `Vacant for ${left} driver(s)`}</span>
                                     </div>
                                 `;
                             }).join('')}
