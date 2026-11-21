@@ -1609,7 +1609,7 @@
                 kpiExpired: "Expired Cards & Licenses",
                 kpiExpiredSub: "Expired TGA Licenses or Cards",
                 kpiNear: "Near Expiration",
-                kpiNearSub: "Expires in less than 60 days",
+                kpiNearSub: "Expires in less than 30 days",
                 kpiVacant: "Vacant Slots",
                 kpiVacantSub: "Available Seats to Assign",
                 filterTitle: "Filter by Entity / Company",
@@ -1643,7 +1643,7 @@
                 avail1: "1 Slot Available (2/3)",
                 emptyCap: "Empty (0/3)",
                 overCap: "Over limit ({n}/3) ⚠",
-                notifTitle: "Expiry Alerts (Expired or < 60 days)",
+                notifTitle: "Expiry Alerts (Expired or < 30 days)",
                 notifZero: "✓ All licenses and cards are up to date!",
                 exportJSON: "Data Backup (JSON)",
                 exportHTML: "Self-contained File (.html)",
@@ -2864,7 +2864,7 @@
                     </div>
                 `;
             } else if (type === 'near-expiry') {
-                titleEl.textContent = isAr ? 'التراخيص والبطاقات القريبة من الانتهاء (أقل من 30 يوماً)' : 'Licenses & Cards Near Expiration (< 60 Days)';
+                titleEl.textContent = isAr ? 'التراخيص والبطاقات القريبة من الانتهاء (أقل من 30 يوماً)' : 'Licenses & Cards Near Expiration (< 30 days)';
                 const nearLics = state.licenses.filter(l => {
                     const d = getDaysDiff(l.expiry);
                     return d > 0 && d <= 60;
@@ -2914,7 +2914,7 @@
                                     </div>
                                 `;
                             }).join('')}
-                            ${totalNear === 0 ? `<div class="py-4 text-center text-slate-500 text-xs">${isAr ? '✓ لا توجد عناصر قاربت على الانتهاء في غضون 30 يوماً.' : '✓ No items expiring within 60 days.'}</div>` : ''}
+                            ${totalNear === 0 ? `<div class="py-4 text-center text-slate-500 text-xs">${isAr ? '✓ لا توجد عناصر قاربت على الانتهاء في غضون 30 يوماً.' : '✓ No items expiring within 30 days.'}</div>` : ''}
                         </div>
                     </div>
                 `;
