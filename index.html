@@ -1465,9 +1465,10 @@
 
             let alerts = [];
 
+            // تعديل: حساب التنبيهات للأقل من أو يساوي 30 يوم
             state.licenses.forEach(l => {
                 const days = getDaysDiff(l.expiry);
-                if (days <= 60) {
+                if (days <= 30) {
                     alerts.push({
                         title: l.activity,
                         sub: translateEntity(l.company) + ` (${l.number})`,
@@ -1480,7 +1481,7 @@
 
             state.vehicles.forEach(v => {
                 const days = getDaysDiff(v.expiry);
-                if (days <= 60) {
+                if (days <= 30) {
                     alerts.push({
                         title: `${isAr ? 'لوحة:' : 'Plate:'} ${v.plateNum} (${translateEntity(v.project)})`,
                         sub: translateEntity(v.company) + ` (${v.cardNum})`,
@@ -1799,7 +1800,7 @@
                 if (days <= 0) {
                     badgeClass = isDark ? "bg-rose-500/10 text-rose-400 border-rose-500/30" : "bg-rose-50 text-rose-700 border-rose-200";
                     statusText = t.expired;
-                } else if (days <= 60) {
+                } else if (days <= 30) {
                     badgeClass = isDark ? "bg-amber-500/10 text-amber-400 border-amber-500/30" : "bg-amber-50 text-amber-700 border-amber-200";
                     statusText = t.daysLeft.replace('{n}', days);
                 }
@@ -1994,7 +1995,7 @@
                 if (days <= 0) {
                     badgeClass = isDark ? "bg-rose-500/10 text-rose-400 border-rose-500/30" : "bg-rose-50 text-rose-700 border-rose-200";
                     statusText = t.expired;
-                } else if (days <= 60) {
+                } else if (days <= 30) {
                     badgeClass = isDark ? "bg-amber-500/10 text-amber-400 border-amber-500/30" : "bg-amber-50 text-amber-700 border-amber-200";
                     statusText = t.daysLeft.replace('{n}', days);
                 }
@@ -2817,7 +2818,7 @@
                                             <div class="text-[11px] text-slate-600 dark:text-slate-400">${translateEntity(l.company)} • ${isAr ? 'رقم:' : 'No:'} <span class="font-mono">${l.number}</span></div>
                                         </div>
                                         <div class="text-left font-mono">
-                                            <span class="text-[11px] ${days <= 60 ? 'text-amber-600 dark:text-amber-400' : 'text-emerald-600 dark:text-emerald-400'} font-bold">${isAr ? 'ينتهي:' : 'Expires:'} ${l.expiry}</span>
+                                            <span class="text-[11px] ${days <= 30 ? 'text-amber-600 dark:text-amber-400' : 'text-emerald-600 dark:text-emerald-400'} font-bold">${isAr ? 'ينتهي:' : 'Expires:'} ${l.expiry}</span>
                                             <span class="block text-[10px] text-slate-500">${days <= 0 ? (isAr ? 'منتهي' : 'Expired') : (isAr ? `متبقي: ${days} يوم` : `${days} days left`)}</span>
                                         </div>
                                     </div>
@@ -2864,14 +2865,14 @@
                     </div>
                 `;
             } else if (type === 'near-expiry') {
-                titleEl.textContent = isAr ? 'التراخيص والبطاقات القريبة من الانتهاء (أقل من 30 يوماً)' : 'Licenses & Cards Near Expiration (< 30 days)';
+                titleEl.textContent = isAr ? 'التراخيص والبطاقات القريبة من الانتهاء (أقل من 30 يوماً)' : 'Licenses & Cards Near Expiration (< 30 Days)';
                 const nearLics = state.licenses.filter(l => {
                     const d = getDaysDiff(l.expiry);
-                    return d > 0 && d <= 60;
+                    return d > 0 && d <= 30;
                 });
                 const nearVehs = state.vehicles.filter(v => {
                     const d = getDaysDiff(v.expiry);
-                    return d > 0 && d <= 60;
+                    return d > 0 && d <= 30;
                 });
                 const totalNear = nearLics.length + nearVehs.length;
 
