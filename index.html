@@ -1741,14 +1741,14 @@
             state.licenses.forEach(l => {
                 const days = getDaysDiff(l.expiry);
                 if (days <= 0) expiredCount++;
-                else if (days <= 60) nearExpiryCount++;
+                else if (days <= 30) nearExpiryCount++;
             });
 
             // فحص المركبات وبطاقات التشغيل
             state.vehicles.forEach(v => {
                 const days = getDaysDiff(v.expiry);
                 if (days <= 0) expiredCount++;
-                else if (days <= 60) nearExpiryCount++;
+                else if (days <= 30) nearExpiryCount++;
 
                 if (v.mode === 'users') {
                     const count = (v.drivers || []).length;
